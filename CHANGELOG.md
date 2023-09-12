@@ -42,6 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Misc Improvements
+
+* [#6380](https://github.com/osmosis-labs/osmosis/pull/6380) Change full range definition to 10^-30 to 10^38.
+
 ### Bug Fixes
 
 * [#6334](https://github.com/osmosis-labs/osmosis/pull/6334) fix: enable taker fee cli
