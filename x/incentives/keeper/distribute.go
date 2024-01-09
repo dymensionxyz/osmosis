@@ -237,7 +237,7 @@ func (k Keeper) distributeInternal(
 	lockSum := lockuptypes.SumLocksByDenom(locks, denom)
 
 	if lockSum.IsZero() {
-		return nil, nil
+		return totalDistrCoins, nil
 	}
 
 	remainCoins := gauge.Coins.Sub(gauge.DistributedCoins...)
@@ -246,6 +246,20 @@ func (k Keeper) distributeInternal(
 	remainEpochs := uint64(1)
 	if !gauge.IsPerpetual {
 		remainEpochs = gauge.NumEpochsPaidOver - gauge.FilledEpochs
+	}
+
+	/* ---------------------------- defense in depth ---------------------------- */
+	// this should never happen in practice since gauge passed in should always be an active gauge.
+	if remainEpochs == uint64(0) {
+		ctx.Logger().Error(fmt.Sprintf("gauge %d has no remaining epochs, skipping", gauge.Id))
+		return totalDistrCoins, nil
+	}
+
+	// this should never happen in practice
+	if remainCoins.Empty() {
+		ctx.Logger().Error(fmt.Sprintf("gauge %d is empty, skipping", gauge.Id))
+		err := k.updateGaugePostDistribute(ctx, gauge, totalDistrCoins)
+		return totalDistrCoins, err
 	}
 
 	for _, lock := range locks {

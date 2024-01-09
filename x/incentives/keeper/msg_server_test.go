@@ -78,6 +78,9 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 	for _, tc := range tests {
 		suite.SetupTest()
 
+		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		suite.Require().NoError(err)
+
 		testAccountPubkey := secp256k1.GenPrivKeyFromSecret([]byte("acc")).PubKey()
 		testAccountAddress := sdk.AccAddress(testAccountPubkey.Address())
 
@@ -112,7 +115,7 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 			NumEpochsPaidOver: 1,
 		}
 		// System under test.
-		_, err := msgServer.CreateGauge(sdk.WrapSDKContext(ctx), msg)
+		_, err = msgServer.CreateGauge(sdk.WrapSDKContext(ctx), msg)
 
 		if tc.expectErr {
 			suite.Require().Error(err)
@@ -188,6 +191,9 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 	for _, tc := range tests {
 		suite.SetupTest()
 
+		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		suite.Require().NoError(err)
+
 		testAccountPubkey := secp256k1.GenPrivKeyFromSecret([]byte("acc")).PubKey()
 		testAccountAddress := sdk.AccAddress(testAccountPubkey.Address())
 		// testAccountAddress := suite.TestAccs[0]
@@ -221,7 +227,7 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 			Rewards: tc.gaugeAddition,
 		}
 
-		_, err := msgServer.AddToGauge(sdk.WrapSDKContext(ctx), msg)
+		_, err = msgServer.AddToGauge(sdk.WrapSDKContext(ctx), msg)
 
 		if tc.expectErr {
 			suite.Require().Error(err)

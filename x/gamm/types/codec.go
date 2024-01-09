@@ -12,14 +12,14 @@ import (
 // on the provided LegacyAmino codec. These types are used for Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterInterface((*CFMMPoolI)(nil), nil)
-	cdc.RegisterConcrete(&MsgJoinPool{}, "osmosis/gamm/join-pool", nil)
-	cdc.RegisterConcrete(&MsgExitPool{}, "osmosis/gamm/exit-pool", nil)
-	cdc.RegisterConcrete(&MsgSwapExactAmountIn{}, "osmosis/gamm/swap-exact-amount-in", nil)
-	cdc.RegisterConcrete(&MsgSwapExactAmountOut{}, "osmosis/gamm/swap-exact-amount-out", nil)
-	cdc.RegisterConcrete(&MsgJoinSwapExternAmountIn{}, "osmosis/gamm/join-swap-extern-amount-in", nil)
-	cdc.RegisterConcrete(&MsgJoinSwapShareAmountOut{}, "osmosis/gamm/join-swap-share-amount-out", nil)
-	cdc.RegisterConcrete(&MsgExitSwapExternAmountOut{}, "osmosis/gamm/exit-swap-extern-amount-out", nil)
-	cdc.RegisterConcrete(&MsgExitSwapShareAmountIn{}, "osmosis/gamm/exit-swap-share-amount-in", nil)
+	cdc.RegisterConcrete(&MsgJoinPool{}, "osmosis/gamm/JoinPool", nil)
+	cdc.RegisterConcrete(&MsgExitPool{}, "osmosis/gamm/ExitPool", nil)
+	cdc.RegisterConcrete(&MsgSwapExactAmountIn{}, "osmosis/gamm/SwapExactAmountIn", nil)
+	cdc.RegisterConcrete(&MsgSwapExactAmountOut{}, "osmosis/gamm/SwapExactAmountOut", nil)
+	cdc.RegisterConcrete(&MsgJoinSwapExternAmountIn{}, "osmosis/gamm/JoinSwapExternAmountIn", nil)
+	cdc.RegisterConcrete(&MsgJoinSwapShareAmountOut{}, "osmosis/gamm/JoinSwapShareAmountOut", nil)
+	cdc.RegisterConcrete(&MsgExitSwapExternAmountOut{}, "osmosis/gamm/ExitSwapExternAmountOut", nil)
+	cdc.RegisterConcrete(&MsgExitSwapShareAmountIn{}, "osmosis/gamm/ExitSwapShareAmountIn", nil)
 }
 
 func RegisterInterfaces(registry types.InterfaceRegistry) {

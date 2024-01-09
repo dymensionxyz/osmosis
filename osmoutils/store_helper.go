@@ -11,9 +11,13 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
+var (
+	ErrNoValuesInRange = errors.New("No values in range")
+)
+
 func GatherAllKeysFromStore(storeObj store.KVStore) []string {
 	iterator := storeObj.Iterator(nil, nil)
-	defer iterator.Close() //nolint:errcheck
+	defer iterator.Close()
 
 	keys := []string{}
 	for ; iterator.Valid(); iterator.Next() {
@@ -24,7 +28,7 @@ func GatherAllKeysFromStore(storeObj store.KVStore) []string {
 
 func GatherValuesFromStore[T any](storeObj store.KVStore, keyStart []byte, keyEnd []byte, parseValue func([]byte) (T, error)) ([]T, error) {
 	iterator := storeObj.Iterator(keyStart, keyEnd)
-	defer iterator.Close() //nolint:errcheck
+	defer iterator.Close()
 	return gatherValuesFromIterator(iterator, parseValue, noStopFn)
 }
 
@@ -46,7 +50,7 @@ func GatherValuesFromStorePrefix[T any](storeObj store.KVStore, prefix []byte, p
 // - internal database error
 func GatherValuesFromStorePrefixWithKeyParser[T any](storeObj store.KVStore, prefix []byte, parse func(key []byte, value []byte) (T, error)) ([]T, error) {
 	iterator := sdk.KVStorePrefixIterator(storeObj, prefix)
-	defer iterator.Close() //nolint:errcheck
+	defer iterator.Close()
 	return gatherValuesFromIteratorWithKeyParser(iterator, parse, noStopFn)
 }
 
@@ -88,11 +92,11 @@ func GetFirstValueAfterPrefixInclusive[T any](storeObj store.KVStore, keyStart [
 
 func GetFirstValueInRange[T any](storeObj store.KVStore, keyStart []byte, keyEnd []byte, reverseIterate bool, parseValue func([]byte) (T, error)) (T, error) {
 	iterator := makeIterator(storeObj, keyStart, keyEnd, reverseIterate)
-	defer iterator.Close() //nolint:errcheck
+	defer iterator.Close()
 
 	if !iterator.Valid() {
 		var blankValue T
-		return blankValue, errors.New("No values in range")
+		return blankValue, ErrNoValuesInRange
 	}
 
 	return parseValue(iterator.Value())
@@ -164,7 +168,8 @@ func MustGetDec(store store.KVStore, key []byte) sdk.Dec {
 }
 
 // Get returns a value at key by mutating the result parameter. Returns true if the value was found and the
-// result mutated correctly. If the value is not in the store, returns false. Returns error only when database or serialization errors occur. (And when an error occurs, returns false)
+// result mutated correctly. If the value is not in the store, returns false.
+// Returns error only when database or serialization errors occur. (And when an error occurs, returns false)
 func Get(store store.KVStore, key []byte, result proto.Message) (found bool, err error) {
 	b := store.Get(key)
 	if b == nil {

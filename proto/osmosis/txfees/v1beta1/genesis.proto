@@ -1,0 +1,25 @@
+syntax = "proto3";
+package osmosis.txfees.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "osmosis/txfees/v1beta1/feetoken.proto";
+
+
+option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
+
+// GenesisState defines the txfees module's genesis state.
+message GenesisState {
+    // params are all the parameters of the module
+  Params params = 1 [ (gogoproto.nullable) = false ];
+  string basedenom = 2;
+  repeated FeeToken feetokens = 3 [ (gogoproto.nullable) = false ];
+}
+
+
+// Params holds parameters for the incentives module
+message Params {
+  // epoch_identifier is what epoch type swap and burn will be triggered by
+  // (day, week, etc.)
+  string epoch_identifier = 1
+      [ (gogoproto.moretags) = "yaml:\"epoch_identifier\"" ];
+}

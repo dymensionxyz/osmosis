@@ -299,6 +299,9 @@ func (suite *KeeperTestSuite) TestChargeFeeIfSufficientFeeDenomBalance() {
 		suite.Run(name, func() {
 			suite.SetupTest()
 
+			err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+			suite.Require().NoError(err)
+
 			testAccount := suite.TestAccs[0]
 
 			ctx := suite.Ctx
@@ -312,7 +315,7 @@ func (suite *KeeperTestSuite) TestChargeFeeIfSufficientFeeDenomBalance() {
 			oldBalanceAmount := bankKeeper.GetBalance(ctx, testAccount, "udym").Amount
 
 			// System under test.
-			err := incentivesKeepers.ChargeFeeIfSufficientFeeDenomBalance(ctx, testAccount, sdk.NewInt(tc.feeToCharge), tc.gaugeCoins)
+			err = incentivesKeepers.ChargeFeeIfSufficientFeeDenomBalance(ctx, testAccount, sdk.NewInt(tc.feeToCharge), tc.gaugeCoins)
 
 			// Assertions.
 			newBalanceAmount := bankKeeper.GetBalance(ctx, testAccount, "udym").Amount

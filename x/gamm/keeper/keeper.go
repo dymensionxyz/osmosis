@@ -34,6 +34,7 @@ type Keeper struct {
 	bankKeeper          types.BankKeeper
 	communityPoolKeeper types.CommunityPoolKeeper
 	poolManager         types.PoolManager
+	txfeeKeeper         types.TxFeeKeeper
 }
 
 func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, paramSpace paramtypes.Subspace, accountKeeper types.AccountKeeper, bankKeeper types.BankKeeper, communityPoolKeeper types.CommunityPoolKeeper) Keeper {
@@ -51,6 +52,17 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, paramSpace p
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
 	}
+
+	if accountKeeper == nil {
+		panic("account keeper is nil")
+	}
+	if bankKeeper == nil {
+		panic("bank keeper is nil")
+	}
+	if communityPoolKeeper == nil {
+		panic("community pool keeper is nil")
+	}
+
 	return Keeper{
 		storeKey:   storeKey,
 		cdc:        cdc,
@@ -73,8 +85,16 @@ func (k *Keeper) SetHooks(gh types.GammHooks) *Keeper {
 	return k
 }
 
+// SetPoolManager sets the pool manager.
+// must be called when initializing the keeper.
 func (k *Keeper) SetPoolManager(poolManager types.PoolManager) {
 	k.poolManager = poolManager
+}
+
+// SetTxFees sets the tx fees keeper.
+// must be called when initializing the keeper.
+func (k *Keeper) SetTxFees(txfees types.TxFeeKeeper) {
+	k.txfeeKeeper = txfees
 }
 
 // GetParams returns the total set params.

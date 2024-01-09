@@ -8,6 +8,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 type msgServer struct {
@@ -178,7 +179,9 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	err = server.keeper.chargeTakerFeeSwapAmountIn(ctx, takerFeesCoins, sender, msg.Routes)
+	//first pool for taker fee swaps if needed
+	takerFeeRoute := msg.Routes[0]
+	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +224,16 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	tokenInCoin := sdk.NewCoin(msg.Routes[0].TokenInDenom, tokenInAmount)
 	tokenInAmountWithTakerFee, takerFeeCoin := server.keeper.AddTakerFee(tokenInCoin, takerFee)
 
-	err = server.keeper.chargeTakerFeeSwapAmountOut(ctx, takerFeeCoin, sender, msg.Routes, msg.TokenOut.Denom)
+	//first pool for taker fee swaps if needed
+	takerFeeRoute := poolmanagertypes.SwapAmountInRoute{}
+	takerFeeRoute.PoolId = msg.Routes[0].PoolId
+	if len(msg.Routes) > 1 {
+		takerFeeRoute.TokenOutDenom = msg.Routes[1].TokenInDenom
+	} else {
+		takerFeeRoute.TokenOutDenom = msg.TokenOutDenom()
+	}
+
+	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, takerFeeRoute)
 	if err != nil {
 		return nil, err
 	}

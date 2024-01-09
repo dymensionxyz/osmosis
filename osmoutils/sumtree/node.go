@@ -55,13 +55,13 @@ func (ptr *ptr) delete() {
 
 func (ptr *ptr) leftSibling() *ptr {
 	iter := ptr.tree.ptrReverseIterator(ptr.level, nil, ptr.key)
-	defer iter.Close() // nolint: errcheck
+	defer iter.Close()
 	return iter.ptr()
 }
 
 func (ptr *ptr) rightSibling() *ptr {
 	iter := ptr.tree.ptrIterator(ptr.level, ptr.key, nil)
-	defer iter.Close() // nolint: errcheck
+	defer iter.Close()
 	if !iter.Valid() {
 		return nil
 	}
@@ -75,7 +75,7 @@ func (ptr *ptr) rightSibling() *ptr {
 func (ptr *ptr) child(n uint16) *ptr {
 	// TODO: set end to prefix iterator end
 	iter := ptr.tree.ptrIterator(ptr.level-1, ptr.node().Children[n].Index, nil)
-	defer iter.Close() // nolint: errcheck
+	defer iter.Close()
 	return iter.ptr()
 }
 

@@ -6,6 +6,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
+	txfeestypes "github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
 // AccountKeeper defines the account contract that must be fulfilled when
@@ -77,4 +78,9 @@ type PoolManager interface {
 		tokenOut sdk.Coin) (tokenInAmount sdk.Int, err error)
 
 	GetPoolModule(ctx sdk.Context, poolId uint64) (poolmanagertypes.SwapI, error)
+}
+
+type TxFeeKeeper interface {
+	GetFeeToken(ctx sdk.Context, denom string) (txfeestypes.FeeToken, error)
+	GetBaseDenom(ctx sdk.Context) (denom string, err error)
 }

@@ -7,7 +7,7 @@ import (
 
 // AssertEventEmitted asserts that ctx's event manager has emitted the given number of events
 // of the given type.
-func (s *KeeperTestHelper) AssertEventEmitted(ctx sdk.Context, eventTypeExpected string, numEventsExpected int) {
+func (s *KeeperTestHelper) AssertEventEmitted(ctx sdk.Context, eventTypeExpected string, numEventsExpected int, msgAndArgs ...interface{}) {
 	allEvents := ctx.EventManager().Events()
 	// filter out other events
 	actualEvents := make([]sdk.Event, 0)
@@ -16,7 +16,7 @@ func (s *KeeperTestHelper) AssertEventEmitted(ctx sdk.Context, eventTypeExpected
 			actualEvents = append(actualEvents, event)
 		}
 	}
-	s.Equal(numEventsExpected, len(actualEvents))
+	s.Equal(numEventsExpected, len(actualEvents), msgAndArgs...)
 }
 
 func (s *KeeperTestHelper) FindEvent(events []sdk.Event, name string) sdk.Event {

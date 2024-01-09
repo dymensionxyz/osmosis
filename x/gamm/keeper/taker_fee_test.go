@@ -8,15 +8,17 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
+	txfeestypes "github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
 /* ----------------------------- Testing ExactIn ---------------------------- */
-func (suite *KeeperTestSuite) TestDYMIsBurned_ExactIn() {
+func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 	tokenInAmt := int64(100000)
 	testcases := map[string]struct {
 		routes            []poolmanagertypes.SwapAmountInRoute
 		tokenIn           sdk.Coin
 		tokenOutMinAmount sdk.Int
+		expectSwap        bool
 		expectError       bool
 	}{
 		"zero hops": {
@@ -95,6 +97,9 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactIn() {
 
 	for name, tc := range testcases {
 		suite.SetupTest()
+
+		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+
 		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
 		params.PoolCreationFee = sdk.NewCoins(
@@ -118,11 +123,9 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactIn() {
 		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
 		suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		//check total supply before swap
-		suppliesBefore := make(map[string]sdk.Int)
-		suppliesBefore["udym"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "udym").Amount
-		suppliesBefore["foo"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "foo").Amount
-		suppliesBefore["bar"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "bar").Amount
+		//get the balance of txfees before swap
+		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
+		balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
 		// check taker fee is not 0
 		suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
@@ -140,24 +143,23 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactIn() {
 		}
 		suite.Require().NoError(err, name)
 
-		// check total supply after swap
-		suppliesAfter := make(map[string]sdk.Int)
-		suppliesAfter["udym"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "udym").Amount
-		suppliesAfter["foo"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "foo").Amount
-		suppliesAfter["bar"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "bar").Amount
+		//get the balance of txfees after swap
+		balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
-		//validate total supply is reduced by taker fee
-		suite.Require().True(suppliesAfter["udym"].LT(suppliesBefore["udym"]), name)
-		suite.Require().True(suppliesAfter["foo"].Equal(suppliesBefore["foo"]), name)
-		suite.Require().True(suppliesAfter["bar"].Equal(suppliesBefore["bar"]), name)
+		testDenom := tc.tokenIn.Denom
+		if tc.expectSwap {
+			testDenom = tc.routes[0].TokenOutDenom
+		}
+		suite.Require().True(balancesAfter.AmountOf(testDenom).GT(balancesBefore.AmountOf(testDenom)), name)
 	}
 }
 
-func (suite *KeeperTestSuite) TestDYMIsBurned_ExactOut() {
+func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 	tokenInAmt := int64(100000)
 	testcases := map[string]struct {
 		routes      []poolmanagertypes.SwapAmountOutRoute
 		tokenOut    sdk.Coin
+		expectSwap  bool
 		expectError bool
 	}{
 		"zero hops": {
@@ -215,20 +217,24 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactOut() {
 			tokenOut:    sdk.NewCoin("baz", sdk.NewInt(tokenInAmt)),
 			expectError: false,
 		},
-		"usdc swap with dym": {
+		"baz swap with usdc": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
-					PoolId:       3,
-					TokenInDenom: "bar",
+					PoolId:       4,
+					TokenInDenom: "baz",
 				},
 			},
-			tokenOut:    sdk.NewCoin("udym", sdk.NewInt(tokenInAmt)),
+			tokenOut:    sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
+			expectSwap:  true,
 			expectError: false,
 		},
 	}
 
 	for name, tc := range testcases {
 		suite.SetupTest()
+
+		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+
 		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
 		params.PoolCreationFee = sdk.NewCoins(
@@ -252,11 +258,9 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactOut() {
 		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("baz", sdk.NewInt(100000000))}
 		suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		//check total supply before swap
-		suppliesBefore := make(map[string]sdk.Int)
-		suppliesBefore["udym"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "udym").Amount
-		suppliesBefore["foo"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "foo").Amount
-		suppliesBefore["bar"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "bar").Amount
+		//get the balance of txfees before swap
+		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
+		balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
 		// check taker fee is not 0
 		suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
@@ -274,16 +278,14 @@ func (suite *KeeperTestSuite) TestDYMIsBurned_ExactOut() {
 		}
 		suite.Require().NoError(err, name)
 
-		// check total supply after swap
-		suppliesAfter := make(map[string]sdk.Int)
-		suppliesAfter["udym"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "udym").Amount
-		suppliesAfter["foo"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "foo").Amount
-		suppliesAfter["bar"] = suite.App.BankKeeper.GetSupply(suite.Ctx, "bar").Amount
+		//get the balance of txfees after swap
+		balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
-		//validate total supply is reduced by taker fee
-		suite.Require().True(suppliesAfter["udym"].LT(suppliesBefore["udym"]), name)
-		suite.Require().True(suppliesAfter["foo"].Equal(suppliesBefore["foo"]), name)
-		suite.Require().True(suppliesAfter["bar"].Equal(suppliesBefore["bar"]), name)
+		testDenom := tc.routes[0].TokenInDenom
+		if tc.expectSwap {
+			testDenom = tc.tokenOut.Denom
+		}
+		suite.Require().True(balancesAfter.AmountOf(testDenom).GT(balancesBefore.AmountOf(testDenom)), testDenom, name)
 	}
 }
 

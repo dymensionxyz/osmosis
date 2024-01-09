@@ -3,8 +3,7 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-
+	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -29,8 +28,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 		tokenIn               sdk.Coin
 		tokenOutMinAmount     sdk.Int
 		expectError           bool
-		expectedBurnEvents    bool
 		expectedSwapEvents    int
+		expectedTakerFeeSwap  bool
 		expectedMessageEvents int
 	}{
 		"zero hops": {
@@ -42,62 +41,59 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 		"one hop": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
-					PoolId:        1,
+					PoolId:        3,
 					TokenOutDenom: "bar",
 				},
 			},
 			tokenIn:               sdk.NewCoin("udym", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    1,
-			expectedBurnEvents:    true,
-			expectedMessageEvents: 4, // 1 gamm + 2 bank send for swap + 1 bank send when burn
+			expectedMessageEvents: 4, // 1 gamm + 2 bank send for swap + 1 bank send
 		},
 		"one hop - taker fee swap": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
-					PoolId:        1,
-					TokenOutDenom: "udym",
+					PoolId:        4,
+					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:               sdk.NewCoin("bar", sdk.NewInt(tokenIn)),
+			tokenIn:               sdk.NewCoin("baz", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    2,
-			expectedBurnEvents:    true,
-			expectedMessageEvents: 6, // 1 gamm + 2 bank send for swap + 2 taker fee swap + 1 bank send when burn
+			expectedTakerFeeSwap:  true,
+			expectedMessageEvents: 6, // 1 gamm + 2 bank send for swap + 2 swap taker fee + 1 bank send when burn
 		},
 		"two hops": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
-					PoolId:        1,
+					PoolId:        3,
 					TokenOutDenom: "bar",
 				},
 				{
-					PoolId:        2,
+					PoolId:        4,
 					TokenOutDenom: "baz",
 				},
 			},
 			tokenIn:               sdk.NewCoin("udym", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    2,
-			expectedBurnEvents:    true,
 			expectedMessageEvents: 6, // 1 gamm + 4 swap + 1 burn
 		},
 		"two hops - taker fee swap": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
-					PoolId:        1,
+					PoolId:        2,
 					TokenOutDenom: "bar",
 				},
 				{
-					PoolId:        2,
+					PoolId:        3,
 					TokenOutDenom: "udym",
 				},
 			},
 			tokenIn:               sdk.NewCoin("foo", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
-			expectedBurnEvents:    true,
-			expectedSwapEvents:    4,  //2 for the swap + 2 for taker fee
-			expectedMessageEvents: 10, // 1 gamm + 8 swap + 1 burn
+			expectedSwapEvents:    2, //2 for the swap
+			expectedMessageEvents: 6, // 1 gamm + 4 swap + 1 burn
 		},
 		"invalid - two hops, denom does not exist": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
@@ -117,37 +113,44 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 	}
 
 	for name, tc := range testcases {
-		suite.Run(name, func() {
-			suite.Setup()
-			ctx := suite.Ctx
+		suite.Setup()
+		ctx := suite.Ctx
+		suite.App.TxFeesKeeper.SetBaseDenom(ctx, "udym")
+		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-			suite.PrepareBalancerPool()
-			suite.PrepareBalancerPool()
+		pool1coins := []sdk.Coin{sdk.NewCoin("udym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+		//"bar" is treated as baseDenom (e.g. USDC)
+		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			// Reset event counts to 0 by creating a new manager.
-			ctx = ctx.WithEventManager(sdk.NewEventManager())
-			suite.Equal(0, len(ctx.EventManager().Events()))
+		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("udym", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			response, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
-				Sender:            suite.TestAccs[0].String(),
-				Routes:            tc.routes,
-				TokenIn:           tc.tokenIn,
-				TokenOutMinAmount: tc.tokenOutMinAmount,
-			})
+		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-			if !tc.expectError {
-				suite.NoError(err)
-				suite.NotNil(response)
-			}
-			if tc.expectedBurnEvents {
-				suite.AssertEventEmitted(ctx, banktypes.EventTypeCoinBurn, 1)
-			}
+		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-			suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents)
-			suite.AssertEventEmitted(ctx, sdk.EventTypeMessage, tc.expectedMessageEvents)
+		// Reset event counts to 0 by creating a new manager.
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
+		suite.Equal(0, len(ctx.EventManager().Events()))
+
+		response, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
+			Sender:            suite.TestAccs[0].String(),
+			Routes:            tc.routes,
+			TokenIn:           tc.tokenIn,
+			TokenOutMinAmount: tc.tokenOutMinAmount,
 		})
+
+		if !tc.expectError {
+			suite.Require().NoError(err, name)
+			suite.Require().NotNil(response, name)
+		}
+
+		suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
+		suite.AssertEventEmitted(ctx, sdk.EventTypeMessage, tc.expectedMessageEvents, name)
 	}
 }
 
@@ -164,75 +167,52 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 		tokenOut              sdk.Coin
 		tokenInMaxAmount      sdk.Int
 		expectError           bool
-		expectedBurnEvents    bool
 		expectedSwapEvents    int
 		expectedMessageEvents int
 	}{
-		// "zero hops": {
-		// 	routes:           []poolmanagertypes.SwapAmountOutRoute{},
-		// 	tokenOut:         sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
-		// 	tokenInMaxAmount: sdk.NewInt(tokenInMaxAmount),
-		// 	expectError:      true,
-		// },
-		// "one hop": {
-		// 	routes: []poolmanagertypes.SwapAmountOutRoute{
-		// 		{
-		// 			PoolId:       1,
-		// 			TokenInDenom: "udym",
-		// 		},
-		// 	},
-		// 	tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
-		// 	tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-		// 	expectedBurnEvents:    true,
-		// 	expectedSwapEvents:    1,
-		// 	expectedMessageEvents: 4, // 1 gamm + 2 for swap + 1 for burn
-		// },
 		"one hop - with taker fee": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
-					PoolId:       1,
+					PoolId:       3,
 					TokenInDenom: "bar",
 				},
 			},
 			tokenOut:              sdk.NewCoin("udym", sdk.NewInt(tokenOut)),
 			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-			expectedBurnEvents:    true,
-			expectedSwapEvents:    2,
-			expectedMessageEvents: 6, // 1 gamm + 2 for swap + 2 swap for taker fee + 1 for send to burn
+			expectedSwapEvents:    1,
+			expectedMessageEvents: 4, // 1 gamm + 2 for swap + 1 for send
 		},
 		"two hops": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
-					PoolId:       1,
+					PoolId:       3,
 					TokenInDenom: "udym",
 				},
 				{
 					PoolId:       2,
-					TokenInDenom: "baz",
+					TokenInDenom: "bar",
 				},
 			},
 			tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
 			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-			expectedBurnEvents:    true,
 			expectedSwapEvents:    2,
 			expectedMessageEvents: 6, // 1 gamm + 4 for swap + 1 for send to community
 		},
 		"two hops - taker fee swap": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
-					PoolId:       1,
+					PoolId:       3,
 					TokenInDenom: "bar",
 				},
 				{
-					PoolId:       2,
+					PoolId:       1,
 					TokenInDenom: "udym",
 				},
 			},
 			tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
 			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-			expectedBurnEvents:    true,
-			expectedSwapEvents:    3,
-			expectedMessageEvents: 8, // 1 gamm + 4 for swap + 2 for taker fee swap + 1 for send to burn
+			expectedSwapEvents:    2,
+			expectedMessageEvents: 6, // 1 gamm + 4 for swap + 1 for send to burn
 		},
 		"invalid - two hops, denom does not exist": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -252,38 +232,44 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 	}
 
 	for name, tc := range testcases {
-		suite.Run(name, func() {
-			suite.Setup()
-			ctx := suite.Ctx
+		suite.Setup()
+		ctx := suite.Ctx
+		suite.App.TxFeesKeeper.SetBaseDenom(ctx, "udym")
+		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-			suite.PrepareBalancerPool()
-			suite.PrepareBalancerPool()
+		pool1coins := []sdk.Coin{sdk.NewCoin("udym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+		//"bar" is treated as baseDenom (e.g. USDC)
+		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			// Reset event counts to 0 by creating a new manager.
-			ctx = ctx.WithEventManager(sdk.NewEventManager())
-			suite.Equal(0, len(ctx.EventManager().Events()))
+		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("udym", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			response, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
-				Sender:           suite.TestAccs[0].String(),
-				Routes:           tc.routes,
-				TokenOut:         tc.tokenOut,
-				TokenInMaxAmount: tc.tokenInMaxAmount,
-			})
+		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+		suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-			if !tc.expectError {
-				suite.NoError(err)
-				suite.NotNil(response)
-			}
+		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-			if tc.expectedBurnEvents {
-				suite.AssertEventEmitted(ctx, banktypes.EventTypeCoinBurn, 1)
-			}
+		// Reset event counts to 0 by creating a new manager.
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
+		suite.Equal(0, len(ctx.EventManager().Events()))
 
-			suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents)
-			suite.AssertEventEmitted(ctx, sdk.EventTypeMessage, tc.expectedMessageEvents)
+		response, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
+			Sender:           suite.TestAccs[0].String(),
+			Routes:           tc.routes,
+			TokenOut:         tc.tokenOut,
+			TokenInMaxAmount: tc.tokenInMaxAmount,
 		})
+
+		if !tc.expectError {
+			suite.Require().NoError(err, name)
+			suite.Require().NotNil(response, name)
+		}
+
+		suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
+		suite.AssertEventEmitted(ctx, sdk.EventTypeMessage, tc.expectedMessageEvents, name)
 	}
 }
 
