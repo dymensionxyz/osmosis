@@ -54,6 +54,10 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		feetoken, err := k.GetFeeToken(ctx, coinBalance.Denom)
 		if err != nil {
 			k.Logger(ctx).Error("unknown fee token", "denom", coinBalance.Denom, "error", err)
+			err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coinBalance))
+			if err != nil {
+				k.Logger(ctx).Error("failed to burn non-native coins", "error", err)
+			}
 			continue
 		}
 
