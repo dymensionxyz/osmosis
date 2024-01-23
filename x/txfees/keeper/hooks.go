@@ -77,7 +77,11 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		}
 		err = osmoutils.ApplyFuncIfNoError(ctx, wrappedRouteExactAmountInFn)
 		if err != nil {
-			ctx.Logger().Error(fmt.Sprintf("failed to swap fee token to base token: %v", err))
+			ctx.Logger().Error(fmt.Sprintf("failed to swap fee token to base token: %v. Trying to burn the tokens", err))
+			err := k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(coinBalance))
+			if err != nil {
+				k.Logger(ctx).Error("failed to burn non-native coins", "error", err)
+			}
 		}
 	}
 
