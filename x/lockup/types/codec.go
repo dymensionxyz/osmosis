@@ -12,6 +12,9 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLockTokens{}, "osmosis/lockup/lock-tokens", nil)
 	cdc.RegisterConcrete(&MsgBeginUnlockingAll{}, "osmosis/lockup/begin-unlock-tokens", nil)
 	cdc.RegisterConcrete(&MsgBeginUnlocking{}, "osmosis/lockup/begin-unlock-period-lock", nil)
+	cdc.RegisterConcrete(&MsgExtendLockup{}, "osmosis/lockup/extend-lockup", nil)
+	cdc.RegisterConcrete(&MsgForceUnlock{}, "osmosis/lockup/force-unlock-tokens", nil)
+
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -20,6 +23,8 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgLockTokens{},
 		&MsgBeginUnlockingAll{},
 		&MsgBeginUnlocking{},
+		&MsgExtendLockup{},
+		&MsgForceUnlock{},
 	)
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }
