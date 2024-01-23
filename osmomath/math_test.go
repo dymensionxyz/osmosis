@@ -29,6 +29,7 @@ func TestPowApprox(t *testing.T) {
 		exp            sdk.Dec
 		powPrecision   sdk.Dec
 		expectedResult sdk.Dec
+		expectPanic    bool
 	}{
 		{
 			// medium base, small exp
@@ -50,6 +51,7 @@ func TestPowApprox(t *testing.T) {
 			exp:            sdk.OneDec(),
 			powPrecision:   sdk.MustNewDecFromStr("0.00001"),
 			expectedResult: sdk.ZeroDec(),
+			expectPanic:    true,
 		},
 		{
 			// large base, small exp
@@ -86,17 +88,38 @@ func TestPowApprox(t *testing.T) {
 			powPrecision:   sdk.MustNewDecFromStr("0.00000001"),
 			expectedResult: sdk.OneDec(),
 		},
+		{
+			// base equal one
+			base:           sdk.MustNewDecFromStr("1"),
+			exp:            sdk.MustNewDecFromStr("123"),
+			powPrecision:   sdk.MustNewDecFromStr("0.00000001"),
+			expectedResult: sdk.OneDec(),
+		},
+		{
+			// base equal one
+			base:         sdk.MustNewDecFromStr("1.99999"),
+			exp:          sdk.MustNewDecFromStr("0.1"),
+			powPrecision: powPrecision,
+			expectPanic:  true,
+		},
+		{
+			// base equal one
+			base:         sdk.MustNewDecFromStr("1.999999999999999999"),
+			exp:          sdk.MustNewDecFromStr("0.1"),
+			powPrecision: powPrecision,
+			expectPanic:  true,
+		},
 	}
 
 	for i, tc := range testCases {
 		var actualResult sdk.Dec
-		ConditionalPanic(t, tc.base.IsZero(), func() {
+		ConditionalPanic(t, tc.expectPanic, func() {
 			fmt.Println(tc.base)
 			actualResult = PowApprox(tc.base, tc.exp, tc.powPrecision)
 			require.True(
 				t,
 				tc.expectedResult.Sub(actualResult).Abs().LTE(tc.powPrecision),
-				fmt.Sprintf("test %d failed: expected value & actual value's difference should be less than precision", i),
+				fmt.Sprintf("test %d failed: expected value & actual value's difference should be less than precision, expected: %s, actual: %s, precision: %s", i, tc.expectedResult, actualResult, tc.powPrecision),
 			)
 		})
 	}
