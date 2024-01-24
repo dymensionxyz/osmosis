@@ -16,7 +16,7 @@ service Query {
   // SpotPrice defines a gRPC query handler that returns the spot price given
   // a base denomination and a quote denomination.
   rpc SpotPrice(QuerySpotPriceRequest) returns (QuerySpotPriceResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v2/pools/{pool_id}/prices";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v2/pools/{pool_id}/prices";
   }
 }
 

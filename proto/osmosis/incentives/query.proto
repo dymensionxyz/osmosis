@@ -17,39 +17,39 @@ service Query {
   rpc ModuleToDistributeCoins(ModuleToDistributeCoinsRequest)
       returns (ModuleToDistributeCoinsResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/module_to_distribute_coins";
+        "/dymensionxyz/dymension/incentives/v1beta1/module_to_distribute_coins";
   }
 
   // GaugeByID returns gauges by their respective ID
   rpc GaugeByID(GaugeByIDRequest) returns (GaugeByIDResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/gauge_by_id/{id}";
+        "/dymensionxyz/dymension/incentives/v1beta1/gauge_by_id/{id}";
   }
   // Gauges returns both upcoming and active gauges
   rpc Gauges(GaugesRequest) returns (GaugesResponse) {
-    option (google.api.http).get = "/osmosis/incentives/v1beta1/gauges";
+    option (google.api.http).get = "/dymensionxyz/dymension/incentives/v1beta1/gauges";
   }
   // ActiveGauges returns active gauges
   rpc ActiveGauges(ActiveGaugesRequest) returns (ActiveGaugesResponse) {
-    option (google.api.http).get = "/osmosis/incentives/v1beta1/active_gauges";
+    option (google.api.http).get = "/dymensionxyz/dymension/incentives/v1beta1/active_gauges";
   }
   // ActiveGaugesPerDenom returns active gauges by denom
   rpc ActiveGaugesPerDenom(ActiveGaugesPerDenomRequest)
       returns (ActiveGaugesPerDenomResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/active_gauges_per_denom";
+        "/dymensionxyz/dymension/incentives/v1beta1/active_gauges_per_denom";
   }
   // Returns scheduled gauges that have not yet occured
   rpc UpcomingGauges(UpcomingGaugesRequest) returns (UpcomingGaugesResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/upcoming_gauges";
+        "/dymensionxyz/dymension/incentives/v1beta1/upcoming_gauges";
   }
   // UpcomingGaugesPerDenom returns scheduled gauges that have not yet occured
   // by denom
   rpc UpcomingGaugesPerDenom(UpcomingGaugesPerDenomRequest)
       returns (UpcomingGaugesPerDenomResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/upcoming_gauges_per_denom";
+        "/dymensionxyz/dymension/incentives/v1beta1/upcoming_gauges_per_denom";
   }
 
   // RewardsEst returns an estimate of the rewards from now until a specified
@@ -57,14 +57,14 @@ service Query {
   // for which they want to find the associated rewards
   rpc RewardsEst(RewardsEstRequest) returns (RewardsEstResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/rewards_est/{owner}";
+        "/dymensionxyz/dymension/incentives/v1beta1/rewards_est/{owner}";
   }
   // LockableDurations returns lockable durations that are valid to distribute
   // incentives for
   rpc LockableDurations(QueryLockableDurationsRequest)
       returns (QueryLockableDurationsResponse) {
     option (google.api.http).get =
-        "/osmosis/incentives/v1beta1/lockable_durations";
+        "/dymensionxyz/dymension/incentives/v1beta1/lockable_durations";
   }
 }
 

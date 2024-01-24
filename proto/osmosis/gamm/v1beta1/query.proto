@@ -17,34 +17,34 @@ option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 service Query {
   // Params returns lockup params.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/params";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/params";
   }
 
   rpc Pools(QueryPoolsRequest) returns (QueryPoolsResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/pools";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools";
   }
 
   // Deprecated: please use the alternative in x/poolmanager
   rpc NumPools(QueryNumPoolsRequest) returns (QueryNumPoolsResponse) {
     option deprecated = true;
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/num_pools";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/num_pools";
   }
 
   rpc TotalLiquidity(QueryTotalLiquidityRequest)
       returns (QueryTotalLiquidityResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/total_liquidity";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/total_liquidity";
   }
 
   // PoolsWithFilter allows you to query specific pools with requested
   // parameters
   rpc PoolsWithFilter(QueryPoolsWithFilterRequest)
       returns (QueryPoolsWithFilterResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/filtered_pools";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/filtered_pools";
   }
 
   // Per Pool gRPC Endpoints
   rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/pools/{pool_id}";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}";
   }
 
 
@@ -56,28 +56,28 @@ service Query {
   rpc CalcJoinPoolShares(QueryCalcJoinPoolSharesRequest)
       returns (QueryCalcJoinPoolSharesResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/join_swap_exact_in";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/join_swap_exact_in";
   }
   rpc CalcExitPoolCoinsFromShares(QueryCalcExitPoolCoinsFromSharesRequest)
       returns (QueryCalcExitPoolCoinsFromSharesResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/exit_swap_share_amount_in";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/exit_swap_share_amount_in";
   }
 
   rpc PoolParams(QueryPoolParamsRequest) returns (QueryPoolParamsResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/params";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/params";
   }
 
   rpc TotalPoolLiquidity(QueryTotalPoolLiquidityRequest)
       returns (QueryTotalPoolLiquidityResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/total_pool_liquidity";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/total_pool_liquidity";
   }
 
   rpc TotalShares(QueryTotalSharesRequest) returns (QueryTotalSharesResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/total_shares";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/total_shares";
   }
 
   // SpotPrice defines a gRPC query handler that returns the spot price given
@@ -85,19 +85,19 @@ service Query {
   rpc SpotPrice(QuerySpotPriceRequest) returns (QuerySpotPriceResponse) {
     option deprecated = true;
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/pools/{pool_id}/prices";
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/prices";
   }
 
   rpc EstimateSwapExactAmountIn(QuerySwapExactAmountInRequest)
       returns (QuerySwapExactAmountInResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_in";
+        "/dymensionxyz/dymension/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_in";
   }
 
   rpc EstimateSwapExactAmountOut(QuerySwapExactAmountOutRequest)
       returns (QuerySwapExactAmountOutResponse) {
     option (google.api.http).get =
-        "/osmosis/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_out";
+        "/dymensionxyz/dymension/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_out";
   }
 }
 

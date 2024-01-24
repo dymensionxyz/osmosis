@@ -443,15 +443,15 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 }
 
 var (
-	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "txfees", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Params_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"dymensionxyz", "dymension", "txfees", "v1beta1", "params"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_FeeTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "txfees", "v1beta1", "fee_tokens"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_FeeTokens_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"dymensionxyz", "dymension", "txfees", "v1beta1", "fee_tokens"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DenomSpotPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "txfees", "v1beta1", "spot_price_by_denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_DenomSpotPrice_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"dymensionxyz", "dymension", "txfees", "v1beta1", "spot_price_by_denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_DenomPoolId_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"osmosis", "txfees", "v1beta1", "denom_pool_id", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_DenomPoolId_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"dymensionxyz", "dymension", "txfees", "v1beta1", "denom_pool_id", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_BaseDenom_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"osmosis", "txfees", "v1beta1", "base_denom"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_BaseDenom_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"dymensionxyz", "dymension", "txfees", "v1beta1", "base_denom"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
