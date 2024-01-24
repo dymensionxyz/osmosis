@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"errors"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -40,8 +39,9 @@ func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.R
 
 // Validate performs basic genesis state validation, returning an error upon any failure.
 func (gs GenesisState) Validate() error {
-	if gs.Params.DistrEpochIdentifier == "" {
-		return errors.New("epoch identifier should NOT be empty")
+	if err := gs.Params.Validate(); err != nil {
+		return err
 	}
+
 	return nil
 }
