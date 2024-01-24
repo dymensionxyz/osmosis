@@ -148,6 +148,9 @@ func (k Keeper) AddToGaugeRewards(ctx sdk.Context, owner sdk.AccAddress, coins s
 	if err != nil {
 		return err
 	}
+	if gauge.IsFinishedGauge(ctx.BlockTime()) {
+		return types.UnexpectedFinishedGaugeError{GaugeId: gaugeID}
+	}
 	if err := k.bk.SendCoinsFromAccountToModule(ctx, owner, types.ModuleName, coins); err != nil {
 		return err
 	}

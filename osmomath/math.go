@@ -10,6 +10,8 @@ import (
 // TODO: Analyze choice here.
 var powPrecision, _ = sdk.NewDecFromStr("0.00000001")
 
+const powIterationLimit = 150_000
+
 var (
 	one_half sdk.Dec = sdk.MustNewDecFromStr("0.5")
 	one      sdk.Dec = sdk.OneDec()
@@ -167,6 +169,9 @@ func PowApprox(base sdk.Dec, exp sdk.Dec, precision sdk.Dec) sdk.Dec {
 			sum.SubMut(term)
 		} else {
 			sum.AddMut(term)
+		}
+		if i == powIterationLimit {
+			panic(fmt.Errorf("failed to reach precision within %d iterations, best guess: %s for %s^%s", powIterationLimit, sum, base, exp))
 		}
 	}
 	return sum
