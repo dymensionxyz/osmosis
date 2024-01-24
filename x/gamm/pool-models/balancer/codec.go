@@ -13,9 +13,9 @@ import (
 // RegisterLegacyAminoCodec registers the necessary x/gamm interfaces and concrete types
 // on the provided LegacyAmino codec. These types are used for Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&Pool{}, "osmosis/gamm/BalancerPool", nil)
-	cdc.RegisterConcrete(&MsgCreateBalancerPool{}, "osmosis/gamm/CreateBalancerPool", nil)
-	cdc.RegisterConcrete(&PoolParams{}, "osmosis/gamm/BalancerPoolParams", nil)
+	cdc.RegisterConcrete(&Pool{}, "dymensionxyz/dymension/gamm/BalancerPool", nil)
+	cdc.RegisterConcrete(&MsgCreateBalancerPool{}, "dymensionxyz/dymension/gamm/CreateBalancerPool", nil)
+	cdc.RegisterConcrete(&PoolParams{}, "dymensionxyz/dymension/gamm/BalancerPoolParams", nil)
 }
 
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
