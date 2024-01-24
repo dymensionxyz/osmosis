@@ -40,25 +40,25 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 	}{
 		{
 			"Query base denom",
-			"/osmosis.txfees.v1beta1.Query/BaseDenom",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/BaseDenom",
 			&types.QueryBaseDenomRequest{},
 			&types.QueryBaseDenomResponse{},
 		},
 		{
 			"Query poolID by denom",
-			"/osmosis.txfees.v1beta1.Query/DenomPoolId",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomPoolId",
 			&types.QueryDenomPoolIdRequest{Denom: "uosmo"},
 			&types.QueryDenomPoolIdResponse{},
 		},
 		{
 			"Query spot price by denom",
-			"/osmosis.txfees.v1beta1.Query/DenomSpotPrice",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomSpotPrice",
 			&types.QueryDenomSpotPriceRequest{Denom: "uosmo"},
 			&types.QueryDenomSpotPriceResponse{},
 		},
 		{
 			"Query fee tokens",
-			"/osmosis.txfees.v1beta1.Query/FeeTokens",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/FeeTokens",
 			&types.QueryFeeTokensRequest{},
 			&types.QueryFeeTokensResponse{},
 		},
