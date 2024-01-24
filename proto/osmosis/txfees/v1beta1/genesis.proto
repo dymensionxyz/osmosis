@@ -1,5 +1,5 @@
 syntax = "proto3";
-package osmosis.txfees.v1beta1;
+package dymensionxyz.dymension.txfees.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "osmosis/txfees/v1beta1/feetoken.proto";

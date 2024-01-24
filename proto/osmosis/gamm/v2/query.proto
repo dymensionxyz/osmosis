@@ -1,5 +1,5 @@
 syntax = "proto3";
-package osmosis.gamm.v2;
+package dymensionxyz.dymension.gamm.v2;
 
 import "gogoproto/gogo.proto";
 import "osmosis/gamm/v1beta1/tx.proto";

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package osmosis.gamm.v1beta1;
+package dymensionxyz.dymension.gamm.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "osmosis/gamm/v1beta1/tx.proto";
@@ -262,7 +262,7 @@ message QuerySwapExactAmountInRequest {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
   uint64 pool_id = 2 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
   string token_in = 3 [ (gogoproto.moretags) = "yaml:\"token_in\"" ];
-  repeated osmosis.poolmanager.v1beta1.SwapAmountInRoute routes = 4 [
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute routes = 4 [
     (gogoproto.moretags) = "yaml:\"routes\"",
     (gogoproto.nullable) = false
   ];
@@ -280,7 +280,7 @@ message QuerySwapExactAmountInResponse {
 message QuerySwapExactAmountOutRequest {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
   uint64 pool_id = 2 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
-  repeated osmosis.poolmanager.v1beta1.SwapAmountOutRoute routes = 3 [
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute routes = 3 [
     (gogoproto.moretags) = "yaml:\"routes\"",
     (gogoproto.nullable) = false
   ];
