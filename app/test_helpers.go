@@ -11,7 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	dymd "github.com/dymensionxyz/dymension/app"
+	dymd "github.com/dymensionxyz/dymension/v3/app"
 )
 
 var defaultGenesisBz []byte

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	"github.com/dymensionxyz/dymension/app"
+	"github.com/dymensionxyz/dymension/v3/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 )

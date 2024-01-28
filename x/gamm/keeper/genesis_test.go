@@ -13,7 +13,7 @@ import (
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	osmoapp "github.com/dymensionxyz/dymension/app"
+	osmoapp "github.com/dymensionxyz/dymension/v3/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"

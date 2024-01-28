@@ -12,7 +12,7 @@ import (
 
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	appParams "github.com/dymensionxyz/dymension/app/params"
+	appParams "github.com/dymensionxyz/dymension/v3/app/params"
 
 	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
 )

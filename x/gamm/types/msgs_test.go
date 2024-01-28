@@ -9,7 +9,7 @@ import (
 
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	appParams "github.com/dymensionxyz/dymension/app/params"
+	appParams "github.com/dymensionxyz/dymension/v3/app/params"
 
 	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
