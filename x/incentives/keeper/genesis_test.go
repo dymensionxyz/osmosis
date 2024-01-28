@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	osmoapp "github.com/dymensionxyz/dymension/app"
+	osmoapp "github.com/dymensionxyz/dymension/v3/app"
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 

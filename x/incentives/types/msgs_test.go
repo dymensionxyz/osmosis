@@ -12,7 +12,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	incentivestypes "github.com/osmosis-labs/osmosis/v15/x/incentives/types"
 
-	appParams "github.com/dymensionxyz/dymension/app/params"
+	appParams "github.com/dymensionxyz/dymension/v3/app/params"
 
 	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 )

@@ -29,7 +29,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
-	"github.com/dymensionxyz/dymension/app"
+	"github.com/dymensionxyz/dymension/v3/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
