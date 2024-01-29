@@ -19,6 +19,9 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 }
 
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
+	//Registering old proto-path for backwards-compatibility
+	proto.RegisterType((*Pool)(nil), "osmosis.gamm.v1beta1.Pool")
+
 	registry.RegisterInterface(
 		"osmosis.poolmanager.v1beta1.PoolI",
 		(*poolmanagertypes.PoolI)(nil),
