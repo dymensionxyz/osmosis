@@ -351,6 +351,8 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		},
 		tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("udym", 499_999)),
 		expectShares: sdk.NewIntFromUint64(6_504_099_261_800_144_638),
+		// pow iteration limit reached
+		expectPanic: true,
 	},
 	{
 		// Currently, our Pow approximation function does not work correctly when one tries
