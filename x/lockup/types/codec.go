@@ -9,11 +9,11 @@ import (
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgLockTokens{}, "dymensionxyz/dymension/lockup/lock-tokens", nil)
-	cdc.RegisterConcrete(&MsgBeginUnlockingAll{}, "dymensionxyz/dymension/lockup/begin-unlock-tokens", nil)
-	cdc.RegisterConcrete(&MsgBeginUnlocking{}, "dymensionxyz/dymension/lockup/begin-unlock-period-lock", nil)
-	cdc.RegisterConcrete(&MsgExtendLockup{}, "dymensionxyz/dymension/lockup/extend-lockup", nil)
-	cdc.RegisterConcrete(&MsgForceUnlock{}, "dymensionxyz/dymension/lockup/force-unlock-tokens", nil)
+	cdc.RegisterConcrete(&MsgLockTokens{}, "dymensionxyz/dymension/lockup/LockTokens", nil)
+	cdc.RegisterConcrete(&MsgBeginUnlockingAll{}, "dymensionxyz/dymension/lockup/BeginUnlockTokens", nil)
+	cdc.RegisterConcrete(&MsgBeginUnlocking{}, "dymensionxyz/dymension/lockup/BeginUnlockPeriodLock", nil)
+	cdc.RegisterConcrete(&MsgExtendLockup{}, "dymensionxyz/dymension/lockup/ExtendLockup", nil)
+	cdc.RegisterConcrete(&MsgForceUnlock{}, "dymensionxyz/dymension/lockup/ForceUnlockTokens", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
