@@ -29,36 +29,36 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 	}{
 		{
 			name:                 "user creates a non-perpetual gauge and fills gauge with all remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(60)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(60)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "user creates a non-perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "user with multiple denoms creates a non-perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "module account creates a perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			isPerpetual:          true,
 			isModuleAccount:      true,
 		},
 		{
 			name:                 "user with multiple denoms creates a perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			isPerpetual:          true,
 		},
 		{
 			name:                 "user tries to create a non-perpetual gauge but does not have enough funds to pay for the create gauge fee",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(40)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(40)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			expectErr:            true,
 		},
 		{
@@ -69,8 +69,8 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 		},
 		{
 			name:                 "one user tries to create a gauge, has enough funds to pay for the create gauge fee but not enough to fill the gauge",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(60)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(30)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(60)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(30)))),
 			expectErr:            true,
 		},
 	}
@@ -78,7 +78,7 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 	for _, tc := range tests {
 		suite.SetupTest()
 
-		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 		suite.Require().NoError(err)
 
 		testAccountPubkey := secp256k1.GenPrivKeyFromSecret([]byte("acc")).PubKey()
@@ -128,7 +128,7 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 		if tc.expectErr {
 			suite.Require().Equal(tc.accountBalanceToFund.String(), balanceAmount.String(), "test: %v", tc.name)
 		} else {
-			fee := sdk.NewCoins(sdk.NewCoin("udym", types.CreateGaugeFee))
+			fee := sdk.NewCoins(sdk.NewCoin("adym", types.CreateGaugeFee))
 			accountBalance := tc.accountBalanceToFund.Sub(tc.gaugeAddition...)
 			finalAccountBalance := accountBalance.Sub(fee...)
 			suite.Require().Equal(finalAccountBalance.String(), balanceAmount.String(), "test: %v", tc.name)
@@ -148,36 +148,36 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 	}{
 		{
 			name:                 "user creates a non-perpetual gauge and fills gauge with all remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(35)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(35)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "user creates a non-perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "user with multiple denoms creates a non-perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 		},
 		{
 			name:                 "module account creates a perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			isPerpetual:          true,
 			isModuleAccount:      true,
 		},
 		{
 			name:                 "user with multiple denoms creates a perpetual gauge and fills gauge with some remaining tokens",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(70))), sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(70)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			isPerpetual:          true,
 		},
 		{
 			name:                 "user tries to create a non-perpetual gauge but does not have enough funds to pay for the create gauge fee",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(20)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("udym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(20)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
 			expectErr:            true,
 		},
 		{
@@ -191,7 +191,7 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 	for _, tc := range tests {
 		suite.SetupTest()
 
-		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 		suite.Require().NoError(err)
 
 		testAccountPubkey := secp256k1.GenPrivKeyFromSecret([]byte("acc")).PubKey()
@@ -240,7 +240,7 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 		if tc.expectErr {
 			suite.Require().Equal(tc.accountBalanceToFund.String(), bal.String(), "test: %v", tc.name)
 		} else {
-			fee := sdk.NewCoins(sdk.NewCoin("udym", types.AddToGaugeFee))
+			fee := sdk.NewCoins(sdk.NewCoin("adym", types.AddToGaugeFee))
 			accountBalance := tc.accountBalanceToFund.Sub(tc.gaugeAddition...)
 			finalAccountBalance := accountBalance.Sub(fee...)
 			suite.Require().Equal(finalAccountBalance.String(), bal.String(), "test: %v", tc.name)

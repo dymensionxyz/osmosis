@@ -83,7 +83,7 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		}
 	}
 
-	// The minimum base gas price is in udym, convert the fee denom's worth to udym terms.
+	// The minimum base gas price is in adym, convert the fee denom's worth to adym terms.
 	// Then compare if its sufficient for paying the tx fee.
 	err = mfd.IsSufficientFee(ctx, minBaseGasPrice, feeTx.GetGas(), feeCoins[0])
 	if err != nil {
@@ -93,7 +93,7 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 	return next(ctx, tx, simulate)
 }
 
-// IsSufficientFee checks if the feeCoin provided (in any asset), is worth enough udym at current spot prices
+// IsSufficientFee checks if the feeCoin provided (in any asset), is worth enough adym at current spot prices
 // to pay the gas cost of this tx.
 func (mfd MempoolFeeDecorator) IsSufficientFee(ctx sdk.Context, minBaseGasPrice sdk.Dec, gasRequested uint64, feeCoin sdk.Coin) error {
 	baseDenom, err := mfd.TxFeesKeeper.GetBaseDenom(ctx)
@@ -209,7 +209,7 @@ func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ct
 		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)
 	}
 
-	// pulls base denom from TxFeesKeeper (should be udym)
+	// pulls base denom from TxFeesKeeper (should be adym)
 	baseDenom, err := txFeesKeeper.GetBaseDenom(ctx)
 	if err != nil {
 		return err

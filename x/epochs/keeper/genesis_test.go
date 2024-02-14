@@ -7,13 +7,13 @@ import (
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	"github.com/dymensionxyz/dymension/v3/app"
-
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
+
+	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
 )
 
 func TestEpochsExportGenesis(t *testing.T) {
-	app := app.Setup(t, false)
+	app := apptesting.Setup(t, false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	chainStartTime := ctx.BlockTime()
@@ -31,7 +31,7 @@ func TestEpochsExportGenesis(t *testing.T) {
 }
 
 func TestEpochsInitGenesis(t *testing.T) {
-	app := app.Setup(t, false)
+	app := apptesting.Setup(t, false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// On init genesis, default epochs information is set
