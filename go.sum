@@ -508,6 +508,8 @@ github.com/dymensionxyz/dymension v1.0.0-rc1.0.20231219114210-d548bc8ea087 h1:fA
 github.com/dymensionxyz/dymension v1.0.0-rc1.0.20231219114210-d548bc8ea087/go.mod h1:gdszhnhMNx1MTUQp1BzlrMHY9CcSra0hNxTVoio32Gs=
 github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240214094852-19fc28642fdd h1:aoMgdS+8I1cixqJ2To69gKsOiVSYTLBYELkBk0sVGi4=
 github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240214094852-19fc28642fdd/go.mod h1:IhjS3DiQUSPNnPQ7yn2nQtOgfkZucGiKVMmIdv7ODEI=
+github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240218083326-cfa125821690 h1:4nkWSp0yK3cWlA19iDPi8JZBWlCA9UYCiHhiEkCuw8Y=
+github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240218083326-cfa125821690/go.mod h1:IhjS3DiQUSPNnPQ7yn2nQtOgfkZucGiKVMmIdv7ODEI=
 github.com/dymensionxyz/osmosis/osmomath v0.0.6-dym-v0.0.1 h1:59ZE3Ocrn04MUpb5VJgfi24eDcnQ9VBfCSw0Mx1n7OI=
 github.com/dymensionxyz/osmosis/osmomath v0.0.6-dym-v0.0.1/go.mod h1:2idySYJxP5YfMAEeSeqD8e7fSchfsI4jn7XFHJgNUsM=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=

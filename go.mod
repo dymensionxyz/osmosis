@@ -7,7 +7,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.46.15
 	github.com/cosmos/iavl v0.19.6
-	github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240214094852-19fc28642fdd
+	github.com/dymensionxyz/dymension/v3 v3.0.0-rc02.0.20240218083326-cfa125821690
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.3
