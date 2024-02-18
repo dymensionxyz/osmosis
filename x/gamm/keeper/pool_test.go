@@ -21,7 +21,7 @@ var (
 	}
 	defaultPoolId                        = uint64(1)
 	defaultAcctFundsStableSwap sdk.Coins = sdk.NewCoins(
-		sdk.NewCoin("udym", sdk.NewInt(10000000000)),
+		sdk.NewCoin("adym", sdk.NewInt(10000000000)),
 		sdk.NewCoin("atom", sdk.NewInt(100)),
 		sdk.NewCoin("osmo", sdk.NewInt(100)),
 	)

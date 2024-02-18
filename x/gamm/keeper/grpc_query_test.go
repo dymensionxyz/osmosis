@@ -105,25 +105,25 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 		{
 			"valid uneven multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("udym", sdk.NewInt(5000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000))),
 			nil,
 		},
 		{
 			"valid even multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("udym", sdk.NewInt(2000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("adym", sdk.NewInt(2000000))),
 			nil,
 		},
 		{
 			"invalid single asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
 			errors.New("no-swap joins require LP'ing with all assets in pool"),
 		},
 		{
 			"pool id does not exist",
 			poolId + 1,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
 			types.PoolDoesNotExistError{PoolId: poolId + 1},
 		},
 		{
@@ -135,7 +135,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 		{
 			"join pool with incorrect amount of assets",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
 			errors.New("no-swap joins require LP'ing with all assets in pool"),
 		},
 	}
@@ -170,7 +170,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 	var (
 		defaultAcctFunds sdk.Coins = sdk.NewCoins(
-			sdk.NewCoin("udym", sdk.NewInt(10000000000)),
+			sdk.NewCoin("adym", sdk.NewInt(10000000000)),
 			sdk.NewCoin("foo", sdk.NewInt(10000000)),
 			sdk.NewCoin("bar", sdk.NewInt(10000000)),
 			sdk.NewCoin("baz", sdk.NewInt(10000000)),
@@ -369,25 +369,25 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolShares() {
 		{
 			"valid uneven multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("udym", sdk.NewInt(5000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000))),
 			nil,
 		},
 		{
 			"valid even multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("udym", sdk.NewInt(2000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("adym", sdk.NewInt(2000000))),
 			nil,
 		},
 		{
 			"valid single asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
 			nil,
 		},
 		{
 			"pool id does not exist",
 			poolId + 1,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
 			types.PoolDoesNotExistError{PoolId: poolId + 1},
 		},
 		{
@@ -399,7 +399,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolShares() {
 		{
 			"join pool with incorrect amount of assets",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("udym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
 			errors.New("balancer pool only supports LP'ing with one asset or all assets in pool"),
 		},
 	}
@@ -536,7 +536,7 @@ func (suite *KeeperTestSuite) TestQueryTotalPoolLiquidity() {
 
 	res, err := queryClient.TotalPoolLiquidity(gocontext.Background(), &types.QueryTotalPoolLiquidityRequest{PoolId: poolId})
 	suite.Require().NoError(err)
-	expectedCoins := sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("udym", sdk.NewInt(5000000)))
+	expectedCoins := sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000)))
 	suite.Require().Equal(res.Liquidity, expectedCoins)
 }
 
@@ -580,7 +580,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolTotalLiquidity() {
 	// create pool
 	res, err = queryClient.TotalLiquidity(gocontext.Background(), &types.QueryTotalLiquidityRequest{})
 	suite.Require().NoError(err)
-	suite.Require().Equal("5000000bar,5000000baz,5000000foo,5000000udym", sdk.Coins(res.Liquidity).String())
+	suite.Require().Equal("5000000adym,5000000bar,5000000baz,5000000foo", sdk.Coins(res.Liquidity).String())
 }
 
 // TODO: Come fix

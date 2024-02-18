@@ -27,22 +27,22 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			tokenOutMinAmount: sdk.NewInt(1),
 			expectError:       true,
 		},
-		"udym as tokenIn": {
+		"adym as tokenIn": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
 					PoolId:        1,
 					TokenOutDenom: "foo",
 				},
 			},
-			tokenIn:           sdk.NewCoin("udym", sdk.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("adym", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
 			expectError:       false,
 		},
-		"udym swapped in first pool": {
+		"adym swapped in first pool": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
 					PoolId:        1,
-					TokenOutDenom: "udym",
+					TokenOutDenom: "adym",
 				},
 			},
 			tokenIn:           sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
@@ -86,7 +86,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
 					PoolId:        3,
-					TokenOutDenom: "udym",
+					TokenOutDenom: "adym",
 				},
 			},
 			tokenIn:           sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
@@ -98,26 +98,26 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 	for name, tc := range testcases {
 		suite.SetupTest()
 
-		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
 		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
 		params.PoolCreationFee = sdk.NewCoins(
-			sdk.NewCoin("udym", sdk.NewInt(100000)),
+			sdk.NewCoin("adym", sdk.NewInt(100000)),
 			sdk.NewCoin("bar", sdk.NewInt(100000)))
 		suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
 
 		ctx := suite.Ctx
 		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("udym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
 		suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 		//"bar" is treated as baseDenom (e.g. USDC)
 		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
 		suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("udym", sdk.NewInt(100000))}
+		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
 		suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
 		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
@@ -167,24 +167,24 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			tokenOut:    sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
 			expectError: true,
 		},
-		"udym as tokenIn": {
+		"adym as tokenIn": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
 					PoolId:       1,
-					TokenInDenom: "udym",
+					TokenInDenom: "adym",
 				},
 			},
 			tokenOut:    sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
 			expectError: false,
 		},
-		"udym swapped in first pool": {
+		"adym swapped in first pool": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
 					PoolId:       1,
 					TokenInDenom: "foo",
 				},
 			},
-			tokenOut:    sdk.NewCoin("udym", sdk.NewInt(tokenInAmt)),
+			tokenOut:    sdk.NewCoin("adym", sdk.NewInt(tokenInAmt)),
 			expectError: false,
 		},
 		"usdc swapped in first pool": {
@@ -233,26 +233,26 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 	for name, tc := range testcases {
 		suite.SetupTest()
 
-		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "udym")
+		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
 		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
 		params.PoolCreationFee = sdk.NewCoins(
-			sdk.NewCoin("udym", sdk.NewInt(1000)),
+			sdk.NewCoin("adym", sdk.NewInt(1000)),
 			sdk.NewCoin("bar", sdk.NewInt(1000)))
 		suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
 
 		ctx := suite.Ctx
 		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("udym", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
+		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
 		suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 		//"bar" is treated as baseDenom (e.g. USDC)
 		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
 		suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("udym", sdk.NewInt(100000000))}
+		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("adym", sdk.NewInt(100000000))}
 		suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
 		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("baz", sdk.NewInt(100000000))}
@@ -322,19 +322,19 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountIn() {
 			},
 		},
 		{
-			name: "Swap - foo -> udym(pool 1) - udym(pool 2) -> baz ",
+			name: "Swap - foo -> adym(pool 1) - adym(pool 2) -> baz ",
 			param: param{
 				routes: []poolmanagertypes.SwapAmountInRoute{
 					{
 						PoolId:        1,
-						TokenOutDenom: "udym",
+						TokenOutDenom: "adym",
 					},
 					{
 						PoolId:        2,
 						TokenOutDenom: "baz",
 					},
 				},
-				tokenIn:           sdk.NewCoin("udym", sdk.NewInt(100000)),
+				tokenIn:           sdk.NewCoin("adym", sdk.NewInt(100000)),
 				tokenOutMinAmount: sdk.NewInt(1),
 			},
 		},
@@ -427,7 +427,7 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountOut() {
 			},
 		},
 		{
-			name: "Swap - foo -> udym(pool 1) - udym(pool 2) -> baz ",
+			name: "Swap - foo -> adym(pool 1) - adym(pool 2) -> baz ",
 			param: param{
 				routes: []poolmanagertypes.SwapAmountOutRoute{
 					{
@@ -436,7 +436,7 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountOut() {
 					},
 					{
 						PoolId:       2,
-						TokenInDenom: "udym",
+						TokenInDenom: "adym",
 					},
 				},
 				tokenInMinAmount: sdk.NewInt(1),

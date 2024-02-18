@@ -30,6 +30,7 @@ import (
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 	"github.com/dymensionxyz/dymension/v3/app"
+	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -57,7 +58,7 @@ var (
 
 // Setup sets up basic environment for suite (App, Ctx, and test accounts)
 func (s *KeeperTestHelper) Setup() {
-	s.App = app.Setup(s.T(), false)
+	s.App = apptesting.Setup(s.T(), false)
 	s.Ctx = s.App.BaseApp.NewContext(false, tmtypes.Header{Height: 1, ChainID: "osmosis_100-1", Time: time.Now().UTC()})
 	s.QueryHelper = &baseapp.QueryServiceTestHelper{
 		GRPCQueryRouter: s.App.GRPCQueryRouter(),
@@ -72,7 +73,7 @@ func (s *KeeperTestHelper) Setup() {
 
 func (s *KeeperTestHelper) SetupTestForInitGenesis() {
 	// Setting to True, leads to init genesis not running
-	s.App = app.Setup(s.T(), true)
+	s.App = apptesting.Setup(s.T(), true)
 	s.Ctx = s.App.BaseApp.NewContext(true, tmtypes.Header{})
 }
 

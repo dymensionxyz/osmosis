@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dymensionxyz/dymension/v3/app"
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
@@ -13,6 +12,8 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
+
+	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
 )
 
 // This test is responsible for testing how epochs increment based off
@@ -117,7 +118,7 @@ func initializeBlankEpochInfoFields(epoch types.EpochInfo, identifier string, du
 }
 
 func TestEpochStartingOneMonthAfterInitGenesis(t *testing.T) {
-	app := app.Setup(t, false)
+	app := apptesting.Setup(t, false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// On init genesis, default epochs information is set

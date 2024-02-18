@@ -15,7 +15,7 @@ const (
 	foo   = "foo"
 	bar   = "bar"
 	baz   = "baz"
-	uosmo = "udym"
+	uosmo = "adym"
 )
 
 var (

@@ -335,10 +335,10 @@ func TestGetCmdSpotPrice(t *testing.T) {
 	desc, _ := cli.GetCmdSpotPrice()
 	tcs := map[string]osmocli.QueryCliTestCase[*types.QuerySpotPriceRequest]{
 		"basic test": {
-			Cmd: "1 udym ibc/111",
+			Cmd: "1 adym ibc/111",
 			ExpectedQuery: &types.QuerySpotPriceRequest{
 				PoolId:          1,
-				BaseAssetDenom:  "udym",
+				BaseAssetDenom:  "adym",
 				QuoteAssetDenom: "ibc/111",
 			},
 		},

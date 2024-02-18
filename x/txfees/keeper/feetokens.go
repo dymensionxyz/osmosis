@@ -34,7 +34,7 @@ func (k Keeper) ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin
 }
 
 // GetFeeToken returns the fee token record for a specific denom,
-// In our case the baseDenom is udym.
+// In our case the baseDenom is adym.
 func (k Keeper) GetBaseDenom(ctx sdk.Context) (denom string, err error) {
 	store := ctx.KVStore(k.storeKey)
 

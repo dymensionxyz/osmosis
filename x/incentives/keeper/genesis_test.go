@@ -8,19 +8,19 @@ import (
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	osmoapp "github.com/dymensionxyz/dymension/v3/app"
-
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/osmosis-labs/osmosis/v15/x/incentives/types"
 	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
+
+	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
 )
 
 // TestIncentivesExportGenesis tests export genesis command for the incentives module.
 func TestIncentivesExportGenesis(t *testing.T) {
 	// export genesis using default configurations
 	// ensure resulting genesis params match default params
-	app := osmoapp.Setup(t, false)
+	app := apptesting.Setup(t, false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 	genesis := app.IncentivesKeeper.ExportGenesis(ctx)
 	require.Equal(t, genesis.Params.DistrEpochIdentifier, "week")
@@ -69,7 +69,7 @@ func TestIncentivesExportGenesis(t *testing.T) {
 
 // TestIncentivesInitGenesis takes a genesis state and tests initializing that genesis for the incentives module.
 func TestIncentivesInitGenesis(t *testing.T) {
-	app := osmoapp.Setup(t, false)
+	app := apptesting.Setup(t, false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// checks that the default genesis parameters pass validation
