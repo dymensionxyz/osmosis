@@ -111,21 +111,12 @@ func (k Keeper) InitializePool(ctx sdk.Context, pool poolmanagertypes.PoolI, sen
 	k.bankKeeper.SetDenomMetaData(ctx, banktypes.Metadata{
 		Description: fmt.Sprintf("The share token of the gamm pool %d", pool.GetId()),
 		DenomUnits: []*banktypes.DenomUnit{
-			{
-				Denom:    poolShareBaseDenom,
-				Exponent: 0,
-				Aliases: []string{
-					"attopoolshare",
-				},
-			},
-			{
-				Denom:    poolShareDisplayDenom,
-				Exponent: types.OneShareExponent,
-				Aliases:  nil,
-			},
-		},
+			{Denom: poolShareBaseDenom, Exponent: 0, Aliases: []string{"attopoolshare"}},
+			{Denom: poolShareDisplayDenom, Exponent: types.OneShareExponent, Aliases: nil}},
 		Base:    poolShareBaseDenom,
 		Display: poolShareDisplayDenom,
+		Name:    poolShareBaseDenom,
+		Symbol:  poolShareDisplayDenom,
 	})
 
 	if err := k.setPool(ctx, pool); err != nil {
