@@ -1,9 +1,10 @@
 package types
 
 import (
+	fmt "fmt"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/types/address"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -109,6 +110,9 @@ type WeightedPoolExtension interface {
 }
 
 func NewPoolAddress(poolId uint64) sdk.AccAddress {
-	key := append([]byte("pool"), sdk.Uint64ToBigEndian(poolId)...)
-	return address.Module(ModuleName, key)
+	return authtypes.NewModuleAddress(ModuleNameFromPoolId(poolId))
+}
+
+func ModuleNameFromPoolId(poolId uint64) string {
+	return fmt.Sprintf("GAMM-%d", poolId)
 }

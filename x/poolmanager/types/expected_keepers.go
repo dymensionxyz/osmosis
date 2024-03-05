@@ -4,22 +4,19 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // AccountI defines the account contract that must be fulfilled when
 // creating a x/gamm keeper.
 type AccountI interface {
-	NewAccount(sdk.Context, authtypes.AccountI) authtypes.AccountI
 	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
-	SetAccount(ctx sdk.Context, acc authtypes.AccountI)
+	SetModuleAccount(ctx sdk.Context, macc authtypes.ModuleAccountI)
 }
 
 // BankI defines the banking contract that must be fulfilled when
 // creating a x/gamm keeper.
 type BankI interface {
 	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
-	SetDenomMetaData(ctx sdk.Context, denomMetaData banktypes.Metadata)
 }
 
 // TODO: godoc

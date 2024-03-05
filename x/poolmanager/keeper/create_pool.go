@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -50,6 +51,17 @@ func (k Keeper) CreatePool(ctx sdk.Context, msg types.CreatePoolMsg) (uint64, er
 	// Get the next pool ID and increment the pool ID counter
 	// Create the pool with the given pool ID
 	poolId := k.getNextPoolIdAndIncrement(ctx)
+
+	// create and save the pool's module account to the account keeper
+	poolName := gammtypes.ModuleNameFromPoolId(poolId)
+	poolAddr := gammtypes.NewPoolAddress(poolId)
+
+	if k.accountExists(ctx, poolAddr) {
+		return 0, fmt.Errorf("cannot create module account %s, "+
+			"due to an account at that address already exists", poolAddr)
+	}
+	k.accountKeeper.SetModuleAccount(ctx, authtypes.NewEmptyModuleAccount(poolName))
+
 	pool, err := msg.CreatePool(ctx, poolId)
 	if err != nil {
 		return 0, err
@@ -59,11 +71,6 @@ func (k Keeper) CreatePool(ctx sdk.Context, msg types.CreatePoolMsg) (uint64, er
 
 	if err := k.validateCreatedPool(poolId, pool); err != nil {
 		return 0, err
-	}
-
-	// create and save the pool's module account to the account keeper
-	if err := osmoutils.CreateModuleAccount(ctx, k.accountKeeper, pool.GetAddress()); err != nil {
-		return 0, fmt.Errorf("creating pool module account for id %d: %w", poolId, err)
 	}
 
 	// Run the respective pool type's initialization logic.
@@ -95,6 +102,18 @@ func emitCreatePoolEvents(ctx sdk.Context, poolId uint64, msg types.CreatePoolMs
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.PoolCreator().String()),
 		),
 	})
+}
+
+// check if account exists
+func (k Keeper) accountExists(ctx sdk.Context, addr sdk.AccAddress) bool {
+	existingAcct := k.accountKeeper.GetAccount(ctx, addr)
+	if existingAcct == nil {
+		return false
+	}
+	if existingAcct.GetSequence() != 0 || existingAcct.GetPubKey() != nil {
+		return true
+	}
+	return false
 }
 
 // getNextPoolIdAndIncrement returns the next pool Id, and increments the corresponding state entry.

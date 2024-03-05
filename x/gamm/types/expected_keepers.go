@@ -2,7 +2,6 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -12,21 +11,17 @@ import (
 // AccountKeeper defines the account contract that must be fulfilled when
 // creating a x/gamm keeper.
 type AccountKeeper interface {
-	NewAccount(sdk.Context, authtypes.AccountI) authtypes.AccountI
-
-	GetAccount(ctx sdk.Context, addr sdk.AccAddress) authtypes.AccountI
-	SetAccount(ctx sdk.Context, acc authtypes.AccountI)
-
 	GetModuleAddressAndPermissions(moduleName string) (addr sdk.AccAddress, permissions []string)
 }
 
 // BankKeeper defines the banking contract that must be fulfilled when
 // creating a x/gamm keeper.
 type BankKeeper interface {
+	//used for joining and exiting pools
 	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
-
 	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
 
+	// used to transfer assets to the pools accounts
 	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
 
 	MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error
