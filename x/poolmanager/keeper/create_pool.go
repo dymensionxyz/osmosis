@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -51,6 +52,23 @@ func (k Keeper) CreatePool(ctx sdk.Context, msg types.CreatePoolMsg) (uint64, er
 	// Create the pool with the given pool ID
 	poolId := k.getNextPoolIdAndIncrement(ctx)
 
+	// create and save the pool's module account to the account keeper
+	poolName := gammtypes.ModuleNameFromPoolId(poolId)
+	poolAddr := gammtypes.NewPoolAddress(poolId)
+
+	if k.accountExists(ctx, poolAddr) {
+		return 0, fmt.Errorf("cannot create module account %s, "+
+			"due to an account at that address already exists", poolAddr)
+	}
+	// Create a new module account for the pool.
+	moduleAccount := authtypes.NewEmptyModuleAccount(poolName)
+	moduleAccountI, ok := (k.accountKeeper.NewAccount(ctx, moduleAccount)).(authtypes.ModuleAccountI) // set the account number
+	if !ok {
+		return 0, fmt.Errorf("cannot create module account %s, "+
+			"failed to set account number", poolAddr)
+	}
+	k.accountKeeper.SetModuleAccount(ctx, moduleAccountI)
+
 	pool, err := msg.CreatePool(ctx, poolId)
 	if err != nil {
 		return 0, err
@@ -75,12 +93,6 @@ func (k Keeper) CreatePool(ctx sdk.Context, msg types.CreatePoolMsg) (uint64, er
 	err = k.bankKeeper.SendCoins(ctx, sender, pool.GetAddress(), initialPoolLiquidity)
 	if err != nil {
 		return 0, err
-	}
-
-	// Create and save the pool's module account to the account keeper.
-	// This utilizes the pool address already created and validated in the previous steps.
-	if err := osmoutils.CreateModuleAccount(ctx, k.accountKeeper, pool.GetAddress()); err != nil {
-		return 0, fmt.Errorf("creating pool module account for id %d: %w", poolId, err)
 	}
 
 	emitCreatePoolEvents(ctx, poolId, msg)
