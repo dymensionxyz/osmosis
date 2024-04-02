@@ -14,9 +14,9 @@ var (
 	DYM = sdk.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 
 	// CreateGaugeFee is the fee required to create a new gauge.
-	CreateGaugeFee = DYM.Mul(sdk.NewInt(50))
+	CreateGaugeFee = DYM.Mul(sdk.NewInt(10))
 	// AddToGagugeFee is the fee required to add to gauge.
-	AddToGaugeFee = DYM.Mul(sdk.NewInt(25))
+	AddToGaugeFee = sdk.ZeroInt()
 )
 
 // NewGauge creates a new gauge struct given the required gauge parameters.
