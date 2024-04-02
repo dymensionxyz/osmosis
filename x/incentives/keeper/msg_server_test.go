@@ -57,8 +57,8 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 		},
 		{
 			name:                 "user tries to create a non-perpetual gauge but does not have enough funds to pay for the create gauge fee",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(40)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(5)))),
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(1)))),
 			expectErr:            true,
 		},
 		{
@@ -69,7 +69,7 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 		},
 		{
 			name:                 "one user tries to create a gauge, has enough funds to pay for the create gauge fee but not enough to fill the gauge",
-			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(60)))),
+			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(20)))),
 			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(30)))),
 			expectErr:            true,
 		},
@@ -118,9 +118,9 @@ func (suite *KeeperTestSuite) TestCreateGauge_Fee() {
 		_, err = msgServer.CreateGauge(sdk.WrapSDKContext(ctx), msg)
 
 		if tc.expectErr {
-			suite.Require().Error(err)
+			suite.Require().Error(err, "test: %v", tc.name)
 		} else {
-			suite.Require().NoError(err)
+			suite.Require().NoError(err, "test: %v", tc.name)
 		}
 
 		balanceAmount := bankKeeper.GetAllBalances(ctx, testAccountAddress)
@@ -175,16 +175,16 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 			isPerpetual:          true,
 		},
 		{
-			name:                 "user tries to create a non-perpetual gauge but does not have enough funds to pay for the create gauge fee",
+			name:                 "user tries to add to a non-perpetual gauge but does not have enough funds to pay for the create gauge fee",
 			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(20)))),
-			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(10)))),
-			expectErr:            true,
+			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("adym", types.DYM.Mul(sdk.NewInt(20)))),
+			expectErr:            false, //no addition fee
 		},
 		{
 			name:                 "user tries to add to a non-perpetual gauge but does not have the correct fee denom",
 			accountBalanceToFund: sdk.NewCoins(sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(60)))),
 			gaugeAddition:        sdk.NewCoins(sdk.NewCoin("foo", types.DYM.Mul(sdk.NewInt(10)))),
-			expectErr:            true,
+			expectErr:            false, //no addition fee
 		},
 	}
 
@@ -230,9 +230,9 @@ func (suite *KeeperTestSuite) TestAddToGauge_Fee() {
 		_, err = msgServer.AddToGauge(sdk.WrapSDKContext(ctx), msg)
 
 		if tc.expectErr {
-			suite.Require().Error(err)
+			suite.Require().Error(err, "test: %v", tc.name)
 		} else {
-			suite.Require().NoError(err)
+			suite.Require().NoError(err, "test: %v", tc.name)
 		}
 
 		bal := bankKeeper.GetAllBalances(ctx, testAccountAddress)
