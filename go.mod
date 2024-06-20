@@ -1,6 +1,6 @@
 module github.com/osmosis-labs/osmosis/v15
 
-go 1.22
+go 1.22.0
 
 toolchain go1.22.4
 
@@ -179,6 +179,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
+	github.com/dymensionxyz/dymension/v3 v3.1.0 // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.14.1 // indirect
@@ -364,8 +365,7 @@ require (
 )
 
 replace (
-	github.com/dymensionxyz/dymension/v3 => ../../dymensionxyz/dymension
-	github.com/evmos/ethermint => github.com/VictorTrustyDev/fork-dym-ethermint 2f58167
+	github.com/evmos/ethermint => github.com/VictorTrustyDev/fork-dym-ethermint v0.0.0-20240620111525-2f581674fa37
 	// Our cosmos-sdk branch is:  https://github.com/osmosis-labs/cosmos-sdk, current branch: v15.x. Direct commit link: https://github.com/osmosis-labs/cosmos-sdk/commit/931007612436a93dcee45314c12a637876ec29f5
 	// github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.45.1-0.20230627154005-cbb746abb7f1
 
