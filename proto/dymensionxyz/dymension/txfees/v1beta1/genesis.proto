@@ -2,7 +2,7 @@ syntax = "proto3";
 package dymensionxyz.dymension.txfees.v1beta1;
 
 import "gogoproto/gogo.proto";
-import "osmosis/txfees/v1beta1/feetoken.proto";
+import "dymensionxyz/dymension/txfees/v1beta1/feetoken.proto";
 
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";

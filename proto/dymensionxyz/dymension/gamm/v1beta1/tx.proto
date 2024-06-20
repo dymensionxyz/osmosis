@@ -3,9 +3,9 @@ package dymensionxyz.dymension.gamm.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
-import "osmosis/poolmanager/v1beta1/swap_route.proto";
-import "osmosis/gamm/v1beta1/tx_swap.proto";
-import "osmosis/gamm/v1beta1/tx_liquidity.proto";
+import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
+import "dymensionxyz/dymension/gamm/v1beta1/tx_swap.proto";
+import "dymensionxyz/dymension/gamm/v1beta1/tx_liquidity.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 

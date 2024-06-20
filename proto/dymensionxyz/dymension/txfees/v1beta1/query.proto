@@ -5,8 +5,8 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/duration.proto";
 
-import "osmosis/txfees/v1beta1/feetoken.proto";
-import "osmosis/txfees/v1beta1/genesis.proto";
+import "dymensionxyz/dymension/txfees/v1beta1/feetoken.proto";
+import "dymensionxyz/dymension/txfees/v1beta1/genesis.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 package dymensionxyz.dymension.lockup;
 
 import "gogoproto/gogo.proto";
-import "osmosis/lockup/lock.proto";
+import "dymensionxyz/dymension/lockup/lock.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/lockup/types";
 

@@ -6,8 +6,8 @@ import "cosmos/base/v1beta1/coin.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
-import "osmosis/lockup/lock.proto";
-import "osmosis/lockup/params.proto";
+import "dymensionxyz/dymension/lockup/lock.proto";
+import "dymensionxyz/dymension/lockup/params.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/lockup/types";
 

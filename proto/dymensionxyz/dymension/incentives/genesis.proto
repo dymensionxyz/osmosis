@@ -3,8 +3,8 @@ package dymensionxyz.dymension.incentives;
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
-import "osmosis/incentives/params.proto";
-import "osmosis/incentives/gauge.proto";
+import "dymensionxyz/dymension/incentives/params.proto";
+import "dymensionxyz/dymension/incentives/gauge.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/incentives/types";
 
