@@ -17,16 +17,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzcodec "github.com/cosmos/cosmos-sdk/x/authz/codec"
 
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/crypto/ed25519"
+	"github.com/cometbft/cometbft/libs/log"
+	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	"github.com/tendermint/tendermint/libs/log"
-	tmtypes "github.com/tendermint/tendermint/proto/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 	"github.com/dymensionxyz/dymension/v3/app"
@@ -147,7 +147,7 @@ func (s *KeeperTestHelper) SetupValidator(bondStatus stakingtypes.BondStatus) sd
 	msg, err := stakingtypes.NewMsgCreateValidator(valAddr, valPub, stakingCoin, stakingtypes.Description{}, ZeroCommission, sdk.OneInt())
 	s.Require().NoError(err)
 
-	msgServer := stakingkeeper.NewMsgServerImpl(s.App.StakingKeeper)
+	msgServer := stakingkeeper.NewMsgServerImpl(&s.App.StakingKeeper)
 	res, err := msgServer.CreateValidator(sdk.WrapSDKContext(s.Ctx), msg)
 	s.Require().NoError(err)
 	s.Require().NotNil(res)
@@ -218,7 +218,7 @@ func (s *KeeperTestHelper) BeginNewBlockWithProposer(executeNextEpoch bool, prop
 	header := tmtypes.Header{Height: s.Ctx.BlockHeight() + 1, Time: newBlockTime}
 	newCtx := s.Ctx.WithBlockTime(newBlockTime).WithBlockHeight(s.Ctx.BlockHeight() + 1)
 	s.Ctx = newCtx
-	lastCommitInfo := abci.LastCommitInfo{
+	lastCommitInfo := abci.CommitInfo{
 		Votes: []abci.VoteInfo{{
 			Validator:       abci.Validator{Address: valAddr, Power: 1000},
 			SignedLastBlock: true,

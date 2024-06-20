@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"os"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	simapp "github.com/cosmos/cosmos-sdk/testutil/sims"
 	dymd "github.com/dymensionxyz/dymension/v3/app"
 )
 
@@ -56,7 +55,7 @@ func SetupTestingAppWithLevelDb(isCheckTx bool) (app *dymd.App, cleanupFn func()
 	if err != nil {
 		panic(err)
 	}
-	db, err := sdk.NewLevelDB("osmosis_leveldb_testing", dir)
+	db, err := dbm.NewDB("osmosis_leveldb_testing", dbm.GoLevelDBBackend, dir)
 	if err != nil {
 		panic(err)
 	}

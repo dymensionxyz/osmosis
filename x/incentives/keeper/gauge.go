@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	db "github.com/cometbft/cometbft-db"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/gogo/protobuf/proto"
-	db "github.com/tendermint/tm-db"
+	"github.com/cosmos/gogoproto/proto"
 
 	epochtypes "github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 	"github.com/osmosis-labs/osmosis/v15/x/incentives/types"

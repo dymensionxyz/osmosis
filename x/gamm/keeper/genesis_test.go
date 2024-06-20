@@ -7,11 +7,11 @@ import (
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
+	"github.com/cometbft/cometbft/crypto/ed25519"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
 	osmoapp "github.com/dymensionxyz/dymension/v3/app"
 
