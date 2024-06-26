@@ -12,6 +12,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
 
+	"github.com/osmosis-labs/osmosis/v15/testutils"
 	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
@@ -301,7 +302,7 @@ func TestAuthzMsg(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			apptesting.TestMessageAuthzSerialization(t, tc.msg)
+			testutils.TestMessageAuthzSerialization(t, tc.msg)
 		})
 	}
 }
