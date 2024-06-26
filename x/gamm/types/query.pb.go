@@ -14,7 +14,6 @@ import (
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
 	_ "github.com/cosmos/gogoproto/gogoproto"
-	_ "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	types2 "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"

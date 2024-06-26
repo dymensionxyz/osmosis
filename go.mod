@@ -2,8 +2,6 @@ module github.com/osmosis-labs/osmosis/v15
 
 go 1.22.0
 
-toolchain go1.22.4
-
 require (
 	cosmossdk.io/math v1.3.0
 	github.com/cometbft/cometbft v0.37.5

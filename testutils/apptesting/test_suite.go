@@ -1,21 +1,16 @@
 package apptesting
 
 import (
-	"encoding/json"
 	"fmt"
-	"testing"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/cosmos/cosmos-sdk/store/rootmulti"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/cosmos/cosmos-sdk/x/authz"
-	authzcodec "github.com/cosmos/cosmos-sdk/x/authz/codec"
 
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -25,7 +20,6 @@ import (
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
@@ -398,46 +392,6 @@ func CreateRandomAccounts(numAccts int) []sdk.AccAddress {
 	}
 
 	return testAddrs
-}
-
-func TestMessageAuthzSerialization(t *testing.T, msg sdk.Msg) {
-	someDate := time.Date(1, 1, 1, 1, 1, 1, 1, time.UTC)
-	const (
-		mockGranter string = "cosmos1abc"
-		mockGrantee string = "cosmos1xyz"
-	)
-
-	var (
-		mockMsgGrant  authz.MsgGrant
-		mockMsgRevoke authz.MsgRevoke
-		mockMsgExec   authz.MsgExec
-	)
-
-	// Authz: Grant Msg
-	typeURL := sdk.MsgTypeURL(msg)
-	expDate := someDate.Add(time.Hour)
-	grant, err := authz.NewGrant(someDate, authz.NewGenericAuthorization(typeURL), &expDate)
-	require.NoError(t, err)
-
-	msgGrant := authz.MsgGrant{Granter: mockGranter, Grantee: mockGrantee, Grant: grant}
-	msgGrantBytes := json.RawMessage(sdk.MustSortJSON(authzcodec.ModuleCdc.MustMarshalJSON(&msgGrant)))
-	err = authzcodec.ModuleCdc.UnmarshalJSON(msgGrantBytes, &mockMsgGrant)
-	require.NoError(t, err)
-
-	// Authz: Revoke Msg
-	msgRevoke := authz.MsgRevoke{Granter: mockGranter, Grantee: mockGrantee, MsgTypeUrl: typeURL}
-	msgRevokeByte := json.RawMessage(sdk.MustSortJSON(authzcodec.ModuleCdc.MustMarshalJSON(&msgRevoke)))
-	err = authzcodec.ModuleCdc.UnmarshalJSON(msgRevokeByte, &mockMsgRevoke)
-	require.NoError(t, err)
-
-	// Authz: Exec Msg
-	msgAny, err := cdctypes.NewAnyWithValue(msg)
-	require.NoError(t, err)
-	msgExec := authz.MsgExec{Grantee: mockGrantee, Msgs: []*cdctypes.Any{msgAny}}
-	execMsgByte := json.RawMessage(sdk.MustSortJSON(authzcodec.ModuleCdc.MustMarshalJSON(&msgExec)))
-	err = authzcodec.ModuleCdc.UnmarshalJSON(execMsgByte, &mockMsgExec)
-	require.NoError(t, err)
-	require.Equal(t, msgExec.Msgs[0].Value, mockMsgExec.Msgs[0].Value)
 }
 
 func GenerateTestAddrs() (string, string) {
