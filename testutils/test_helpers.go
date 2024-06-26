@@ -1,4 +1,4 @@
-package app
+package testutils
 
 import (
 	"encoding/json"
@@ -10,14 +10,15 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	simapp "github.com/cosmos/cosmos-sdk/testutil/sims"
-	dymd "github.com/dymensionxyz/dymension/v3/app"
+
+	osmod "github.com/osmosis-labs/osmosis/v15/app"
 )
 
 var defaultGenesisBz []byte
 
 func getDefaultGenesisStateBytes(cdc codec.JSONCodec) []byte {
 	if len(defaultGenesisBz) == 0 {
-		genesisState := dymd.NewDefaultGenesisState(cdc)
+		genesisState := osmod.NewDefaultGenesisState(cdc)
 		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 		if err != nil {
 			panic(err)
@@ -28,10 +29,10 @@ func getDefaultGenesisStateBytes(cdc codec.JSONCodec) []byte {
 }
 
 // Setup initializes a new OsmosisApp.
-func Setup(isCheckTx bool) *dymd.App {
+func Setup(isCheckTx bool) *osmod.App {
 	db := dbm.NewMemDB()
-	encCdc := dymd.MakeEncodingConfig()
-	app := dymd.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, dymd.DefaultNodeHome, 0, encCdc, simapp.EmptyAppOptions{})
+	encCdc := osmod.MakeEncodingConfig()
+	app := osmod.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, osmod.DefaultNodeHome, 0, encCdc, simapp.EmptyAppOptions{})
 
 	if !isCheckTx {
 		stateBytes := getDefaultGenesisStateBytes(encCdc.Codec)
@@ -50,7 +51,7 @@ func Setup(isCheckTx bool) *dymd.App {
 
 // SetupTestingAppWithLevelDb initializes a new OsmosisApp intended for testing,
 // with LevelDB as a db.
-func SetupTestingAppWithLevelDb(isCheckTx bool) (app *dymd.App, cleanupFn func()) {
+func SetupTestingAppWithLevelDb(isCheckTx bool) (app *osmod.App, cleanupFn func()) {
 	dir, err := os.MkdirTemp(os.TempDir(), "osmosis_leveldb_testing")
 	if err != nil {
 		panic(err)
@@ -59,11 +60,11 @@ func SetupTestingAppWithLevelDb(isCheckTx bool) (app *dymd.App, cleanupFn func()
 	if err != nil {
 		panic(err)
 	}
-	encCdc := dymd.MakeEncodingConfig()
-	app = dymd.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, dymd.DefaultNodeHome, 5, encCdc, simapp.EmptyAppOptions{})
+	encCdc := osmod.MakeEncodingConfig()
+	app = osmod.New(log.NewNopLogger(), db, nil, true, map[int64]bool{}, osmod.DefaultNodeHome, 5, encCdc, simapp.EmptyAppOptions{})
 
 	if !isCheckTx {
-		genesisState := dymd.NewDefaultGenesisState(encCdc.Codec)
+		genesisState := osmod.NewDefaultGenesisState(encCdc.Codec)
 		stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 		if err != nil {
 			panic(err)

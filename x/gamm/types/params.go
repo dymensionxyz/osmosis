@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
 // Parameter store keys.

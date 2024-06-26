@@ -12,7 +12,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
 func TestMsgLockTokens(t *testing.T) {

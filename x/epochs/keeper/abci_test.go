@@ -13,7 +13,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
 )
 
 // This test is responsible for testing how epochs increment based off
@@ -118,7 +118,7 @@ func initializeBlankEpochInfoFields(epoch types.EpochInfo, identifier string, du
 }
 
 func TestEpochStartingOneMonthAfterInitGenesis(t *testing.T) {
-	app := apptesting.Setup(t, false)
+	app := apptesting.Setup(false)
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// On init genesis, default epochs information is set

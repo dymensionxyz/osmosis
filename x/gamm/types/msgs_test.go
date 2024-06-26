@@ -9,7 +9,7 @@ import (
 
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 

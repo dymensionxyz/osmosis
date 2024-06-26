@@ -9,7 +9,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
 )
 
 func TestEpochsExportGenesis(t *testing.T) {

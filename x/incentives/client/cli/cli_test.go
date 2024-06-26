@@ -5,8 +5,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/types/query"
 
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/osmoutils/osmocli"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/incentives/client/cli"
 	"github.com/osmosis-labs/osmosis/v15/x/incentives/types"
 )

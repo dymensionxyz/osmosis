@@ -8,8 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	osmoapp "github.com/dymensionxyz/dymension/v3/app"
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
+
+	osmoapp "github.com/osmosis-labs/osmosis/v15/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/lockup"
 	"github.com/osmosis-labs/osmosis/v15/x/lockup/types"

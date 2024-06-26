@@ -7,8 +7,8 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/osmosis-labs/osmosis/v15/app"
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	"github.com/osmosis-labs/osmosis/v15/testutils"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/lockup/keeper"
 )
 
@@ -33,7 +33,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 }
 
 func (suite *KeeperTestSuite) SetupTestWithLevelDb() {
-	suite.App, suite.cleanup = app.SetupTestingAppWithLevelDb(false)
+	suite.App, suite.cleanup = testutils.SetupTestingAppWithLevelDb(false)
 	suite.Ctx = suite.App.BaseApp.NewContext(false, tmproto.Header{Height: 1, ChainID: "osmosis_100-1", Time: time.Now().UTC()})
 }
 

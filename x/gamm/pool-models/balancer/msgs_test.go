@@ -8,7 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	balancer "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )

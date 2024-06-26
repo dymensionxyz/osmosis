@@ -13,7 +13,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/incentives/types"
 	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
 )
 
 // TestIncentivesExportGenesis tests export genesis command for the incentives module.

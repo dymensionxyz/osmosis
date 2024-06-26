@@ -13,13 +13,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	osmoapp "github.com/dymensionxyz/dymension/v3/app"
+	osmoapp "github.com/osmosis-labs/osmosis/v15/app"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	apptesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
 )
 
 func TestGammInitGenesis(t *testing.T) {

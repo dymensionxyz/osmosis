@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
+	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 )
 
