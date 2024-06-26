@@ -74,7 +74,8 @@ func TestGammInitGenesis(t *testing.T) {
 	require.Error(t, err)
 
 	liquidity := app.GAMMKeeper.GetTotalLiquidity(ctx)
-	require.Equal(t, liquidity, sdk.Coins{sdk.NewInt64Coin("nodetoken", 10), sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)})
+	expectedValue := sdk.Coins{sdk.NewInt64Coin("nodetoken", 10), sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)}
+	require.Equal(t, liquidity, expectedValue.Sort())
 }
 
 func TestGammExportGenesis(t *testing.T) {

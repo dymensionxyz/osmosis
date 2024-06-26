@@ -30,7 +30,7 @@ var (
 	// pool assets
 	defaultDymAsset = balancertypes.PoolAsset{
 		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("adym", sdk.NewInt(10000)),
+		Token:  sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(10000)),
 	}
 	defaultBarAsset = balancertypes.PoolAsset{
 		Weight: sdk.NewInt(100),

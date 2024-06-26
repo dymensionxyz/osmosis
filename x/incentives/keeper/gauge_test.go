@@ -229,7 +229,7 @@ func (suite *KeeperTestSuite) TestGaugeOperations() {
 
 			// check rewards estimation
 			rewardsEst = suite.App.IncentivesKeeper.GetRewardsEst(suite.Ctx, lockOwners[0], []lockuptypes.PeriodLock{}, 100)
-			suite.Require().Equal(sdk.Coins(nil), rewardsEst)
+			suite.Require().Equal(sdk.Coins{}, rewardsEst)
 
 			// check gauge ids by denom
 			gaugeIdsByDenom = suite.App.IncentivesKeeper.GetAllGaugeIDsByDenom(suite.Ctx, "lptoken")

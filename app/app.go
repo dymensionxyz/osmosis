@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cosmos/cosmos-sdk/client"
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
@@ -156,6 +155,7 @@ func init() {
 	DefaultNodeHome = filepath.Join(userHomeDir, "."+appparams.Name)
 
 	sdk.DefaultPowerReduction = ethermint.PowerReduction
+	sdk.DefaultBondDenom = appparams.BaseDenom
 }
 
 // App extends an ABCI application, but with most of its parameters exported.
@@ -487,6 +487,13 @@ func New(
 		app.TxFeesKeeper,
 	)
 
+	app.GAMMKeeper.SetHooks(
+		gammtypes.NewMultiGammHooks(
+			// insert gamm hooks receivers here
+			app.TxFeesKeeper.Hooks(),
+		),
+	)
+
 	app.IncentivesKeeper.SetHooks(
 		incentivestypes.NewMultiIncentiveHooks(
 		// insert incentive hooks receivers here
@@ -653,10 +660,6 @@ func New(
 	app.MountTransientStores(tkeys)
 	app.MountMemoryStores(memKeys)
 
-	// initialize BaseApp
-	app.SetInitChainer(app.InitChainer)
-	app.SetBeginBlocker(app.BeginBlocker)
-
 	maxGasWanted := cast.ToUint64(appOpts.Get(flags.EVMMaxTxGasWanted))
 	anteHandler, err := ante.NewAnteHandler(ante.HandlerOptions{
 		AccountKeeper:          &app.AccountKeeper,
@@ -673,8 +676,18 @@ func New(
 		panic(err)
 	}
 
+	// initialize BaseApp
+	app.SetInitChainer(app.InitChainer)
+	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetAnteHandler(anteHandler)
 	app.SetEndBlocker(app.EndBlocker)
+
+	if loadLatest {
+		if err := app.LoadLatestVersion(); err != nil {
+			logger.Error("error on loading last version", "err", err)
+			os.Exit(1)
+		}
+	}
 
 	return app
 }
@@ -697,7 +710,7 @@ func (app App) GetBaseApp() *baseapp.BaseApp { return app.BaseApp }
 // InitChainer application update at chain initialization
 func (app *App) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
-	if err := tmjson.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
+	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
 	}
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())

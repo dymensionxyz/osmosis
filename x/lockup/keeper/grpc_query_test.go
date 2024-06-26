@@ -49,7 +49,7 @@ func (suite *KeeperTestSuite) TestModuleLockedAmount() {
 	// initial check
 	res, err := suite.querier.ModuleLockedAmount(sdk.WrapSDKContext(suite.Ctx), &types.ModuleLockedAmountRequest{})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
@@ -66,12 +66,12 @@ func (suite *KeeperTestSuite) TestModuleLockedAmount() {
 	now := suite.Ctx.BlockTime()
 	res, err = suite.querier.ModuleLockedAmount(sdk.WrapSDKContext(suite.Ctx.WithBlockTime(now.Add(time.Second))), &types.ModuleLockedAmountRequest{})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 
 	// module locked balance after 2 second = unlockTime + 1s
 	res, err = suite.querier.ModuleLockedAmount(sdk.WrapSDKContext(suite.Ctx.WithBlockTime(now.Add(2*time.Second))), &types.ModuleLockedAmountRequest{})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 }
 
 func (suite *KeeperTestSuite) TestAccountUnlockableCoins() {
@@ -167,7 +167,7 @@ func (suite *KeeperTestSuite) TestAccountLockedCoins() {
 	// initial check
 	res, err := suite.querier.AccountLockedCoins(sdk.WrapSDKContext(suite.Ctx), &types.AccountLockedCoinsRequest{Owner: addr1.String()})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 
 	// lock coins
 	coins := sdk.Coins{sdk.NewInt64Coin("stake", 10)}
@@ -183,12 +183,12 @@ func (suite *KeeperTestSuite) TestAccountLockedCoins() {
 	now := suite.Ctx.BlockTime()
 	res, err = suite.querier.AccountLockedCoins(sdk.WrapSDKContext(suite.Ctx.WithBlockTime(now.Add(time.Second))), &types.AccountLockedCoinsRequest{Owner: addr1.String()})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 
 	// check after 2 second = unlockTime + 1s
 	res, err = suite.querier.AccountLockedCoins(sdk.WrapSDKContext(suite.Ctx.WithBlockTime(now.Add(2*time.Second))), &types.AccountLockedCoinsRequest{Owner: addr1.String()})
 	suite.Require().NoError(err)
-	suite.Require().Equal(res.Coins, sdk.Coins(nil))
+	suite.Require().Equal(res.Coins, sdk.Coins{})
 }
 
 func (suite *KeeperTestSuite) TestAccountLockedPastTime() {

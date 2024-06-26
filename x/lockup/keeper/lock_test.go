@@ -227,7 +227,7 @@ func (suite *KeeperTestSuite) TestModuleLockedCoins() {
 
 	// initial check
 	lockedCoins := suite.App.LockupKeeper.GetModuleLockedCoins(suite.Ctx)
-	suite.Require().Equal(lockedCoins, sdk.Coins(nil))
+	suite.Require().Equal(lockedCoins, sdk.Coins{})
 
 	// lock coins
 	addr1 := sdk.AccAddress([]byte("addr1---------------"))
