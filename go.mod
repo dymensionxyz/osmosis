@@ -1,6 +1,8 @@
 module github.com/osmosis-labs/osmosis/v15
 
-go 1.22.0
+go 1.21
+
+toolchain go1.22.4
 
 require (
 	cosmossdk.io/math v1.3.0
@@ -370,4 +372,6 @@ replace (
 
 	//  broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+
+	golang.org/x/exp => golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
 )
