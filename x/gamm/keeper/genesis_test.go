@@ -23,7 +23,7 @@ import (
 )
 
 func TestGammInitGenesis(t *testing.T) {
-	app := apptesting.Setup(false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	balancerPool, err := balancer.NewBalancerPool(1, balancer.PoolParams{
@@ -78,7 +78,7 @@ func TestGammInitGenesis(t *testing.T) {
 }
 
 func TestGammExportGenesis(t *testing.T) {
-	app := apptesting.Setup(false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
@@ -126,7 +126,7 @@ func TestGammExportGenesis(t *testing.T) {
 }
 
 func TestMarshalUnmarshalGenesis(t *testing.T) {
-	app := apptesting.Setup(false)
+	app := apptesting.Setup(false, "")
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	encodingConfig := osmoapp.MakeEncodingConfig()
