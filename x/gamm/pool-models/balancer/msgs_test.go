@@ -8,15 +8,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appParams "github.com/dymensionxyz/dymension/v3/app/params"
-
 	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	balancer "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )
 
 func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")

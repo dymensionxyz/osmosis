@@ -12,8 +12,6 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	incentivestypes "github.com/osmosis-labs/osmosis/v15/x/incentives/types"
 
-	appParams "github.com/dymensionxyz/dymension/v3/app/params"
-
 	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 )
 
@@ -218,7 +216,7 @@ func TestMsgAddToGauge(t *testing.T) {
 
 // // Test authz serialize and de-serializes for incentives msg.
 func TestAuthzMsg(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	coin := sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(1))

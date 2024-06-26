@@ -5,7 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	appparams "github.com/dymensionxyz/dymension/v3/app/params"
+
+	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
 )
 
 // Parameter store keys.
@@ -33,7 +34,7 @@ func NewParams(poolCreationFee sdk.Coins) Params {
 // default gamm module parameters.
 func DefaultParams() Params {
 	return Params{
-		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(appparams.BaseDenom, 1000_000_000)},
+		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(apptesting.BaseDenom, 1000_000_000)},
 		EnableGlobalPoolFees: false,
 		GlobalFees:           GlobalFees{sdk.MustNewDecFromStr("0.02"), sdk.ZeroDec()},
 		TakerFee:             sdk.MustNewDecFromStr("0.01"),

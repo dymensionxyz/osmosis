@@ -9,14 +9,12 @@ import (
 
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	appParams "github.com/dymensionxyz/dymension/v3/app/params"
-
 	apptesting "github.com/osmosis-labs/osmosis/v15/app/apptesting"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 func TestMsgSwapExactAmountIn(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -146,7 +144,7 @@ func TestMsgSwapExactAmountIn(t *testing.T) {
 }
 
 func TestMsgSwapExactAmountOut(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -276,7 +274,7 @@ func TestMsgSwapExactAmountOut(t *testing.T) {
 }
 
 func TestMsgJoinPool(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -376,7 +374,7 @@ func TestMsgJoinPool(t *testing.T) {
 }
 
 func TestMsgExitPool(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -475,7 +473,7 @@ func TestMsgExitPool(t *testing.T) {
 }
 
 func TestMsgJoinSwapExternAmountIn(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -575,7 +573,7 @@ func TestMsgJoinSwapExternAmountIn(t *testing.T) {
 }
 
 func TestMsgJoinSwapShareAmountOut(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -675,7 +673,7 @@ func TestMsgJoinSwapShareAmountOut(t *testing.T) {
 }
 
 func TestMsgExitSwapExternAmountOut(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")
@@ -774,7 +772,7 @@ func TestMsgExitSwapExternAmountOut(t *testing.T) {
 }
 
 func TestMsgExitSwapShareAmountIn(t *testing.T) {
-	appParams.SetAddressPrefixes()
+	apptesting.SetAddressPrefixes()
 	pk1 := ed25519.GenPrivKey().PubKey()
 	addr1 := sdk.AccAddress(pk1.Address()).String()
 	invalidAddr := sdk.AccAddress("invalid")

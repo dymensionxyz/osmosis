@@ -365,7 +365,7 @@ require (
 )
 
 replace (
-	github.com/evmos/ethermint => github.com/VictorTrustyDev/fork-dym-ethermint v0.0.0-20240620111525-2f581674fa37
+	github.com/evmos/ethermint => github.com/dymensionxyz/ethermint v0.22.0-dymension-v0.4.1.0.20240625101522-b1506ae83050
 	// Our cosmos-sdk branch is:  https://github.com/osmosis-labs/cosmos-sdk, current branch: v15.x. Direct commit link: https://github.com/osmosis-labs/cosmos-sdk/commit/931007612436a93dcee45314c12a637876ec29f5
 	// github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.45.1-0.20230627154005-cbb746abb7f1
 
