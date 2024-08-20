@@ -2,7 +2,6 @@ syntax = "proto3";
 package dymensionxyz.dymension.gamm.v1beta1;
 
 import "gogoproto/gogo.proto";
-import "dymensionxyz/dymension/gamm/poolmodels/balancer/v1beta1/tx.proto";
 import "dymensionxyz/dymension/gamm/v1beta1/genesis.proto";
 import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
 
