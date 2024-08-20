@@ -7,11 +7,6 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
-// SetParams sets the total set of params.
-func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-	k.setParams(ctx, params)
-}
-
 // SetPool adds an existing pool to the keeper store.
 func (k Keeper) SetPool(ctx sdk.Context, pool poolmanagertypes.PoolI) error {
 	return k.setPool(ctx, pool)
