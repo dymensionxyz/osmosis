@@ -10,7 +10,7 @@ import (
 // InitGenesis initializes the x/gamm module's state from a provided genesis
 // state, which includes the current live pools, global pool parameters (e.g. pool creation fee), next pool id etc.
 func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState, unpacker codectypes.AnyUnpacker) {
-	k.setParams(ctx, genState.Params)
+	k.SetParams(ctx, genState.Params)
 	k.setNextPoolId(ctx, genState.NextPoolNumber)
 
 	// Sums up the liquidity in all genesis state pools to find the total liquidity across all pools.
