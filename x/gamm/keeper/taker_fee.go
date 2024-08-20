@@ -12,6 +12,10 @@ import (
 // If the taker fee coin is a registered fee token, send it to the txfees module
 // If the taker fee coin is not supported, swap it to the base denom on the first pool, then send it to the txfees module
 func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sdk.AccAddress, route poolmanagertypes.SwapAmountInRoute) error {
+	if takerFeeCoin.IsZero() {
+		return nil
+	}
+
 	// Check if the taker fee coin is the base denom
 	denom, err := k.txfeeKeeper.GetBaseDenom(ctx)
 	if err != nil {
