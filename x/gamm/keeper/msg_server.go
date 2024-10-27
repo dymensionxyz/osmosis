@@ -37,7 +37,7 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := server.keeper.GetParams(ctx)
 
-	//validate the pool contains asset which is whitelisted
+	// validate the pool contains asset which is whitelisted
 	found := false
 	for _, asset := range msg.PoolAssets {
 		if ok, _ := params.PoolCreationFee.Find(asset.Token.Denom); ok {
@@ -49,13 +49,13 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 		return nil, types.ErrPoolAssetNotAllowed
 	}
 
-	//set global fees
+	// set global fees
 	if params.EnableGlobalPoolFees {
 		msg.PoolParams.SwapFee = params.GlobalFees.SwapFee
 		msg.PoolParams.ExitFee = params.GlobalFees.ExitFee
 	}
 
-	//validate uniqueness of pool assets
+	// validate uniqueness of pool assets
 	poolAlreadyExists := false
 	iter := server.keeper.iterator(ctx, types.KeyPrefixPools)
 	defer iter.Close() //nolint:errcheck
@@ -172,14 +172,15 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	tokenInAfterSubTakerFee, takerFeesCoins := server.keeper.SubTakerFee(msg.TokenIn, server.keeper.GetParams(ctx).TakerFee)
+	takerFee := server.keeper.GetParams(ctx).TakerFee
+	tokenInAfterSubTakerFee, takerFeesCoins := server.keeper.SubTakerFee(msg.TokenIn, takerFee)
 
 	tokenOutAmount, err := server.keeper.poolManager.RouteExactAmountIn(ctx, sender, msg.Routes, tokenInAfterSubTakerFee, msg.TokenOutMinAmount)
 	if err != nil {
 		return nil, err
 	}
 
-	//first pool for taker fee swaps if needed
+	// first pool for taker fee swaps if needed
 	takerFeeRoute := msg.Routes[0]
 	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute)
 	if err != nil {
@@ -192,6 +193,9 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
+			sdk.NewAttribute(types.AttributeKeyTokensIn, msg.TokenIn.String()),
+			sdk.NewAttribute(types.AttributeKeyTokensOut, tokenOutAmount.String()),
+			sdk.NewAttribute(types.AttributeTakerFee, takerFee.String()),
 		),
 	})
 
@@ -212,7 +216,7 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	//limit the the TokenInMaxAmount to have enough for taker fee
+	// limit the TokenInMaxAmount to have enough for taker fee
 	maxTokenIn := sdk.NewCoin(msg.Routes[0].TokenInDenom, msg.TokenInMaxAmount)
 	tokenInAfterSubTakerFee, _ := server.keeper.SubTakerFee(maxTokenIn, takerFee)
 
@@ -224,7 +228,7 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	tokenInCoin := sdk.NewCoin(msg.Routes[0].TokenInDenom, tokenInAmount)
 	tokenInAmountWithTakerFee, takerFeeCoin := server.keeper.AddTakerFee(tokenInCoin, takerFee)
 
-	//first pool for taker fee swaps if needed
+	// first pool for taker fee swaps if needed
 	takerFeeRoute := poolmanagertypes.SwapAmountInRoute{}
 	takerFeeRoute.PoolId = msg.Routes[0].PoolId
 	if len(msg.Routes) > 1 {
@@ -244,6 +248,9 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 			sdk.EventTypeMessage,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
+			sdk.NewAttribute(types.AttributeKeyTokensIn, tokenInCoin.String()),
+			sdk.NewAttribute(types.AttributeKeyTokensOut, msg.TokenOut.String()),
+			sdk.NewAttribute(types.AttributeTakerFee, takerFee.String()),
 		),
 	})
 
