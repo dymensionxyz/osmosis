@@ -190,12 +190,12 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 	// Swap event is handled elsewhere
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			sdk.EventTypeMessage,
+			types.TypeEvtSwapExactAmountIn,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeKeyTokensIn, msg.TokenIn.String()),
 			sdk.NewAttribute(types.AttributeKeyTokensOut, tokenOutAmount.String()),
-			sdk.NewAttribute(types.AttributeTakerFee, takerFee.String()),
+			sdk.NewAttribute(types.AttributeTakerFee, takerFeesCoins.String()),
 		),
 	})
 
@@ -245,12 +245,12 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	// Swap event is handled elsewhere
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			sdk.EventTypeMessage,
+			types.TypeEvtSwapExactAmountOut,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeKeyTokensIn, tokenInCoin.String()),
 			sdk.NewAttribute(types.AttributeKeyTokensOut, msg.TokenOut.String()),
-			sdk.NewAttribute(types.AttributeTakerFee, takerFee.String()),
+			sdk.NewAttribute(types.AttributeTakerFee, takerFeeCoin.String()),
 		),
 	})
 
