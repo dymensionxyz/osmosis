@@ -8,13 +8,13 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )
 
-func EmitSwapEvent(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) {
+func EmitSwapEvent(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice sdk.Dec) {
 	ctx.EventManager().EmitEvents(sdk.Events{
-		newSwapEvent(sender, poolId, input, output),
+		newSwapEvent(sender, poolId, input, output, spotPrice),
 	})
 }
 
-func newSwapEvent(sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) sdk.Event {
+func newSwapEvent(sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice sdk.Dec) sdk.Event {
 	return sdk.NewEvent(
 		types.TypeEvtTokenSwapped,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
@@ -22,6 +22,7 @@ func newSwapEvent(sender sdk.AccAddress, poolId uint64, input sdk.Coins, output 
 		sdk.NewAttribute(types.AttributeKeyPoolId, strconv.FormatUint(poolId, 10)),
 		sdk.NewAttribute(types.AttributeKeyTokensIn, input.String()),
 		sdk.NewAttribute(types.AttributeKeyTokensOut, output.String()),
+		sdk.NewAttribute(types.AttributeKeyClosingPrice, spotPrice.String()),
 	)
 }
 

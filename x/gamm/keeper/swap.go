@@ -193,7 +193,12 @@ func (k Keeper) updatePoolForSwap(
 		return err
 	}
 
-	events.EmitSwapEvent(ctx, sender, pool.GetId(), tokensIn, tokensOut)
+	spotPrice, err := pool.SpotPrice(ctx, tokenIn.Denom, tokenOut.Denom)
+	if err != nil {
+		return err
+	}
+
+	events.EmitSwapEvent(ctx, sender, pool.GetId(), tokensIn, tokensOut, spotPrice)
 	k.hooks.AfterSwap(ctx, sender, pool.GetId(), tokensIn, tokensOut)
 	k.RecordTotalLiquidityIncrease(ctx, tokensIn)
 	k.RecordTotalLiquidityDecrease(ctx, tokensOut)
