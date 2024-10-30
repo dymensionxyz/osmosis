@@ -16,5 +16,6 @@ const (
 	AttributeKeySwapFee        = "swap_fee"
 	AttributeKeyTokensIn       = "tokens_in"
 	AttributeKeyTokensOut      = "tokens_out"
+	AttributeKeyClosingPrice   = "closing_price"
 	AttributeTakerFee          = "taker_fee"
 )
