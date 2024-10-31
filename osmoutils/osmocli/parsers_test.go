@@ -142,7 +142,7 @@ func TestParseFieldFromArg(t *testing.T) {
 			testingStruct:  testingStruct{Dec: sdk.MustNewDecFromStr("100")},
 			arg:            "10",
 			fieldIndex:     8,
-			expectedStruct: testingStruct{Dec: sdk.MustNewDecFromStr("10")},
+			expectedStruct: testingStruct{Dec: sdk.MustNewDecFromStr("100")},
 		},
 	}
 

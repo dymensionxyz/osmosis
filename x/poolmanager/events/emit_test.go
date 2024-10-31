@@ -35,6 +35,7 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 		poolId          uint64
 		tokensIn        sdk.Coins
 		tokensOut       sdk.Coins
+		closingPrice    sdk.Dec
 	}{
 		"basic valid": {
 			ctx:             suite.CreateTestContext(),
@@ -42,6 +43,7 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 			poolId:          1,
 			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(1234))),
 			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomB, sdk.NewInt(5678))),
+			closingPrice:    sdk.NewDec(123),
 		},
 		"valid with multiple tokens in and out": {
 			ctx:             suite.CreateTestContext(),
@@ -49,6 +51,7 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 			poolId:          200,
 			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(12)), sdk.NewCoin(testDenomB, sdk.NewInt(99))),
 			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomC, sdk.NewInt(88)), sdk.NewCoin(testDenomD, sdk.NewInt(34))),
+			closingPrice:    sdk.NewDec(123),
 		},
 	}
 
@@ -62,13 +65,14 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 					sdk.NewAttribute(types.AttributeKeyPoolId, strconv.FormatUint(tc.poolId, 10)),
 					sdk.NewAttribute(types.AttributeKeyTokensIn, tc.tokensIn.String()),
 					sdk.NewAttribute(types.AttributeKeyTokensOut, tc.tokensOut.String()),
+					sdk.NewAttribute(types.AttributeKeyClosingPrice, tc.closingPrice.String()),
 				),
 			}
 
 			hasNoEventManager := tc.ctx.EventManager() == nil
 
 			// System under test.
-			events.EmitSwapEvent(tc.ctx, tc.testAccountAddr, tc.poolId, tc.tokensIn, tc.tokensOut)
+			events.EmitSwapEvent(tc.ctx, tc.testAccountAddr, tc.poolId, tc.tokensIn, tc.tokensOut, tc.closingPrice)
 
 			// Assertions
 			if hasNoEventManager {

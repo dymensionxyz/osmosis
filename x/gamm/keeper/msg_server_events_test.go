@@ -111,44 +111,46 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 	}
 
 	for name, tc := range testcases {
-		suite.Setup()
-		ctx := suite.Ctx
-		suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
-		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
+		suite.Run(name, func() {
+			suite.Setup()
+			ctx := suite.Ctx
+			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
+			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool1coins...)
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-		//"bar" is treated as baseDenom (e.g. USDC)
-		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool2coins...)
+			//"bar" is treated as baseDenom (e.g. USDC)
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool3coins...)
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool4coins...)
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		// Reset event counts to 0 by creating a new manager.
-		ctx = ctx.WithEventManager(sdk.NewEventManager())
-		suite.Equal(0, len(ctx.EventManager().Events()))
+			// Reset event counts to 0 by creating a new manager.
+			ctx = ctx.WithEventManager(sdk.NewEventManager())
+			suite.Equal(0, len(ctx.EventManager().Events()))
 
-		response, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
-			Sender:            suite.TestAccs[0].String(),
-			Routes:            tc.routes,
-			TokenIn:           tc.tokenIn,
-			TokenOutMinAmount: tc.tokenOutMinAmount,
+			response, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
+				Sender:            suite.TestAccs[0].String(),
+				Routes:            tc.routes,
+				TokenIn:           tc.tokenIn,
+				TokenOutMinAmount: tc.tokenOutMinAmount,
+			})
+
+			if !tc.expectError {
+				suite.Require().NoError(err, name)
+				suite.Require().NotNil(response, name)
+			}
+
+			suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
+			suite.AssertEventEmitted(ctx, types.TypeEvtSwapExactAmountIn, tc.expectedMessageEvents, name)
 		})
-
-		if !tc.expectError {
-			suite.Require().NoError(err, name)
-			suite.Require().NotNil(response, name)
-		}
-
-		suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
-		suite.AssertEventEmitted(ctx, types.TypeEvtSwapExactAmountIn, tc.expectedMessageEvents, name)
 	}
 }
 
@@ -230,44 +232,46 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 	}
 
 	for name, tc := range testcases {
-		suite.Setup()
-		ctx := suite.Ctx
-		suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
-		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
+		suite.Run(name, func() {
+			suite.Setup()
+			ctx := suite.Ctx
+			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
+			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool1coins...)
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-		//"bar" is treated as baseDenom (e.g. USDC)
-		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool2coins...)
+			//"bar" is treated as baseDenom (e.g. USDC)
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool3coins...)
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool4coins...)
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		// Reset event counts to 0 by creating a new manager.
-		ctx = ctx.WithEventManager(sdk.NewEventManager())
-		suite.Equal(0, len(ctx.EventManager().Events()))
+			// Reset event counts to 0 by creating a new manager.
+			ctx = ctx.WithEventManager(sdk.NewEventManager())
+			suite.Equal(0, len(ctx.EventManager().Events()))
 
-		response, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
-			Sender:           suite.TestAccs[0].String(),
-			Routes:           tc.routes,
-			TokenOut:         tc.tokenOut,
-			TokenInMaxAmount: tc.tokenInMaxAmount,
+			response, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
+				Sender:           suite.TestAccs[0].String(),
+				Routes:           tc.routes,
+				TokenOut:         tc.tokenOut,
+				TokenInMaxAmount: tc.tokenInMaxAmount,
+			})
+
+			if !tc.expectError {
+				suite.Require().NoError(err, name)
+				suite.Require().NotNil(response, name)
+			}
+
+			suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
+			suite.AssertEventEmitted(ctx, types.TypeEvtSwapExactAmountOut, tc.expectedMessageEvents, name)
 		})
-
-		if !tc.expectError {
-			suite.Require().NoError(err, name)
-			suite.Require().NotNil(response, name)
-		}
-
-		suite.AssertEventEmitted(ctx, types.TypeEvtTokenSwapped, tc.expectedSwapEvents, name)
-		suite.AssertEventEmitted(ctx, types.TypeEvtSwapExactAmountOut, tc.expectedMessageEvents, name)
 	}
 }
 

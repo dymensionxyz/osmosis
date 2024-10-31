@@ -454,7 +454,10 @@ func New(
 		appCodec, keys[gammtypes.StoreKey],
 		app.GetSubspace(gammtypes.ModuleName),
 		app.AccountKeeper,
-		app.BankKeeper, app.DistrKeeper)
+		app.BankKeeper,
+		app.DistrKeeper,
+		nil, // avoid dependency from the dymension repo
+	)
 	app.GAMMKeeper = &gammKeeper
 
 	app.PoolManagerKeeper = poolmanagerkeeper.NewKeeper(
