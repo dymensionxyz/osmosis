@@ -18,7 +18,7 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
 
-func (suite *KeeperTestSuite) SetupTest(isCheckTx bool) {
+func (suite *KeeperTestSuite) SetupTest() {
 	suite.Setup()
 
 	// Mint some assets to the accounts.

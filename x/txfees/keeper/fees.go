@@ -4,20 +4,17 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
-// ChargeFees charges the specified taker fee from the payer's account and
+// ChargeFeesFromPayer charges the specified taker fee from the payer's account and
 // processes it according to the fee token's properties.
-// If a beneficiary is provided, half of the fee is sent to the beneficiary.
-// The remaining fee is sent to the txfees module account.
-// If the fee token is the base denomination, it is burned.
-// If the fee token is a registered fee token, it is swapped to the base denomination and then burned.
-// If the fee token is unknown, it is burned directly.
-func (k Keeper) ChargeFees(
+// Wrapper for ChargeFees that sends the fee to x/txfees in advance.
+func (k Keeper) ChargeFeesFromPayer(
 	ctx sdk.Context,
 	payer sdk.AccAddress,
 	takerFeeCoin sdk.Coin,
@@ -27,43 +24,76 @@ func (k Keeper) ChargeFees(
 		// Nothing to charge
 		return nil
 	}
-
-	// Send half of the fee to beneficiary if presented
-	if beneficiary != nil {
-		// beneficiaryCoin = takerFeeCoin / 2
-		// note that beneficiaryCoin * 2 != takerFeeCoin because of the integer division rounding
-		beneficiaryCoin := sdk.Coin{Denom: takerFeeCoin.Denom, Amount: takerFeeCoin.Amount.QuoRaw(2)}
-		// takerFeeCoin = takerFeeCoin - beneficiaryCoin
-		takerFeeCoin = takerFeeCoin.Sub(beneficiaryCoin)
-
-		err := k.bankKeeper.SendCoins(ctx, payer, *beneficiary, sdk.NewCoins(beneficiaryCoin))
-		if err != nil {
-			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
-		}
-	}
-
+	// Charge the fee from the payer to x/txfees
 	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, payer, types.ModuleName, sdk.NewCoins(takerFeeCoin))
 	if err != nil {
 		return fmt.Errorf("send coins to txfees account: %w", err)
 	}
 
-	return k.ChargeFeesFromModuleAcc(ctx, takerFeeCoin)
+	return k.ChargeFees(ctx, takerFeeCoin, beneficiary, payer.String())
 }
 
-// ChargeFeesFromModuleAcc processes the specified taker fee according to the fee token's properties.
-// The main difference from ChargeFees is that the specified fee must be already present in the module account.
+// ChargeFees processes the specified taker fee according to the fee token's properties.
+// The fee must be sent to the module account beforehand.
+// Payer field if optional and is only used for the event.
+//
+// If a beneficiary is provided, half of the fee is sent to the beneficiary.
+// The remaining fee is sent to the txfees module account.
 // If the fee token is the base denomination, it is burned.
 // If the fee token is a registered fee token, it is swapped to the base denomination and then burned.
 // If the fee token is unknown, it is burned directly.
-func (k Keeper) ChargeFeesFromModuleAcc(
+func (k Keeper) ChargeFees(
 	ctx sdk.Context,
 	takerFeeCoin sdk.Coin,
+	beneficiary *sdk.AccAddress,
+	payer string, // optional, only used for the event
 ) error {
 	if takerFeeCoin.Amount.IsZero() {
 		// Nothing to charge
 		return nil
 	}
 
+	// Send half of the fee to beneficiary if presented
+	beneficiaryCoin := sdk.Coin{Denom: "", Amount: sdk.ZeroInt()}
+	var beneficiaryAddr string
+	if beneficiary != nil {
+		beneficiaryAddr = beneficiary.String()
+		// beneficiaryCoin = takerFeeCoin / 2
+		// note that beneficiaryCoin * 2 != takerFeeCoin because of the integer division rounding
+		beneficiaryCoin = sdk.Coin{Denom: takerFeeCoin.Denom, Amount: takerFeeCoin.Amount.QuoRaw(2)}
+		// takerFeeCoin = takerFeeCoin - beneficiaryCoin
+		takerFeeCoin = takerFeeCoin.Sub(beneficiaryCoin)
+
+		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, sdk.NewCoins(beneficiaryCoin))
+		if err != nil {
+			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
+		}
+	}
+
+	err := k.chargeFees(ctx, takerFeeCoin)
+	if err != nil {
+		return fmt.Errorf("charge fees: %w", err)
+	}
+
+	err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
+		Payer:              payer,
+		TakerFee:           takerFeeCoin.String(),
+		Beneficiary:        beneficiaryAddr,
+		BeneficiaryRevenue: beneficiaryCoin.String(),
+	})
+	if err != nil {
+		k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
+	}
+
+	return nil
+}
+
+// chargeFees processes the specified taker fee according to the fee token's properties.
+// The fee must be sent to the txfees module account beforehand.
+func (k Keeper) chargeFees(
+	ctx sdk.Context,
+	takerFeeCoin sdk.Coin,
+) (err error) {
 	baseDenom, err := k.GetBaseDenom(ctx)
 	if err != nil {
 		return fmt.Errorf("get base denom: %w", err)

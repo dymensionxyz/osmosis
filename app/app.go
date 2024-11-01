@@ -456,7 +456,6 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.DistrKeeper,
-		nil, // avoid dependency from the dymension repo
 	)
 	app.GAMMKeeper = &gammKeeper
 

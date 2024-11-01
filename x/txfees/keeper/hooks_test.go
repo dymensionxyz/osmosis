@@ -43,7 +43,7 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 	}
 
 	for _, tc := range tests {
-		suite.SetupTest(false)
+		suite.SetupTest()
 
 		// create pools for three separate fee tokens
 		suite.PrepareBalancerPoolWithCoins(sdk.NewCoin(baseDenom, sdk.NewInt(1000000000000)), sdk.NewCoin(uion, sdk.NewInt(5000)))

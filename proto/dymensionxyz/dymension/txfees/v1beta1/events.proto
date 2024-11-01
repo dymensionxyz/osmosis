@@ -1,0 +1,15 @@
+syntax = "proto3";
+package dymensionxyz.dymension.txfees.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
+
+message EventChargeFee {
+  string payer = 1;
+  string taker_fee = 2;
+  // Beneficiary is the address that will receive the fee. Optional: may be empty.
+  string beneficiary = 3;
+  string beneficiary_revenue = 4;
+}

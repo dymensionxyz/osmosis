@@ -65,7 +65,7 @@ func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, route poolm
 
 // sendToTxFees sends the taker fee coin to the txfees module
 func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoin sdk.Coin, beneficiary *sdk.AccAddress) error {
-	err := k.txfeeKeeper.ChargeFees(ctx, sender, takerFeeCoin, beneficiary)
+	err := k.txfeeKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
 	if err != nil {
 		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
 	}
