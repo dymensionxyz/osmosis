@@ -58,7 +58,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 			},
 			tokenIn:               sdk.NewCoin("baz", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
-			expectedSwapEvents:    2,
+			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
 		"two hops": {
@@ -90,7 +90,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 			},
 			tokenIn:               sdk.NewCoin("foo", sdk.NewInt(tokenIn)),
 			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
-			expectedSwapEvents:    2, //2 for the swap
+			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
 		"invalid - two hops, denom does not exist": {
@@ -179,7 +179,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 			},
 			tokenOut:              sdk.NewCoin("adym", sdk.NewInt(tokenOut)),
 			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-			expectedSwapEvents:    1,
+			expectedSwapEvents:    2, // 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
 		"two hops": {
@@ -211,7 +211,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 			},
 			tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
 			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
-			expectedSwapEvents:    2,
+			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
 		"invalid - two hops, denom does not exist": {

@@ -10,9 +10,16 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
+// ChargeFees charges the specified taker fee from the payer's account and
+// processes it according to the fee token's properties.
+// If a beneficiary is provided, half of the fee is sent to the beneficiary.
+// The remaining fee is sent to the txfees module account.
+// If the fee token is the base denomination, it is burned.
+// If the fee token is a registered fee token, it is swapped to the base denomination and then burned.
+// If the fee token is unknown, it is burned directly.
 func (k Keeper) ChargeFees(
 	ctx sdk.Context,
-	sender sdk.AccAddress,
+	payer sdk.AccAddress,
 	takerFeeCoin sdk.Coin,
 	beneficiary *sdk.AccAddress,
 ) error {
@@ -29,15 +36,32 @@ func (k Keeper) ChargeFees(
 		// takerFeeCoin = takerFeeCoin - beneficiaryCoin
 		takerFeeCoin = takerFeeCoin.Sub(beneficiaryCoin)
 
-		err := k.bankKeeper.SendCoins(ctx, sender, *beneficiary, sdk.NewCoins(beneficiaryCoin))
+		err := k.bankKeeper.SendCoins(ctx, payer, *beneficiary, sdk.NewCoins(beneficiaryCoin))
 		if err != nil {
 			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
 		}
 	}
 
-	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, types.ModuleName, sdk.NewCoins(takerFeeCoin))
+	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, payer, types.ModuleName, sdk.NewCoins(takerFeeCoin))
 	if err != nil {
 		return fmt.Errorf("send coins to txfees account: %w", err)
+	}
+
+	return k.ChargeFeesFromModuleAcc(ctx, takerFeeCoin)
+}
+
+// ChargeFeesFromModuleAcc processes the specified taker fee according to the fee token's properties.
+// The main difference from ChargeFees is that the specified fee must be already present in the module account.
+// If the fee token is the base denomination, it is burned.
+// If the fee token is a registered fee token, it is swapped to the base denomination and then burned.
+// If the fee token is unknown, it is burned directly.
+func (k Keeper) ChargeFeesFromModuleAcc(
+	ctx sdk.Context,
+	takerFeeCoin sdk.Coin,
+) error {
+	if takerFeeCoin.Amount.IsZero() {
+		// Nothing to charge
+		return nil
 	}
 
 	baseDenom, err := k.GetBaseDenom(ctx)

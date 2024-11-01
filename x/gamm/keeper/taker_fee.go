@@ -69,7 +69,7 @@ func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoi
 	if err != nil {
 		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
 	}
-	return k.txfeeKeeper.ChargeFees(ctx, sender, takerFeeCoin, beneficiary)
+	return nil
 }
 
 /* ---------------------------------- Utils --------------------------------- */
