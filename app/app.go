@@ -474,6 +474,7 @@ func New(
 		app.BankKeeper,
 		app.PoolManagerKeeper,
 		app.GAMMKeeper,
+		app.DistrKeeper,
 	)
 	app.TxFeesKeeper = &txfeeskeeper
 	app.GAMMKeeper.SetPoolManager(app.PoolManagerKeeper)

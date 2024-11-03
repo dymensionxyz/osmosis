@@ -57,3 +57,8 @@ type TxFeesKeeper interface {
 	GetBaseDenom(ctx sdk.Context) (denom string, err error)
 	GetFeeToken(ctx sdk.Context, denom string) (FeeToken, error)
 }
+
+// CommunityPoolKeeper defines the contract needed to be fulfilled for distribution keeper.
+type CommunityPoolKeeper interface {
+	FundCommunityPool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error
+}

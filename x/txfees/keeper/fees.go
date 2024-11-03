@@ -20,7 +20,7 @@ func (k Keeper) ChargeFeesFromPayer(
 	takerFeeCoin sdk.Coin,
 	beneficiary *sdk.AccAddress,
 ) error {
-	if takerFeeCoin.Amount.IsZero() {
+	if takerFeeCoin.IsZero() {
 		// Nothing to charge
 		return nil
 	}
@@ -48,37 +48,56 @@ func (k Keeper) ChargeFees(
 	beneficiary *sdk.AccAddress,
 	payer string, // optional, only used for the event
 ) error {
-	if takerFeeCoin.Amount.IsZero() {
+	if takerFeeCoin.IsZero() {
 		// Nothing to charge
 		return nil
 	}
 
-	// Send half of the fee to beneficiary if presented
+	// Swaps the taker fee coin to the base denom.
+	// If the fee token is unknown or the swap is unsuccessful, the fee is sent to the community pool.
+	baseDenomFee, err := k.swapFeeToBaseDenom(ctx, takerFeeCoin)
+	if err != nil {
+		return fmt.Errorf("swap fee to base denom: %w", err)
+	}
+	if baseDenomFee.IsNil() || baseDenomFee.IsZero() {
+		// Fee is unknown token, thus sent to the community pool
+		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
+			Payer:              payer,
+			TakerFee:           takerFeeCoin.String(),
+			Beneficiary:        ValueFromPtr(beneficiary).String(),
+			BeneficiaryRevenue: "",
+		})
+		if err != nil {
+			k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
+		}
+		return nil
+	}
+
+	// Send 50% of the base denom fee to the beneficiary if presented
 	beneficiaryCoin := sdk.Coin{Denom: "", Amount: sdk.ZeroInt()}
-	var beneficiaryAddr string
 	if beneficiary != nil {
-		beneficiaryAddr = beneficiary.String()
 		// beneficiaryCoin = takerFeeCoin / 2
 		// note that beneficiaryCoin * 2 != takerFeeCoin because of the integer division rounding
-		beneficiaryCoin = sdk.Coin{Denom: takerFeeCoin.Denom, Amount: takerFeeCoin.Amount.QuoRaw(2)}
+		beneficiaryCoin = sdk.Coin{Denom: baseDenomFee.Denom, Amount: baseDenomFee.Amount.QuoRaw(2)}
 		// takerFeeCoin = takerFeeCoin - beneficiaryCoin
-		takerFeeCoin = takerFeeCoin.Sub(beneficiaryCoin)
+		baseDenomFee = baseDenomFee.Sub(beneficiaryCoin)
 
-		err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, sdk.NewCoins(beneficiaryCoin))
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, sdk.NewCoins(beneficiaryCoin))
 		if err != nil {
 			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
 		}
 	}
 
-	err := k.chargeFees(ctx, takerFeeCoin)
+	// Burn the remaining base denom fee
+	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(baseDenomFee))
 	if err != nil {
-		return fmt.Errorf("charge fees: %w", err)
+		return fmt.Errorf("burn coins: %w", err)
 	}
 
 	err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
 		Payer:              payer,
-		TakerFee:           takerFeeCoin.String(),
-		Beneficiary:        beneficiaryAddr,
+		TakerFee:           baseDenomFee.String(),
+		Beneficiary:        ValueFromPtr(beneficiary).String(),
 		BeneficiaryRevenue: beneficiaryCoin.String(),
 	})
 	if err != nil {
@@ -88,45 +107,48 @@ func (k Keeper) ChargeFees(
 	return nil
 }
 
-// chargeFees processes the specified taker fee according to the fee token's properties.
+func ValueFromPtr[T any](ptr *T) (zero T) {
+	if ptr == nil {
+		return zero
+	}
+	return *ptr
+}
+
+// swapFeeToBaseDenom swaps the taker fee coin to the base denom.
+// If the fee token is unknown, it is sent to the community pool.
 // The fee must be sent to the txfees module account beforehand.
-func (k Keeper) chargeFees(
+func (k Keeper) swapFeeToBaseDenom(
 	ctx sdk.Context,
 	takerFeeCoin sdk.Coin,
-) (err error) {
+) (baseDenomFee sdk.Coin, err error) {
 	baseDenom, err := k.GetBaseDenom(ctx)
 	if err != nil {
-		return fmt.Errorf("get base denom: %w", err)
+		return sdk.Coin{}, fmt.Errorf("get base denom: %w", err)
 	}
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 
-	// If the coin is in base denom, just burn
+	// The fee is already in the base denom
 	if takerFeeCoin.Denom == baseDenom {
-		err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(takerFeeCoin))
-		if err != nil {
-			return fmt.Errorf("burn coins: %w", err)
-		}
-		return nil
+		return takerFeeCoin, nil
 	}
 
 	// Get a fee token for the coin
 	feetoken, err := k.GetFeeToken(ctx, takerFeeCoin.Denom)
 	if err != nil {
-		// This should never happen in practice
 		k.Logger(ctx).Error("Unknown fee token", "denom", takerFeeCoin.Denom, "error", err)
 
-		// Burn unknown fee tokens
-		err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(takerFeeCoin))
+		// Send unknown fee tokens to the community pool
+		err = k.communityPool.FundCommunityPool(ctx, sdk.NewCoins(takerFeeCoin), moduleAddr)
 		if err != nil {
-			return fmt.Errorf("unknown fee token: burn coins: %w", err)
+			return sdk.Coin{}, fmt.Errorf("unknown fee token: func community pool: %w", err)
 		}
 
-		return nil
+		return sdk.Coin{}, nil
 	}
 
 	// Swap the coin to base denom
 	var (
 		tokenOutAmount = sdk.ZeroInt() // Token amount in base denom
-		moduleAddr     = k.accountKeeper.GetModuleAddress(types.ModuleName)
 		route          = []poolmanagertypes.SwapAmountInRoute{{
 			PoolId:        feetoken.PoolID,
 			TokenOutDenom: baseDenom,
@@ -139,21 +161,14 @@ func (k Keeper) chargeFees(
 	if err != nil {
 		k.Logger(ctx).Error("Failed to swap fee token to base token. Trying to burn the tokens", "denom", takerFeeCoin.Denom, "error", err)
 
-		// Burn unknown fee tokens
-		err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(takerFeeCoin))
+		// Send unknown fee tokens to the community pool
+		err = k.communityPool.FundCommunityPool(ctx, sdk.NewCoins(takerFeeCoin), moduleAddr)
 		if err != nil {
-			return fmt.Errorf("unknown fee token: burn coins: %w", err)
+			return sdk.Coin{}, fmt.Errorf("unknown fee token: func community pool: %w", err)
 		}
 
-		return nil
+		return sdk.Coin{}, nil
 	}
 
-	// Burn the coin swapped to base denom
-	takerFeeBaseDenom := sdk.NewCoins(sdk.NewCoin(baseDenom, tokenOutAmount))
-	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, takerFeeBaseDenom)
-	if err != nil {
-		return fmt.Errorf("burn coins: %w", err)
-	}
-
-	return nil
+	return sdk.Coin{Denom: baseDenom, Amount: tokenOutAmount}, nil
 }
