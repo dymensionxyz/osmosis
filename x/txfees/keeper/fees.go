@@ -41,7 +41,7 @@ func (k Keeper) ChargeFeesFromPayer(
 // The remaining fee is sent to the txfees module account.
 // If the fee token is the base denomination, it is burned.
 // If the fee token is a registered fee token, it is swapped to the base denomination and then burned.
-// If the fee token is unknown, it is burned directly.
+// If the fee token is unknown, it is sent to the community pool.
 func (k Keeper) ChargeFees(
 	ctx sdk.Context,
 	takerFeeCoin sdk.Coin,
