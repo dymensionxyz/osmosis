@@ -223,6 +223,7 @@ func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ct
 			return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
 		}
 	} else {
+		// TODO: investigate handling non-DYM fees https://github.com/dymensionxyz/dymension/issues/1387
 		// sends to the txfees module to be swapped and burned
 		err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.ModuleName, fees)
 		if err != nil {
