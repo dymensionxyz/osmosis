@@ -13,9 +13,9 @@ const (
 	AttributeKeyPoolId         = "pool_id"
 	AttributeKeyPoolIdEntering = "pool_id_entering"
 	AttributeKeyPoolIdLeaving  = "pool_id_leaving"
-	AttributeKeySwapFee        = "swap_fee"
 	AttributeKeyTokensIn       = "tokens_in"
 	AttributeKeyTokensOut      = "tokens_out"
 	AttributeKeyClosingPrice   = "closing_price"
-	AttributeTakerFee          = "taker_fee"
+	AttributeKeyTakerFee       = "taker_fee"
+	AttributeKeySwapFee        = "swap_fee"
 )
