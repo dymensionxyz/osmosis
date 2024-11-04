@@ -71,7 +71,7 @@ func (k Keeper) ChargeFees(
 			Error("Cannot swap fee to base denom. Send it to the community pool.")
 	}
 
-	// If the fee token is unknown or the swap is unsuccessful, send the fee to the community pool
+	// If the fee token is unknown or the swap is unsuccessful, emit event and return 
 	if baseDenomFee.Empty() {
 		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
 			Payer:              payer,
