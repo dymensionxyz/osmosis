@@ -53,14 +53,26 @@ func (k Keeper) ChargeFees(
 		return nil
 	}
 
-	// Swaps the taker fee coin to the base denom.
-	// If the fee token is unknown or the swap is unsuccessful, the fee is sent to the community pool.
-	baseDenomFee, err := k.swapFeeToBaseDenom(ctx, takerFeeCoin)
+	// Swap the taker fee to the base denom
+	baseDenomFee, communityPoolCoins, err := k.swapFeeToBaseDenom(ctx, takerFeeCoin)
 	if err != nil {
 		return fmt.Errorf("swap fee to base denom: %w", err)
 	}
-	if baseDenomFee.IsNil() || baseDenomFee.IsZero() {
-		// Fee is unknown token, thus sent to the community pool
+
+	// If the fee token is unknown or the swap is unsuccessful, the fee is sent to the community pool.
+	if !communityPoolCoins.Empty() {
+		// Send unknown fee tokens to the community pool
+		err = k.communityPool.FundCommunityPool(ctx, communityPoolCoins, k.accountKeeper.GetModuleAddress(types.ModuleName))
+		if err != nil {
+			return fmt.Errorf("unknown fee token: func community pool: %w", err)
+		}
+
+		k.Logger(ctx).With("fee", communityPoolCoins.String(), "error", err).
+			Error("Cannot swap fee to base denom. Send it to the community pool.")
+	}
+
+	// If the fee token is unknown or the swap is unsuccessful, send the fee to the community pool
+	if baseDenomFee.Empty() {
 		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
 			Payer:              payer,
 			TakerFee:           takerFeeCoin.String(),
@@ -74,22 +86,23 @@ func (k Keeper) ChargeFees(
 	}
 
 	// Send 50% of the base denom fee to the beneficiary if presented
-	beneficiaryCoin := sdk.Coin{Denom: "", Amount: sdk.ZeroInt()}
+	var beneficiaryCoins sdk.Coins
 	if beneficiary != nil {
+		fee := baseDenomFee[0]
 		// beneficiaryCoin = takerFeeCoin / 2
 		// note that beneficiaryCoin * 2 != takerFeeCoin because of the integer division rounding
-		beneficiaryCoin = sdk.Coin{Denom: baseDenomFee.Denom, Amount: baseDenomFee.Amount.QuoRaw(2)}
+		beneficiaryCoins = sdk.Coins{{Denom: fee.Denom, Amount: fee.Amount.QuoRaw(2)}}
 		// takerFeeCoin = takerFeeCoin - beneficiaryCoin
-		baseDenomFee = baseDenomFee.Sub(beneficiaryCoin)
+		baseDenomFee = baseDenomFee.Sub(beneficiaryCoins...)
 
-		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, sdk.NewCoins(beneficiaryCoin))
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, beneficiaryCoins)
 		if err != nil {
 			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
 		}
 	}
 
 	// Burn the remaining base denom fee
-	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(baseDenomFee))
+	err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, baseDenomFee)
 	if err != nil {
 		return fmt.Errorf("burn coins: %w", err)
 	}
@@ -98,7 +111,7 @@ func (k Keeper) ChargeFees(
 		Payer:              payer,
 		TakerFee:           baseDenomFee.String(),
 		Beneficiary:        ValueFromPtr(beneficiary).String(),
-		BeneficiaryRevenue: beneficiaryCoin.String(),
+		BeneficiaryRevenue: beneficiaryCoins.String(),
 	})
 	if err != nil {
 		k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
@@ -120,30 +133,22 @@ func ValueFromPtr[T any](ptr *T) (zero T) {
 func (k Keeper) swapFeeToBaseDenom(
 	ctx sdk.Context,
 	takerFeeCoin sdk.Coin,
-) (baseDenomFee sdk.Coin, err error) {
+) (baseDenomFee, communityPoolFee sdk.Coins, err error) {
 	baseDenom, err := k.GetBaseDenom(ctx)
 	if err != nil {
-		return sdk.Coin{}, fmt.Errorf("get base denom: %w", err)
+		return nil, nil, fmt.Errorf("get base denom: %w", err)
 	}
 	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 
 	// The fee is already in the base denom
 	if takerFeeCoin.Denom == baseDenom {
-		return takerFeeCoin, nil
+		return sdk.Coins{takerFeeCoin}, nil, nil
 	}
 
 	// Get a fee token for the coin
 	feetoken, err := k.GetFeeToken(ctx, takerFeeCoin.Denom)
 	if err != nil {
-		k.Logger(ctx).Error("Unknown fee token", "denom", takerFeeCoin.Denom, "error", err)
-
-		// Send unknown fee tokens to the community pool
-		err = k.communityPool.FundCommunityPool(ctx, sdk.NewCoins(takerFeeCoin), moduleAddr)
-		if err != nil {
-			return sdk.Coin{}, fmt.Errorf("unknown fee token: func community pool: %w", err)
-		}
-
-		return sdk.Coin{}, nil
+		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
 	// Swap the coin to base denom
@@ -159,16 +164,8 @@ func (k Keeper) swapFeeToBaseDenom(
 		return err
 	})
 	if err != nil {
-		k.Logger(ctx).Error("Failed to swap fee token to base token. Trying to burn the tokens", "denom", takerFeeCoin.Denom, "error", err)
-
-		// Send unknown fee tokens to the community pool
-		err = k.communityPool.FundCommunityPool(ctx, sdk.NewCoins(takerFeeCoin), moduleAddr)
-		if err != nil {
-			return sdk.Coin{}, fmt.Errorf("unknown fee token: func community pool: %w", err)
-		}
-
-		return sdk.Coin{}, nil
+		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
-	return sdk.Coin{Denom: baseDenom, Amount: tokenOutAmount}, nil
+	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
 }

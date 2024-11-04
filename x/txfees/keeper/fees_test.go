@@ -120,6 +120,9 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			if tc.beneficiary != nil {
 				s.Require().Equal(tc.beneficiary.String(), event.Beneficiary)
 				s.Require().Equal(tc.expBeneficiaryRev.String(), event.BeneficiaryRevenue)
+			} else {
+				s.Require().Equal("", event.Beneficiary)
+				s.Require().Equal("", event.BeneficiaryRevenue)
 			}
 
 			// The fee is either burned or not applied if case of error
