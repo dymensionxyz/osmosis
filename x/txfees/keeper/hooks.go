@@ -10,7 +10,6 @@ import (
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
-	txfeestypes "github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
 // Hooks is the wrapper struct for the txfees keeper.
@@ -39,7 +38,7 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		return nil
 	}
 
-	moduleAddr := k.accountKeeper.GetModuleAddress(txfeestypes.ModuleName)
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 	baseDenom, _ := k.GetBaseDenom(ctx)
 
 	//get all balances of this module
@@ -144,7 +143,7 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		return
 	}
 
-	feeToken := txfeestypes.FeeToken{
+	feeToken := types.FeeToken{
 		PoolID: poolId,
 		Denom:  nonNativeDenom,
 	}

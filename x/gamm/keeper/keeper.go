@@ -35,9 +35,17 @@ type Keeper struct {
 	communityPoolKeeper types.CommunityPoolKeeper
 	poolManager         types.PoolManager
 	txfeeKeeper         types.TxFeeKeeper
+	rollappKeeper       types.RollappKeeper
 }
 
-func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, paramSpace paramtypes.Subspace, accountKeeper types.AccountKeeper, bankKeeper types.BankKeeper, communityPoolKeeper types.CommunityPoolKeeper) Keeper {
+func NewKeeper(
+	cdc codec.BinaryCodec,
+	storeKey storetypes.StoreKey,
+	paramSpace paramtypes.Subspace,
+	accountKeeper types.AccountKeeper,
+	bankKeeper types.BankKeeper,
+	communityPoolKeeper types.CommunityPoolKeeper,
+) Keeper {
 	// Ensure that the module account are set.
 	moduleAddr, perms := accountKeeper.GetModuleAddressAndPermissions(types.ModuleName)
 	if moduleAddr == nil {
@@ -74,7 +82,7 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey, paramSpace p
 	}
 }
 
-// Set the gamm hooks.
+// SetHooks sets the gamm hooks.
 func (k *Keeper) SetHooks(gh types.GammHooks) *Keeper {
 	if k.hooks != nil {
 		panic("cannot set gamm hooks twice")
@@ -95,6 +103,12 @@ func (k *Keeper) SetPoolManager(poolManager types.PoolManager) {
 // must be called when initializing the keeper.
 func (k *Keeper) SetTxFees(txfees types.TxFeeKeeper) {
 	k.txfeeKeeper = txfees
+}
+
+// SetRollapp sets the tx fees keeper.
+// must be called when initializing the keeper.
+func (k *Keeper) SetRollapp(rollapp types.RollappKeeper) {
+	k.rollappKeeper = rollapp
 }
 
 // GetParams returns the total set params.

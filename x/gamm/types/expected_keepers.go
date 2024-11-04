@@ -78,4 +78,9 @@ type PoolManager interface {
 type TxFeeKeeper interface {
 	GetFeeToken(ctx sdk.Context, denom string) (txfeestypes.FeeToken, error)
 	GetBaseDenom(ctx sdk.Context) (denom string, err error)
+	ChargeFeesFromPayer(ctx sdk.Context, payer sdk.AccAddress, takerFeeCoin sdk.Coin, beneficiary *sdk.AccAddress) error
+}
+
+type RollappKeeper interface {
+	GetRollappOwnerByDenom(ctx sdk.Context, denom string) (sdk.AccAddress, error)
 }

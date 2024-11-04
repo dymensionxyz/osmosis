@@ -454,7 +454,9 @@ func New(
 		appCodec, keys[gammtypes.StoreKey],
 		app.GetSubspace(gammtypes.ModuleName),
 		app.AccountKeeper,
-		app.BankKeeper, app.DistrKeeper)
+		app.BankKeeper,
+		app.DistrKeeper,
+	)
 	app.GAMMKeeper = &gammKeeper
 
 	app.PoolManagerKeeper = poolmanagerkeeper.NewKeeper(
@@ -472,6 +474,7 @@ func New(
 		app.BankKeeper,
 		app.PoolManagerKeeper,
 		app.GAMMKeeper,
+		app.DistrKeeper,
 	)
 	app.TxFeesKeeper = &txfeeskeeper
 	app.GAMMKeeper.SetPoolManager(app.PoolManagerKeeper)

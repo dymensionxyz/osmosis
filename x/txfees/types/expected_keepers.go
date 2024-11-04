@@ -48,6 +48,7 @@ type BankKeeper interface {
 	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
 	GetAllBalances(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 	BurnCoins(ctx sdk.Context, name string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 }
 
 // TxFeesKeeper defines the expected transaction fee keeper
@@ -55,4 +56,9 @@ type TxFeesKeeper interface {
 	ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error)
 	GetBaseDenom(ctx sdk.Context) (denom string, err error)
 	GetFeeToken(ctx sdk.Context, denom string) (FeeToken, error)
+}
+
+// CommunityPoolKeeper defines the contract needed to be fulfilled for distribution keeper.
+type CommunityPoolKeeper interface {
+	FundCommunityPool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error
 }

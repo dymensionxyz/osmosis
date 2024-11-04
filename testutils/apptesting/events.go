@@ -27,6 +27,16 @@ func (s *KeeperTestHelper) FindEvent(events []sdk.Event, name string) sdk.Event 
 	return events[index]
 }
 
+// FindLastEventOfType returns the last event of the given type.
+func (s *KeeperTestHelper) FindLastEventOfType(events []sdk.Event, eventType string) (sdk.Event, bool) {
+	for i := len(events) - 1; i >= 0; i-- {
+		if events[i].Type == eventType {
+			return events[i], true
+		}
+	}
+	return sdk.Event{}, false
+}
+
 func (s *KeeperTestHelper) ExtractAttributes(event sdk.Event) map[string]string {
 	attrs := make(map[string]string)
 	if event.Attributes == nil {

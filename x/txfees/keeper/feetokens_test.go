@@ -5,7 +5,7 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestBaseDenom() {
-	suite.SetupTest(false)
+	suite.SetupTest()
 
 	// Test getting basedenom (should be default from genesis)
 	baseDenom, err := suite.App.TxFeesKeeper.GetBaseDenom(suite.Ctx)
@@ -66,7 +66,7 @@ func (suite *KeeperTestSuite) TestFeeTokenConversions() {
 	}
 
 	for _, tc := range tests {
-		suite.SetupTest(false)
+		suite.SetupTest()
 
 		_ = suite.PrepareBalancerPoolWithCoins(
 			tc.baseDenomPoolInput,

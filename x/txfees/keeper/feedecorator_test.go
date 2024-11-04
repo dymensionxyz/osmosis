@@ -116,7 +116,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 
 	for _, tc := range tests {
 		// reset pool and accounts for each test
-		suite.SetupTest(false)
+		suite.SetupTest()
 
 		// setup uion with 1:1 fee
 		suite.PrepareBalancerPoolWithCoins(

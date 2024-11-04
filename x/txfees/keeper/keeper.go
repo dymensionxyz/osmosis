@@ -22,6 +22,7 @@ type Keeper struct {
 	bankKeeper          types.BankKeeper
 	poolManager         types.PoolManager
 	spotPriceCalculator types.SpotPriceCalculator
+	communityPool       types.CommunityPoolKeeper
 }
 
 var _ types.TxFeesKeeper = (*Keeper)(nil)
@@ -34,6 +35,7 @@ func NewKeeper(
 	bankKeeper types.BankKeeper,
 	poolManager types.PoolManager,
 	spotPriceCalculator types.SpotPriceCalculator,
+	communityPool types.CommunityPoolKeeper,
 ) Keeper {
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
@@ -47,6 +49,7 @@ func NewKeeper(
 		epochKeeper:         epochKeeper,
 		poolManager:         poolManager,
 		spotPriceCalculator: spotPriceCalculator,
+		communityPool:       communityPool,
 	}
 }
 

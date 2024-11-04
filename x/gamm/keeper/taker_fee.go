@@ -1,10 +1,11 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
-	txfeestypes "github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
 // ChargeTakerFee charges the taker fee to the sender
@@ -16,19 +17,28 @@ func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sd
 		return nil
 	}
 
+	var rollappOwner *sdk.AccAddress
+	if k.rollappKeeper != nil {
+		owner, err := k.rollappKeeper.GetRollappOwnerByDenom(ctx, takerFeeCoin.Denom)
+		// ignore error as it's not critical
+		if err == nil {
+			rollappOwner = &owner
+		}
+	}
+
 	// Check if the taker fee coin is the base denom
 	denom, err := k.txfeeKeeper.GetBaseDenom(ctx)
 	if err != nil {
 		return err
 	}
 	if takerFeeCoin.Denom == denom {
-		return k.sendToTxFees(ctx, sender, takerFeeCoin)
+		return k.sendToTxFees(ctx, sender, takerFeeCoin, rollappOwner)
 	}
 
 	// Check if the taker fee coin is a registered fee token
 	_, err = k.txfeeKeeper.GetFeeToken(ctx, takerFeeCoin.Denom)
 	if err == nil {
-		return k.sendToTxFees(ctx, sender, takerFeeCoin)
+		return k.sendToTxFees(ctx, sender, takerFeeCoin, rollappOwner)
 	}
 
 	// If not supported denom, swap on the first pool to get some pool base denom, which has liquidity with DYM
@@ -38,7 +48,7 @@ func (k Keeper) chargeTakerFee(ctx sdk.Context, takerFeeCoin sdk.Coin, sender sd
 		return err
 	}
 
-	return k.sendToTxFees(ctx, sender, swappedTakerFee)
+	return k.sendToTxFees(ctx, sender, swappedTakerFee, rollappOwner)
 }
 
 // swapTakerFee swaps the taker fee coin to the base denom on the first pool
@@ -54,8 +64,12 @@ func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, route poolm
 }
 
 // sendToTxFees sends the taker fee coin to the txfees module
-func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoin sdk.Coin) error {
-	return k.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, txfeestypes.ModuleName, sdk.NewCoins(takerFeeCoin))
+func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoin sdk.Coin, beneficiary *sdk.AccAddress) error {
+	err := k.txfeeKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
+	if err != nil {
+		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
+	}
+	return nil
 }
 
 /* ---------------------------------- Utils --------------------------------- */

@@ -96,61 +96,64 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 	}
 
 	for name, tc := range testcases {
-		suite.SetupTest()
+		suite.Run(name, func() {
+			suite.SetupTest()
 
-		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
-		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
-		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
-		params.PoolCreationFee = sdk.NewCoins(
-			sdk.NewCoin("adym", sdk.NewInt(100000)),
-			sdk.NewCoin("bar", sdk.NewInt(100000)))
-		suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
+			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
+			params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
+			params.PoolCreationFee = sdk.NewCoins(
+				sdk.NewCoin("adym", sdk.NewInt(100000)),
+				sdk.NewCoin("bar", sdk.NewInt(100000)))
+			suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
 
-		ctx := suite.Ctx
-		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+			ctx := suite.Ctx
+			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool1coins...)
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-		//"bar" is treated as baseDenom (e.g. USDC)
-		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool2coins...)
+			//"bar" is treated as baseDenom (e.g. USDC)
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool3coins...)
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
-		suite.PrepareBalancerPoolWithCoins(pool4coins...)
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		//get the balance of txfees before swap
-		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
-		balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+			//get the balance of txfees before swap
+			moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
+			balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
-		// check taker fee is not 0
-		suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
+			// check taker fee is not 0
+			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
 
-		// make swap
-		_, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
-			Sender:            suite.TestAccs[0].String(),
-			Routes:            tc.routes,
-			TokenIn:           tc.tokenIn,
-			TokenOutMinAmount: tc.tokenOutMinAmount,
+			// make swap
+			_, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
+				Sender:            suite.TestAccs[0].String(),
+				Routes:            tc.routes,
+				TokenIn:           tc.tokenIn,
+				TokenOutMinAmount: tc.tokenOutMinAmount,
+			})
+			if tc.expectError {
+				suite.Require().Error(err, name)
+				return
+			}
+			suite.Require().NoError(err, name)
+
+			//get the balance of txfees after swap
+			balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+
+			testDenom := tc.tokenIn.Denom
+			if tc.expectSwap {
+				testDenom = tc.routes[0].TokenOutDenom
+			}
+			// x/txfees balance is the same as initially since the fees are distributed immediately
+			suite.Require().True(balancesAfter.AmountOf(testDenom).Equal(balancesBefore.AmountOf(testDenom)), name)
 		})
-		if tc.expectError {
-			suite.Require().Error(err, name)
-			continue
-		}
-		suite.Require().NoError(err, name)
-
-		//get the balance of txfees after swap
-		balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
-
-		testDenom := tc.tokenIn.Denom
-		if tc.expectSwap {
-			testDenom = tc.routes[0].TokenOutDenom
-		}
-		suite.Require().True(balancesAfter.AmountOf(testDenom).GT(balancesBefore.AmountOf(testDenom)), name)
 	}
 }
 
@@ -231,61 +234,64 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 	}
 
 	for name, tc := range testcases {
-		suite.SetupTest()
+		suite.Run(name, func() {
+			suite.SetupTest()
 
-		suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
-		suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
-		params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
-		params.PoolCreationFee = sdk.NewCoins(
-			sdk.NewCoin("adym", sdk.NewInt(1000)),
-			sdk.NewCoin("bar", sdk.NewInt(1000)))
-		suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
+			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
+			params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
+			params.PoolCreationFee = sdk.NewCoins(
+				sdk.NewCoin("adym", sdk.NewInt(1000)),
+				sdk.NewCoin("bar", sdk.NewInt(1000)))
+			suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
 
-		ctx := suite.Ctx
-		msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
+			ctx := suite.Ctx
+			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-		pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
-		suite.PrepareBalancerPoolWithCoins(pool1coins...)
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
+			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
-		//"bar" is treated as baseDenom (e.g. USDC)
-		pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
-		suite.PrepareBalancerPoolWithCoins(pool2coins...)
+			//"bar" is treated as baseDenom (e.g. USDC)
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("foo", sdk.NewInt(100000000))}
+			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-		pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("adym", sdk.NewInt(100000000))}
-		suite.PrepareBalancerPoolWithCoins(pool3coins...)
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("adym", sdk.NewInt(100000000))}
+			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-		pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("baz", sdk.NewInt(100000000))}
-		suite.PrepareBalancerPoolWithCoins(pool4coins...)
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000000)), sdk.NewCoin("baz", sdk.NewInt(100000000))}
+			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
-		//get the balance of txfees before swap
-		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
-		balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+			//get the balance of txfees before swap
+			moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
+			balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 
-		// check taker fee is not 0
-		suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
+			// check taker fee is not 0
+			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
 
-		// make swap
-		_, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
-			Sender:           suite.TestAccs[0].String(),
-			Routes:           tc.routes,
-			TokenOut:         tc.tokenOut,
-			TokenInMaxAmount: sdk.NewInt(1000000000000000000),
+			// make swap
+			_, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
+				Sender:           suite.TestAccs[0].String(),
+				Routes:           tc.routes,
+				TokenOut:         tc.tokenOut,
+				TokenInMaxAmount: sdk.NewInt(1000000000000000000),
+			})
+			if tc.expectError {
+				suite.Require().Error(err, name)
+				return
+			}
+			suite.Require().NoError(err, name)
+
+			//get the balance of txfees after swap
+			balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+
+			testDenom := tc.routes[0].TokenInDenom
+			if tc.expectSwap {
+				testDenom = tc.tokenOut.Denom
+			}
+			// x/txfees balance is the same as initially since the fees are distributed immediately
+			suite.Require().True(balancesAfter.AmountOf(testDenom).Equal(balancesBefore.AmountOf(testDenom)), testDenom, name)
 		})
-		if tc.expectError {
-			suite.Require().Error(err, name)
-			continue
-		}
-		suite.Require().NoError(err, name)
-
-		//get the balance of txfees after swap
-		balancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
-
-		testDenom := tc.routes[0].TokenInDenom
-		if tc.expectSwap {
-			testDenom = tc.tokenOut.Denom
-		}
-		suite.Require().True(balancesAfter.AmountOf(testDenom).GT(balancesBefore.AmountOf(testDenom)), testDenom, name)
 	}
 }
 
