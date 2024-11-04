@@ -195,7 +195,6 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeKeyTokensIn, msg.TokenIn.String()),
 			sdk.NewAttribute(types.AttributeKeyTokensOut, tokenOutAmount.String()),
-			sdk.NewAttribute(types.AttributeTakerFee, takerFeesCoins.String()),
 		),
 	})
 
@@ -250,7 +249,6 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeKeyTokensIn, tokenInCoin.String()),
 			sdk.NewAttribute(types.AttributeKeyTokensOut, msg.TokenOut.String()),
-			sdk.NewAttribute(types.AttributeTakerFee, takerFeeCoin.String()),
 		),
 	})
 

@@ -198,7 +198,10 @@ func (k Keeper) updatePoolForSwap(
 		return err
 	}
 
-	events.EmitSwapEvent(ctx, sender, pool.GetId(), tokensIn, tokensOut, spotPrice)
+	takerFee := k.GetParams(ctx).TakerFee
+	swapFee := pool.GetSwapFee(ctx)
+
+	events.EmitSwapEvent(ctx, sender, pool.GetId(), tokensIn, tokensOut, spotPrice, takerFee, swapFee)
 	k.hooks.AfterSwap(ctx, sender, pool.GetId(), tokensIn, tokensOut)
 	k.RecordTotalLiquidityIncrease(ctx, tokensIn)
 	k.RecordTotalLiquidityDecrease(ctx, tokensOut)
