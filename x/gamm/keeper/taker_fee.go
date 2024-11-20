@@ -82,19 +82,19 @@ func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoi
 //
 // Return nil beneficiary address if no one is rewarded: case (4) or error.
 func (k Keeper) getTakerFeeBeneficiary(ctx sdk.Context, inDenom, outDenom string) *sdk.AccAddress {
+	// This keeper is set to nil in osmosis repo to avoid circular dependency.
+	// Should be non-nil in the dymension repo.
 	if k.rollappKeeper == nil {
 		return nil
 	}
 	// First, try cases (1) and (2)
 	ownerIn, errIn := k.rollappKeeper.GetRollappOwnerByDenom(ctx, inDenom)
 	if errIn == nil {
-		// ignore error as it's not critical
 		return &ownerIn
 	}
 	// Try case (3)
 	ownerOut, errOut := k.rollappKeeper.GetRollappOwnerByDenom(ctx, outDenom)
 	if errOut == nil {
-		// ignore error as it's not critical
 		return &ownerOut
 	}
 	// Case (4) or error while parsing denoms
