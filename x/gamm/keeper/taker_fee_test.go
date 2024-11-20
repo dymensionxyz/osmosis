@@ -1,10 +1,12 @@
 package keeper_test
 
 import (
+	"errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
-
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -18,6 +20,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 		routes            []poolmanagertypes.SwapAmountInRoute
 		tokenIn           sdk.Coin
 		tokenOutMinAmount sdk.Int
+		expectBeneficiary bool
 		expectSwap        bool
 		expectError       bool
 	}{
@@ -25,6 +28,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			routes:            []poolmanagertypes.SwapAmountInRoute{},
 			tokenIn:           sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: false,
 			expectError:       true,
 		},
 		"adym as tokenIn": {
@@ -36,6 +40,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("adym", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: true,
 			expectError:       false,
 		},
 		"adym swapped in first pool": {
@@ -47,6 +52,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: true,
 			expectError:       false,
 		},
 		"usdc swapped in first pool": {
@@ -58,6 +64,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: false,
 			expectError:       false,
 		},
 		"usdc as token in": {
@@ -69,6 +76,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: false,
 			expectError:       false,
 		},
 		"usdc as token in - no route to dym": {
@@ -80,6 +88,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: false,
 			expectError:       false,
 		},
 		"usdc swap with dym": {
@@ -91,6 +100,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			},
 			tokenIn:           sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
 			tokenOutMinAmount: sdk.NewInt(1),
+			expectBeneficiary: true,
 			expectError:       false,
 		},
 	}
@@ -98,6 +108,15 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 	for name, tc := range testcases {
 		suite.Run(name, func() {
 			suite.SetupTest()
+
+			// set mock rollapp keeper with a random beneficiary for testing taker fees
+			beneficiary := apptesting.CreateRandomAccounts(1)[0]
+			rollappKeeper := new(RollappKeeperMock)
+			suite.App.GAMMKeeper.SetRollapp(rollappKeeper)
+			// we consider adym as a rollapp token for convenience
+			// if either IN or OUR token is adym, we expect the rollapp owner to be rewarded
+			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, "adym").Return(beneficiary, nil)
+			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, mock.Anything).Return(nil, errors.New("not a rollapp token"))
 
 			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
@@ -127,6 +146,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			//get the balance of txfees before swap
 			moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
 			balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+			beneficiaryBalancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, beneficiary)
 
 			// check taker fee is not 0
 			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
@@ -153,6 +173,19 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			}
 			// x/txfees balance is the same as initially since the fees are distributed immediately
 			suite.Require().True(balancesAfter.AmountOf(testDenom).Equal(balancesBefore.AmountOf(testDenom)), name)
+
+			// check if the beneficiary is rewarded
+			beneficiaryBalancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, beneficiary)
+			baseDenom, err := suite.App.TxFeesKeeper.GetBaseDenom(suite.Ctx)
+			suite.Require().NoError(err)
+
+			beneficiaryFeeBefore := beneficiaryBalancesBefore.AmountOf(baseDenom)
+			beneficiaryFeeAfter := beneficiaryBalancesAfter.AmountOf(baseDenom)
+			if tc.expectBeneficiary {
+				suite.Require().True(beneficiaryFeeBefore.LT(beneficiaryFeeAfter))
+			} else {
+				suite.Require().True(beneficiaryFeeBefore.Equal(beneficiaryFeeAfter))
+			}
 		})
 	}
 }
@@ -160,15 +193,17 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 	tokenInAmt := int64(100000)
 	testcases := map[string]struct {
-		routes      []poolmanagertypes.SwapAmountOutRoute
-		tokenOut    sdk.Coin
-		expectSwap  bool
-		expectError bool
+		routes            []poolmanagertypes.SwapAmountOutRoute
+		tokenOut          sdk.Coin
+		expectBeneficiary bool
+		expectSwap        bool
+		expectError       bool
 	}{
 		"zero hops": {
-			routes:      []poolmanagertypes.SwapAmountOutRoute{},
-			tokenOut:    sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
-			expectError: true,
+			routes:            []poolmanagertypes.SwapAmountOutRoute{},
+			tokenOut:          sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: false,
+			expectError:       true,
 		},
 		"adym as tokenIn": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -177,8 +212,9 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "adym",
 				},
 			},
-			tokenOut:    sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
-			expectError: false,
+			tokenOut:          sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: true,
+			expectError:       false,
 		},
 		"adym swapped in first pool": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -187,8 +223,9 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "foo",
 				},
 			},
-			tokenOut:    sdk.NewCoin("adym", sdk.NewInt(tokenInAmt)),
-			expectError: false,
+			tokenOut:          sdk.NewCoin("adym", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: true,
+			expectError:       false,
 		},
 		"usdc swapped in first pool": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -197,8 +234,9 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "foo",
 				},
 			},
-			tokenOut:    sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
-			expectError: false,
+			tokenOut:          sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: false,
+			expectError:       false,
 		},
 		"usdc as token in": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -207,8 +245,9 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:    sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
-			expectError: false,
+			tokenOut:          sdk.NewCoin("foo", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: false,
+			expectError:       false,
 		},
 		"usdc as token in - no route to dym": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -217,8 +256,9 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:    sdk.NewCoin("baz", sdk.NewInt(tokenInAmt)),
-			expectError: false,
+			tokenOut:          sdk.NewCoin("baz", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: false,
+			expectError:       false,
 		},
 		"baz swap with usdc": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -227,15 +267,25 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "baz",
 				},
 			},
-			tokenOut:    sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
-			expectSwap:  true,
-			expectError: false,
+			tokenOut:          sdk.NewCoin("bar", sdk.NewInt(tokenInAmt)),
+			expectBeneficiary: false,
+			expectSwap:        true,
+			expectError:       false,
 		},
 	}
 
 	for name, tc := range testcases {
 		suite.Run(name, func() {
 			suite.SetupTest()
+
+			// set mock rollapp keeper with a random beneficiary for testing taker fees
+			beneficiary := apptesting.CreateRandomAccounts(1)[0]
+			rollappKeeper := new(RollappKeeperMock)
+			suite.App.GAMMKeeper.SetRollapp(rollappKeeper)
+			// we consider adym as a rollapp token for convenience
+			// if either IN or OUR token is adym, we expect the rollapp owner to be rewarded
+			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, "adym").Return(beneficiary, nil)
+			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, mock.Anything).Return(nil, errors.New("not a rollapp token"))
 
 			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
 
@@ -265,6 +315,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			//get the balance of txfees before swap
 			moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(txfeestypes.ModuleName)
 			balancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
+			beneficiaryBalancesBefore := suite.App.BankKeeper.GetAllBalances(suite.Ctx, beneficiary)
 
 			// check taker fee is not 0
 			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(sdk.ZeroDec()))
@@ -291,6 +342,19 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			}
 			// x/txfees balance is the same as initially since the fees are distributed immediately
 			suite.Require().True(balancesAfter.AmountOf(testDenom).Equal(balancesBefore.AmountOf(testDenom)), testDenom, name)
+
+			// check if the beneficiary is rewarded
+			beneficiaryBalancesAfter := suite.App.BankKeeper.GetAllBalances(suite.Ctx, beneficiary)
+			baseDenom, err := suite.App.TxFeesKeeper.GetBaseDenom(suite.Ctx)
+			suite.Require().NoError(err)
+
+			beneficiaryFeeBefore := beneficiaryBalancesBefore.AmountOf(baseDenom)
+			beneficiaryFeeAfter := beneficiaryBalancesAfter.AmountOf(baseDenom)
+			if tc.expectBeneficiary {
+				suite.Require().True(beneficiaryFeeBefore.LT(beneficiaryFeeAfter))
+			} else {
+				suite.Require().True(beneficiaryFeeBefore.Equal(beneficiaryFeeAfter))
+			}
 		})
 	}
 }
@@ -501,4 +565,16 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountOut() {
 			suite.Require().Equal(tokensAfterTakerFeeReduction.TruncateInt(), multihopTokenInAmount)
 		})
 	}
+}
+
+type RollappKeeperMock struct {
+	mock.Mock
+}
+
+func (m *RollappKeeperMock) GetRollappOwnerByDenom(ctx sdk.Context, denom string) (sdk.AccAddress, error) {
+	args := m.Called(ctx, denom)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(sdk.AccAddress), args.Error(1)
 }

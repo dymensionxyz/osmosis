@@ -182,7 +182,15 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 
 	// first pool for taker fee swaps if needed
 	takerFeeRoute := msg.Routes[0]
-	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute)
+
+	// If the IN denom is a RollApp, we reward the IN RollApp owner.
+	// Otherwise, if the OUT denom is a RollApp, we reward the OUT RollApp owner.
+	// OUT denom is the last route's token out denom.
+	outDenom := msg.Routes[len(msg.Routes)-1].TokenOutDenom
+
+	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, msg.TokenIn.Denom, outDenom)
+
+	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute, beneficiary)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +244,14 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 		takerFeeRoute.TokenOutDenom = msg.TokenOutDenom()
 	}
 
-	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, takerFeeRoute)
+	// If the IN denom is a RollApp, we reward the IN RollApp owner.
+	// Otherwise, if the OUT denom is a RollApp, we reward the OUT RollApp owner.
+	// IN denom is the first route's token in denom.
+	inDenom := msg.Routes[0].TokenInDenom
+
+	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, inDenom, msg.TokenOut.Denom)
+
+	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, takerFeeRoute, beneficiary)
 	if err != nil {
 		return nil, err
 	}
