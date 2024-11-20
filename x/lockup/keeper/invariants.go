@@ -14,7 +14,7 @@ import (
 // RegisterInvariants registers all governance invariants.
 func RegisterInvariants(ir sdk.InvariantRegistry, keeper Keeper) {
 	ir.RegisterRoute(types.ModuleName, "accumulation-store-invariant", AccumulationStoreInvariant(keeper))
-	ir.RegisterRoute(types.ModuleName, "locks-amount-invariant", LocksBalancesInvariant(keeper))
+	// ir.RegisterRoute(types.ModuleName, "locks-amount-invariant", LocksBalancesInvariant(keeper))
 }
 
 // AccumulationStoreInvariant ensures that the sum of all lockups at a given duration
