@@ -14,23 +14,34 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
+// mockFeeMarketKeeper implements the FeeMarketKeeper interface for testing
+type mockFeeMarketKeeper struct {
+	minGasPrice sdk.Dec
+}
+
+func (m mockFeeMarketKeeper) GetMinGasPrice(ctx sdk.Context) sdk.Dec {
+	return m.minGasPrice
+}
+
 func (suite *KeeperTestSuite) TestFeeDecorator() {
 	baseDenom := sdk.DefaultBondDenom
 	baseGas := uint64(10000)
 	point1BaseDenomMinGasPrices := sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom,
 		sdk.MustNewDecFromStr("0.1")))
+	point2BaseDenomFeeMarketPrice := sdk.MustNewDecFromStr("0.2")
 
 	// uion is setup with a relative price of 1:1
 	uion := "uion"
 
 	type testcase struct {
-		name         string
-		txFee        sdk.Coins
-		minGasPrices sdk.DecCoins // if blank, set to 0
-		gasRequested uint64       // if blank, set to base gas
-		isCheckTx    bool
-		isSimulate   bool // if blank, is false
-		expectPass   bool
+		name              string
+		txFee             sdk.Coins
+		minGasPrices      sdk.DecCoins // if blank, set to 0
+		feeMarketMinPrice sdk.Dec      // if blank, no feemarket keeper is used
+		gasRequested      uint64       // if blank, set to base gas
+		isCheckTx         bool
+		isSimulate        bool // if blank, is false
+		expectPass        bool
 	}
 
 	tests := []testcase{}
@@ -111,6 +122,30 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
 			},
+			{
+				name:              fmt.Sprintf("works with feemarket min gas price higher than chain min - %s", txType[isCheckTx]),
+				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
+				minGasPrices:      point1BaseDenomMinGasPrices,                     // 0.1
+				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                   // 0.2
+				isCheckTx:         isCheckTx == 1,
+				expectPass:        true,
+			},
+			{
+				name:              fmt.Sprintf("fails with feemarket min gas price higher than chain min - insufficient fee - %s", txType[isCheckTx]),
+				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 1000)), // 0.1 * 10000
+				minGasPrices:      point1BaseDenomMinGasPrices,                     // 0.1
+				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                   // 0.2
+				isCheckTx:         isCheckTx == 1,
+				expectPass:        isCheckTx != 1, // should pass on deliverTx, fail on checkTx
+			},
+			{
+				name:              fmt.Sprintf("works with chain min gas price higher than feemarket - %s", txType[isCheckTx]),
+				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
+				minGasPrices:      sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom, point2BaseDenomFeeMarketPrice)), // 0.2
+				feeMarketMinPrice: sdk.MustNewDecFromStr("0.1"),                                                     // 0.1
+				isCheckTx:         isCheckTx == 1,
+				expectPass:        true,
+			},
 		}...)
 	}
 
@@ -157,7 +192,12 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 		bankutil.FundAccount(suite.App.BankKeeper, suite.Ctx, addr0, tc.txFee)
 		tx := suite.BuildTx(txBuilder, msgs, sigV2, "", tc.txFee, gasLimit)
 
-		mfd := ante.NewMempoolFeeDecorator(*suite.App.TxFeesKeeper)
+		var feeMarketKeeper types.FeeMarketKeeper
+		if !tc.feeMarketMinPrice.IsNil() {
+			feeMarketKeeper = mockFeeMarketKeeper{minGasPrice: tc.feeMarketMinPrice}
+		}
+
+		mfd := ante.NewMempoolFeeDecorator(*suite.App.TxFeesKeeper, feeMarketKeeper)
 		dfd := ante.NewDeductFeeDecorator(*suite.App.TxFeesKeeper, suite.App.AccountKeeper, suite.App.BankKeeper, nil)
 		antehandlerMFD := sdk.ChainAnteDecorators(mfd, dfd)
 		_, err = antehandlerMFD(suite.Ctx, tx, tc.isSimulate)

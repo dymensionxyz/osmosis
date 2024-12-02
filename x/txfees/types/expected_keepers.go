@@ -62,3 +62,8 @@ type TxFeesKeeper interface {
 type CommunityPoolKeeper interface {
 	FundCommunityPool(ctx sdk.Context, amount sdk.Coins, sender sdk.AccAddress) error
 }
+
+// FeeMarketKeeper defines the expected interface needed to get min gas price
+type FeeMarketKeeper interface {
+	GetMinGasPrice(ctx sdk.Context) sdk.Dec
+}

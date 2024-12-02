@@ -24,12 +24,14 @@ const (
 // If fee is high enough or not CheckTx, then call next AnteHandler
 // CONTRACT: Tx must implement FeeTx to use MempoolFeeDecorator.
 type MempoolFeeDecorator struct {
-	TxFeesKeeper keeper.Keeper
+	TxFeesKeeper    keeper.Keeper
+	FeeMarketKeeper types.FeeMarketKeeper
 }
 
-func NewMempoolFeeDecorator(txFeesKeeper keeper.Keeper) MempoolFeeDecorator {
+func NewMempoolFeeDecorator(txFeesKeeper keeper.Keeper, feeMarketKeeper types.FeeMarketKeeper) MempoolFeeDecorator {
 	return MempoolFeeDecorator{
-		TxFeesKeeper: txFeesKeeper,
+		TxFeesKeeper:    txFeesKeeper,
+		FeeMarketKeeper: feeMarketKeeper,
 	}
 }
 
@@ -59,6 +61,14 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		return ctx, err
 	}
 	minBaseGasPrice := ctx.MinGasPrices().AmountOf(baseDenom)
+
+	// Get min price from feemarket keeper and use the max between the two
+	if mfd.FeeMarketKeeper != nil {
+		feeMarketMinGasPrice := mfd.FeeMarketKeeper.GetMinGasPrice(ctx)
+		if feeMarketMinGasPrice.GT(minBaseGasPrice) {
+			minBaseGasPrice = feeMarketMinGasPrice
+		}
+	}
 
 	// If minBaseGasPrice is zero, then we don't need to check the fee. Continue
 	if minBaseGasPrice.IsZero() {
