@@ -61,31 +61,29 @@ func (k Keeper) ChargeFees(
 	takerFeeBaseDenom, err := k.swapFeeToBaseDenom(ctx, takerFee)
 	// Send unknown fee tokens to the community pool
 	if errors.Is(err, errUnswappableFeeToken) {
+		k.Logger(ctx).With("fee", takerFee.String(), "payer", payer).
+			Debug("Cannot swap fee to base denom. Sending it to the community pool.")
+
 		err = k.communityPool.FundCommunityPool(ctx, sdk.NewCoins(takerFee), k.accountKeeper.GetModuleAddress(types.ModuleName))
 		if err != nil {
-			return fmt.Errorf("unknown fee token: func community pool: %w", err)
+			return fmt.Errorf("fund community pool: %w", err)
 		}
-
-		k.Logger(ctx).With("fee", takerFee.String(), "payer", payer).
-			Debug("Cannot swap fee to base denom. Send it to the community pool.")
 
 		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
-			Payer:              payer,
-			TakerFee:           takerFeeCoin.String(),
-			Beneficiary:        ValueFromPtr(beneficiary).String(),
-			BeneficiaryRevenue: "",
+			Payer:         payer,
+			TakerFee:      takerFee.String(),
+			CommunityPool: true,
 		})
 		if err != nil {
-			k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
+			k.Logger(ctx).Error("emit event", "event", "EventChargeFee", "error", err)
 		}
 		return nil
-	}
-	if err != nil {
+	} else if err != nil {
 		return fmt.Errorf("swap fee to base denom: %w", err)
 	}
 
+	// Nothing to charge after swapping (not supposed to happen actually)
 	if takerFeeBaseDenom.IsNil() || takerFeeBaseDenom.IsZero() {
-		// Nothing to charge after swapping (not supposed to happen actually)
 		k.Logger(ctx).With("fee", takerFee.String(), "payer", payer).
 			Error("Fee after swapping to base denom is zero. Nothing to charge.")
 		return nil
@@ -94,14 +92,14 @@ func (k Keeper) ChargeFees(
 	// Send 50% of the base denom fee to the beneficiary if presented
 	beneficiaryFee := sdk.Coins{}
 	if beneficiary != nil {
-		// beneficiaryCoin = takerFeeCoin / 2
+		// beneficiaryFee = takerFee / 2
 		beneficiaryFee = sdk.Coins{sdk.NewCoin(takerFeeBaseDenom.Denom, takerFeeBaseDenom.Amount.QuoRaw(2))}
 		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, *beneficiary, beneficiaryFee)
 		if err != nil {
 			return fmt.Errorf("send coins from fee payer to beneficiary: %w", err)
 		}
 
-		// takerFee = takerFee - beneficiaryFee
+		// update remaining taker fee
 		takerFeeBaseDenom = takerFeeBaseDenom.Sub(beneficiaryFee[0])
 	}
 
@@ -113,7 +111,8 @@ func (k Keeper) ChargeFees(
 
 	err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
 		Payer:              payer,
-		TakerFee:           takerFeeBaseDenom.String(),
+		TakerFee:           takerFee.String(),
+		SwappedTakerFee:    takerFeeBaseDenom.String(),
 		Beneficiary:        ValueFromPtr(beneficiary).String(),
 		BeneficiaryRevenue: beneficiaryFee.String(),
 	})
