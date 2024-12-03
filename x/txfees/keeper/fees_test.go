@@ -117,7 +117,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			event := s.ExtractChargeFeeEvent(s.Ctx.EventManager().Events(), eventName)
 			s.Require().Equal(tc.payer.String(), event.Payer)
 			s.Require().Equal(tc.expTakerFee.String(), event.TakerFee)
-			if tc.beneficiary != nil {
+			if tc.expBeneficiaryRev != nil {
 				s.Require().Equal(tc.beneficiary.String(), event.Beneficiary)
 				s.Require().Equal(tc.expBeneficiaryRev.String(), event.BeneficiaryRevenue)
 			} else {
