@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 // ChargeTakerFee charges the taker fee to the sender
@@ -17,57 +15,17 @@ func (k Keeper) chargeTakerFee(
 	ctx sdk.Context,
 	takerFeeCoin sdk.Coin,
 	sender sdk.AccAddress,
-	route poolmanagertypes.SwapAmountInRoute,
 	beneficiary *sdk.AccAddress,
 ) error {
 	if takerFeeCoin.IsZero() {
 		return nil
 	}
-
-	// Check if the taker fee coin is the base denom
-	denom, err := k.txfeeKeeper.GetBaseDenom(ctx)
-	if err != nil {
-		return err
-	}
-	if takerFeeCoin.Denom == denom {
-		return k.sendToTxFees(ctx, sender, takerFeeCoin, beneficiary)
-	}
-
-	// Check if the taker fee coin is a registered fee token
-	_, err = k.txfeeKeeper.GetFeeToken(ctx, takerFeeCoin.Denom)
-	if err == nil {
-		return k.sendToTxFees(ctx, sender, takerFeeCoin, beneficiary)
-	}
-
-	// If not supported denom, swap on the first pool to get some pool base denom, which has liquidity with DYM
-	ctx.Logger().Debug("taker fee coin is not supported by txfee module, requires swap", "takerFeeCoin", takerFeeCoin)
-	swappedTakerFee, err := k.swapTakerFee(ctx, sender, route, takerFeeCoin)
-	if err != nil {
-		return err
-	}
-
-	return k.sendToTxFees(ctx, sender, swappedTakerFee, beneficiary)
-}
-
-// swapTakerFee swaps the taker fee coin to the base denom on the first pool
-func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, route poolmanagertypes.SwapAmountInRoute, tokenIn sdk.Coin) (sdk.Coin, error) {
-	minAmountOut := sdk.ZeroInt()
-	swapRoutes := poolmanagertypes.SwapAmountInRoutes{route}
-	out, err := k.poolManager.RouteExactAmountIn(ctx, sender, swapRoutes, tokenIn, minAmountOut)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-	coin := sdk.NewCoin(route.TokenOutDenom, out)
-	return coin, nil
-}
-
-// sendToTxFees sends the taker fee coin to the txfees module
-func (k Keeper) sendToTxFees(ctx sdk.Context, sender sdk.AccAddress, takerFeeCoin sdk.Coin, beneficiary *sdk.AccAddress) error {
 	err := k.txfeeKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
 	if err != nil {
 		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
 	}
 	return nil
+
 }
 
 // While charging taker fee, we reward the owner of the rollapp involved in swap. In that case,
