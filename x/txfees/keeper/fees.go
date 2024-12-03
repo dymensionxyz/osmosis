@@ -162,13 +162,14 @@ func (k Keeper) swapFeeToBaseDenom(
 			TokenOutDenom: baseDenom,
 		}}
 	)
-	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
-		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
-		return err
-	})
+
+	cacheCtx, write := ctx.CacheContext()
+	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(cacheCtx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 	if err != nil {
 		return sdk.Coin{}, fmt.Errorf("failed to swap fee token: %w", err)
 	}
+	cacheCtx.WithEventManager(sdk.NewEventManager()) // This clears any events that were emitted
+	write()                                          // This writes the state changes but with cleared events
 
 	return sdk.NewCoin(baseDenom, tokenOutAmount), nil
 }
