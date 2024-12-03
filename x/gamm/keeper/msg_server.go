@@ -8,7 +8,6 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
 type msgServer struct {
@@ -180,9 +179,6 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	// first pool for taker fee swaps if needed
-	takerFeeRoute := msg.Routes[0]
-
 	// If the IN denom is a RollApp, we reward the IN RollApp owner.
 	// Otherwise, if the OUT denom is a RollApp, we reward the OUT RollApp owner.
 	// OUT denom is the last route's token out denom.
@@ -190,7 +186,7 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 
 	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, msg.TokenIn.Denom, outDenom)
 
-	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, takerFeeRoute, beneficiary)
+	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, beneficiary)
 	if err != nil {
 		return nil, err
 	}
@@ -235,23 +231,13 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	tokenInCoin := sdk.NewCoin(msg.Routes[0].TokenInDenom, tokenInAmount)
 	tokenInAmountWithTakerFee, takerFeeCoin := server.keeper.AddTakerFee(tokenInCoin, takerFee)
 
-	// first pool for taker fee swaps if needed
-	takerFeeRoute := poolmanagertypes.SwapAmountInRoute{}
-	takerFeeRoute.PoolId = msg.Routes[0].PoolId
-	if len(msg.Routes) > 1 {
-		takerFeeRoute.TokenOutDenom = msg.Routes[1].TokenInDenom
-	} else {
-		takerFeeRoute.TokenOutDenom = msg.TokenOutDenom()
-	}
-
 	// If the IN denom is a RollApp, we reward the IN RollApp owner.
 	// Otherwise, if the OUT denom is a RollApp, we reward the OUT RollApp owner.
 	// IN denom is the first route's token in denom.
 	inDenom := msg.Routes[0].TokenInDenom
-
 	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, inDenom, msg.TokenOut.Denom)
 
-	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, takerFeeRoute, beneficiary)
+	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, beneficiary)
 	if err != nil {
 		return nil, err
 	}

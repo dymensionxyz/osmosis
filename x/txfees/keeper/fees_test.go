@@ -15,57 +15,50 @@ func (s *KeeperTestSuite) TestChargeFees() {
 		payer             sdk.AccAddress
 		takerFee          sdk.Coin
 		beneficiary       *sdk.AccAddress
-		expTakerFee       sdk.Coins
-		expBeneficiaryRev sdk.Coins
+		expTakerFee       sdk.Coin
+		expBeneficiaryRev sdk.Coin
 		expCommunityRev   sdk.DecCoins
 	}{
 		"beneficiary, base denom": {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("adym", sdk.NewInt(100)),
 			beneficiary:       &accs[1],
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(50))),
-			expBeneficiaryRev: sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(50))),
+			expTakerFee:       sdk.NewCoin("adym", sdk.NewInt(50)),
+			expBeneficiaryRev: sdk.NewCoin("adym", sdk.NewInt(50)),
 			expCommunityRev:   nil,
 		},
 		"beneficiary, fee token": {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("foo", sdk.NewInt(100)),
 			beneficiary:       &accs[1],
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(50))), // 50 = 99 - 49 (99 since 0.01% is the default swap taker fee)
-			expBeneficiaryRev: sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(49))), // 49 = 99 / 2
+			expTakerFee:       sdk.NewCoin("adym", sdk.NewInt(50)), // 50 = 99 - 49 (99 since 0.01% is the default swap taker fee)
+			expBeneficiaryRev: sdk.NewCoin("adym", sdk.NewInt(49)), // 49 = 99 / 2
 			expCommunityRev:   nil,
 		},
 		"beneficiary, non fee token": {
-			payer:             accs[0],
-			takerFee:          sdk.NewCoin("baz", sdk.NewInt(100)),
-			beneficiary:       &accs[1],
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100))),
-			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100)))...),
+			payer:           accs[0],
+			takerFee:        sdk.NewCoin("baz", sdk.NewInt(100)),
+			beneficiary:     &accs[1],
+			expTakerFee:     sdk.NewCoin("baz", sdk.NewInt(100)),
+			expCommunityRev: sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100)))...),
 		},
 		"no beneficiary, base denom": {
-			payer:             accs[0],
-			takerFee:          sdk.NewCoin("adym", sdk.NewInt(100)),
-			beneficiary:       nil,
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(100))),
-			expBeneficiaryRev: nil,
-			expCommunityRev:   nil,
+			payer:           accs[0],
+			takerFee:        sdk.NewCoin("adym", sdk.NewInt(100)),
+			expTakerFee:     sdk.NewCoin("adym", sdk.NewInt(100)),
+			expCommunityRev: nil,
 		},
 		"no beneficiary, fee token": {
-			payer:             accs[0],
-			takerFee:          sdk.NewCoin("foo", sdk.NewInt(100)),
-			beneficiary:       nil,
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(99))), // 0.01% is the default fee
-			expBeneficiaryRev: nil,
-			expCommunityRev:   nil,
+			payer:           accs[0],
+			takerFee:        sdk.NewCoin("foo", sdk.NewInt(100)),
+			expTakerFee:     sdk.NewCoin("adym", sdk.NewInt(99)), // 0.01% is the default fee
+			expCommunityRev: nil,
 		},
 		"no beneficiary, non fee token": {
-			payer:             accs[0],
-			takerFee:          sdk.NewCoin("baz", sdk.NewInt(100)),
-			beneficiary:       nil,
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100))),
-			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100)))...),
+			payer:           accs[0],
+			takerFee:        sdk.NewCoin("baz", sdk.NewInt(100)),
+			expTakerFee:     sdk.NewCoin("baz", sdk.NewInt(100)),
+			expCommunityRev: sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", sdk.NewInt(100)))...),
 		},
 	}
 
@@ -117,7 +110,8 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			event := s.ExtractChargeFeeEvent(s.Ctx.EventManager().Events(), eventName)
 			s.Require().Equal(tc.payer.String(), event.Payer)
 			s.Require().Equal(tc.expTakerFee.String(), event.TakerFee)
-			if tc.beneficiary != nil {
+
+			if !tc.expBeneficiaryRev.IsNil() {
 				s.Require().Equal(tc.beneficiary.String(), event.Beneficiary)
 				s.Require().Equal(tc.expBeneficiaryRev.String(), event.BeneficiaryRevenue)
 			} else {
@@ -131,10 +125,10 @@ func (s *KeeperTestSuite) TestChargeFees() {
 
 			// Check beneficiary balance
 			var actualBeneficiaryBalance sdk.Coins
-			if tc.beneficiary != nil {
+			if !tc.expBeneficiaryRev.IsNil() {
 				actualBeneficiaryBalance = s.App.BankKeeper.GetAllBalances(s.Ctx, *tc.beneficiary)
+				s.Require().True(actualBeneficiaryBalance.AmountOf(tc.expBeneficiaryRev.Denom).Equal(tc.expBeneficiaryRev.Amount))
 			}
-			s.Require().True(tc.expBeneficiaryRev.IsEqual(actualBeneficiaryBalance))
 
 			// Check community pool balance
 			actualCommunityPoolBalance := s.App.DistrKeeper.GetFeePoolCommunityCoins(s.Ctx)
