@@ -158,31 +158,33 @@ func (k Keeper) swapFeeToBaseDenom(
 		}}
 	)
 
-	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
-		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+	// starting new event manager. the swap events will be emitted on this event manager
+	noEventsCtx := ctx.WithEventManager(sdk.NewEventManager())
+	err = osmoutils.ApplyFuncIfNoError(noEventsCtx, func(ctx sdk.Context) error {
+		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(noEventsCtx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 		return err
 	})
 	if err != nil {
+		k.Logger(ctx).Error("swap fee to base denom", "error", err)
 		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
-	// If the swap is successful, we add the taker fee attribute to the emitted event
-	k.appendTakerFeeAttribute(ctx)
+	// If the swap is successful,
+	// 1. we add the taker fee attribute to the emitted event
+	// 2. we emit the events on the original event manager
+	// k.appendTakerFeeAttribute(ctx, oldEvents.AppendEvents(noEventsCtx.EventManager().Events()))
+	k.appendTakerFeeAttribute(ctx, noEventsCtx.EventManager().Events())
 
 	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
 }
 
 // appendTakerFeeAttribute modifies the last token swap event to include the taker fee attribute
-func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) sdk.Context {
-	emittedEvents := ctx.EventManager().Events()
+func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context, emittedEvents sdk.Events) {
 	if len(emittedEvents) > 0 && emittedEvents[len(emittedEvents)-1].Type == gammtypes.TypeEvtTokenSwapped {
 		ev := emittedEvents[len(emittedEvents)-1].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
 		emittedEvents[len(emittedEvents)-1] = ev
-
-		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		ctx.EventManager().EmitEvents(emittedEvents)
 	} else {
 		k.Logger(ctx).Error("no token swap event found")
 	}
-	return ctx
 }
