@@ -7,7 +7,6 @@ import (
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
-	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
@@ -158,7 +157,9 @@ func (k Keeper) swapFeeToBaseDenom(
 		}}
 	)
 
-	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
+	m := sdk.NewEventManager()
+	forkCtx := ctx.WithEventManager(m)
+	err = osmoutils.ApplyFuncIfNoError(forkCtx, func(ctx sdk.Context) error {
 		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 		return err
 	})
@@ -167,22 +168,18 @@ func (k Keeper) swapFeeToBaseDenom(
 	}
 
 	// If the swap is successful, we add the taker fee attribute to the emitted event
-	k.appendTakerFeeAttribute(ctx)
+	k.appendTakerFeeAttribute(ctx, m.Events())
 
 	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
 }
 
 // appendTakerFeeAttribute modifies the last token swap event to include the taker fee attribute
-func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) sdk.Context {
-	emittedEvents := ctx.EventManager().Events()
-	if len(emittedEvents) > 0 && emittedEvents[len(emittedEvents)-1].Type == gammtypes.TypeEvtTokenSwapped {
-		ev := emittedEvents[len(emittedEvents)-1].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
-		emittedEvents[len(emittedEvents)-1] = ev
-
-		ctx = ctx.WithEventManager(sdk.NewEventManager())
-		ctx.EventManager().EmitEvents(emittedEvents)
-	} else {
-		k.Logger(ctx).Error("no token swap event found")
+func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context, evts sdk.Events) {
+	n := len(evts)
+	if 0 < n {
+		ev := evts[n-1]
+		ev.AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
+		evts[n-1] = ev
 	}
-	return ctx
+	ctx.EventManager().EmitEvents(evts)
 }
