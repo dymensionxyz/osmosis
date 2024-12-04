@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
+	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
@@ -149,14 +150,20 @@ func (k Keeper) swapFeeToBaseDenom(
 	}
 
 	// Swap the coin to base denom
-	route := []poolmanagertypes.SwapAmountInRoute{{
-		PoolId:        feetoken.PoolID,
-		TokenOutDenom: baseDenom,
-	}}
+	var (
+		tokenOutAmount = sdk.ZeroInt() // Token amount in base denom
+		route          = []poolmanagertypes.SwapAmountInRoute{{
+			PoolId:        feetoken.PoolID,
+			TokenOutDenom: baseDenom,
+		}}
+	)
 
-	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
+		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+		return err
+	})
 	if err != nil {
-		return nil, nil, fmt.Errorf("swap fee token: %w", err)
+		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
 	// If the swap is successful, we add the taker fee attribute to the emitted event
