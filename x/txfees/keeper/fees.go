@@ -78,7 +78,7 @@ func (k Keeper) ChargeFees(
 			CommunityPool: true,
 		})
 		if err != nil {
-			return fmt.Errorf("emit event: %w", err)
+			k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
 		}
 		return nil
 	}
@@ -112,7 +112,7 @@ func (k Keeper) ChargeFees(
 		BeneficiaryRevenue: beneficiaryCoins.String(),
 	})
 	if err != nil {
-		return fmt.Errorf("emit event: %w", err)
+		k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
 	}
 
 	return nil
