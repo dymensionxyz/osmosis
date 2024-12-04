@@ -177,9 +177,7 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) sdk.Context {
 	emittedEvents := ctx.EventManager().Events()
 	if len(emittedEvents) > 0 && emittedEvents[len(emittedEvents)-1].Type == gammtypes.TypeEvtTokenSwapped {
 		ev := emittedEvents[len(emittedEvents)-1].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
-
-		emittedEvents = emittedEvents[:len(emittedEvents)-1]
-		emittedEvents = append(emittedEvents, ev)
+		emittedEvents[len(emittedEvents)-1] = ev
 
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		ctx.EventManager().EmitEvents(emittedEvents)
