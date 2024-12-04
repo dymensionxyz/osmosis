@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
-	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
@@ -70,7 +69,7 @@ func (k Keeper) ChargeFees(
 			return fmt.Errorf("fund community pool: %w", err)
 		}
 
-		k.Logger(ctx).With("fee", communityPool.String()).Error("Sent fees to the community pool.")
+		k.Logger(ctx).With("fee", communityPool.String()).Debug("Sent fees to the community pool.")
 
 		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
 			Payer:         payer,
@@ -78,7 +77,7 @@ func (k Keeper) ChargeFees(
 			CommunityPool: true,
 		})
 		if err != nil {
-			k.Logger(ctx).Error("emit event", "event", "EventChargeFee", "error", err)
+			return fmt.Errorf("emit event: %w", err)
 		}
 		return nil
 	}
@@ -112,7 +111,7 @@ func (k Keeper) ChargeFees(
 		BeneficiaryRevenue: beneficiaryCoins.String(),
 	})
 	if err != nil {
-		k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
+		return fmt.Errorf("emit event: %w", err)
 	}
 
 	return nil
@@ -155,23 +154,30 @@ func (k Keeper) swapFeeToBaseDenom(
 		TokenOutDenom: baseDenom,
 	}}
 
-	cacheCtx, write := osmoutils.NoEventCacheContext(ctx)
-	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(cacheCtx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 	if err != nil {
 		return nil, nil, fmt.Errorf("swap fee token: %w", err)
 	}
-	write()
 
-	// if we manage, we modify the last event to include the taker fee attribute
-	emittedEvents := cacheCtx.EventManager().Events()
+	// If the swap is successful, we add the taker fee attribute to the emitted event
+	k.appendTakerFeeAttribute(ctx)
+
+	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
+}
+
+// appendTakerFeeAttribute modifies the last token swap event to include the taker fee attribute
+func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) sdk.Context {
+	emittedEvents := ctx.EventManager().Events()
 	if len(emittedEvents) > 0 && emittedEvents[len(emittedEvents)-1].Type == gammtypes.TypeEvtTokenSwapped {
 		ev := emittedEvents[len(emittedEvents)-1].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
 
 		emittedEvents = emittedEvents[:len(emittedEvents)-1]
 		emittedEvents = append(emittedEvents, ev)
 
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		ctx.EventManager().EmitEvents(emittedEvents)
+	} else {
+		k.Logger(ctx).Error("no token swap event found")
 	}
-
-	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
+	return ctx
 }
