@@ -6,12 +6,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
+	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
-const AttributeKeyTakerFee = "taker_fee"
+const AttributeKeyTakerFee = "fees_swap"
 
 // ChargeFeesFromPayer charges the specified taker fee from the payer's account and
 // processes it according to the fee token's properties.
@@ -154,25 +155,23 @@ func (k Keeper) swapFeeToBaseDenom(
 		TokenOutDenom: baseDenom,
 	}}
 
-	cacheCtx, write := ctx.CacheContext()
-	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+	cacheCtx, write := osmoutils.NoEventCacheContext(ctx)
+	tokenOutAmount, err := k.poolManager.RouteExactAmountIn(cacheCtx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 	if err != nil {
 		return nil, nil, fmt.Errorf("swap fee token: %w", err)
 	}
-	emmittedEvents := cacheCtx.EventManager().Events()
-
-	// This clears any events that were emitted
-	cacheCtx.WithEventManager(sdk.NewEventManager())
+	write()
 
 	// if we manage, we modify the last event to include the taker fee attribute
-	if len(emmittedEvents) > 0 {
-		ev := emmittedEvents[len(emmittedEvents)-1]
-		if ev.Type == gammtypes.TypeEvtTokenSwapped {
-			ev.AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
-			cacheCtx.EventManager().EmitEvents(emmittedEvents)
-		}
+	emittedEvents := cacheCtx.EventManager().Events()
+	if len(emittedEvents) > 0 && emittedEvents[len(emittedEvents)-1].Type == gammtypes.TypeEvtTokenSwapped {
+		ev := emittedEvents[len(emittedEvents)-1].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
+
+		emittedEvents = emittedEvents[:len(emittedEvents)-1]
+		emittedEvents = append(emittedEvents, ev)
+
+		ctx.EventManager().EmitEvents(emittedEvents)
 	}
-	write()
 
 	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
 }

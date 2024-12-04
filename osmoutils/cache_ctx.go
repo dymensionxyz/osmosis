@@ -77,3 +77,16 @@ func PrintPanicRecoveryError(ctx sdk.Context, recoveryError interface{}) {
 	}
 	ctx.Logger().Error("stack trace: " + errStackTrace)
 }
+
+// NoEventCacheContext returns a cache context
+// The write method ignores the event manager
+func NoEventCacheContext(c sdk.Context) (cc sdk.Context, writeCache func()) {
+	cms := c.MultiStore().CacheMultiStore()
+	cc = c.WithMultiStore(cms).WithEventManager(sdk.NewEventManager())
+
+	writeCache = func() {
+		cms.Write()
+	}
+
+	return cc, writeCache
+}
