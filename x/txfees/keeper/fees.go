@@ -7,9 +7,12 @@ import (
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
+	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
+
+const AttributeKeyTakerFee = "fees_swap"
 
 // ChargeFeesFromPayer charges the specified taker fee from the payer's account and
 // processes it according to the fee token's properties.
@@ -44,40 +47,35 @@ func (k Keeper) ChargeFeesFromPayer(
 // If the fee token is unknown, it is sent to the community pool.
 func (k Keeper) ChargeFees(
 	ctx sdk.Context,
-	takerFeeCoin sdk.Coin,
+	takerFee sdk.Coin,
 	beneficiary *sdk.AccAddress,
 	payer string, // optional, only used for the event
 ) error {
-	if takerFeeCoin.IsZero() {
+	if takerFee.IsZero() {
 		// Nothing to charge
 		return nil
 	}
 
 	// Swap the taker fee to the base denom
-	baseDenomFee, communityPoolCoins, err := k.swapFeeToBaseDenom(ctx, takerFeeCoin)
+	baseDenomFee, communityPool, err := k.swapFeeToBaseDenom(ctx, takerFee)
 	if err != nil {
 		return fmt.Errorf("swap fee to base denom: %w", err)
 	}
 
 	// If the fee token is unknown or the swap is unsuccessful, the fee is sent to the community pool.
-	if !communityPoolCoins.Empty() {
+	if !communityPool.Empty() {
 		// Send unknown fee tokens to the community pool
-		err = k.communityPool.FundCommunityPool(ctx, communityPoolCoins, k.accountKeeper.GetModuleAddress(types.ModuleName))
+		err = k.communityPool.FundCommunityPool(ctx, communityPool, k.accountKeeper.GetModuleAddress(types.ModuleName))
 		if err != nil {
-			return fmt.Errorf("unknown fee token: func community pool: %w", err)
+			return fmt.Errorf("fund community pool: %w", err)
 		}
 
-		k.Logger(ctx).With("fee", communityPoolCoins.String(), "error", err).
-			Error("Cannot swap fee to base denom. Send it to the community pool.")
-	}
+		k.Logger(ctx).With("fee", communityPool.String()).Debug("Sent fees to the community pool.")
 
-	// If the fee token is unknown or the swap is unsuccessful, emit event and return 
-	if baseDenomFee.Empty() {
 		err = uevent.EmitTypedEvent(ctx, &types.EventChargeFee{
-			Payer:              payer,
-			TakerFee:           takerFeeCoin.String(),
-			Beneficiary:        ValueFromPtr(beneficiary).String(),
-			BeneficiaryRevenue: "",
+			Payer:         payer,
+			TakerFee:      communityPool.String(),
+			CommunityPool: true,
 		})
 		if err != nil {
 			k.Logger(ctx).Error("Failed to emit event", "event", "EventChargeFee", "error", err)
@@ -159,13 +157,32 @@ func (k Keeper) swapFeeToBaseDenom(
 			TokenOutDenom: baseDenom,
 		}}
 	)
+
 	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
 		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
 		return err
 	})
 	if err != nil {
+		k.Logger(ctx).Error("swap fee to base denom", "error", err)
 		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
+	// If the swap is successful, we add the taker fee attribute to the emitted event
+	k.appendTakerFeeAttribute(ctx)
+
 	return sdk.Coins{{Denom: baseDenom, Amount: tokenOutAmount}}, nil, nil
+}
+
+// appendTakerFeeAttribute modifies the last token swap event to include the taker fee attribute
+func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
+	// we can modify the event in place, directly on the emittedEvents slice
+	emittedEvents := ctx.EventManager().Events()
+
+	for i := len(emittedEvents) - 1; i >= 0; i-- {
+		if emittedEvents[i].Type == gammtypes.TypeEvtTokenSwapped {
+			ev := emittedEvents[i].AppendAttributes(sdk.NewAttribute(AttributeKeyTakerFee, "true"))
+			emittedEvents[i] = ev
+			break
+		}
+	}
 }

@@ -57,6 +57,7 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 
 	for name, tc := range testcases {
 		suite.Run(name, func() {
+			params := types.DefaultParams()
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(
 					types.TypeEvtTokenSwapped,
@@ -66,13 +67,15 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 					sdk.NewAttribute(types.AttributeKeyTokensIn, tc.tokensIn.String()),
 					sdk.NewAttribute(types.AttributeKeyTokensOut, tc.tokensOut.String()),
 					sdk.NewAttribute(types.AttributeKeyClosingPrice, tc.closingPrice.String()),
+					sdk.NewAttribute(types.AttributeKeyTakerFee, params.TakerFee.String()),
+					sdk.NewAttribute(types.AttributeKeySwapFee, params.GlobalFees.SwapFee.String()),
 				),
 			}
 
 			hasNoEventManager := tc.ctx.EventManager() == nil
 
 			// System under test.
-			events.EmitSwapEvent(tc.ctx, tc.testAccountAddr, tc.poolId, tc.tokensIn, tc.tokensOut, tc.closingPrice)
+			events.EmitSwapEvent(tc.ctx, tc.testAccountAddr, tc.poolId, tc.tokensIn, tc.tokensOut, tc.closingPrice, params.TakerFee, params.GlobalFees.SwapFee)
 
 			// Assertions
 			if hasNoEventManager {

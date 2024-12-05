@@ -5,6 +5,8 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
+	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	"github.com/osmosis-labs/osmosis/v15/x/txfees/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -109,15 +111,22 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			err = s.App.TxFeesKeeper.ChargeFeesFromPayer(s.Ctx, tc.payer, tc.takerFee, tc.beneficiary)
 			s.Require().NoError(err)
 
-			// Verify results
+			/* ----------------------------- assert results ----------------------------- */
+			// if taker fee not in base denom, expect swap event
+			if tc.takerFee.Denom != "adym" && tc.expCommunityRev == nil {
+				event, found := s.FindLastEventOfType(s.Ctx.EventManager().Events(), gammtypes.TypeEvtTokenSwapped)
+				s.Require().True(found)
+				attrs := s.ExtractAttributes(event)
+				s.Require().True(attrs[keeper.AttributeKeyTakerFee] == "true")
+			}
 
 			// Verify charge fee event
 			eventName := proto.MessageName(new(types.EventChargeFee))
 			s.AssertEventEmitted(s.Ctx, eventName, 1)
-			event := s.ExtractChargeFeeEvent(s.Ctx.EventManager().Events(), eventName)
+			event := s.extractChargeFeeEvent(s.Ctx.EventManager().Events(), eventName)
 			s.Require().Equal(tc.payer.String(), event.Payer)
 			s.Require().Equal(tc.expTakerFee.String(), event.TakerFee)
-			if tc.beneficiary != nil {
+			if tc.expBeneficiaryRev != nil {
 				s.Require().Equal(tc.beneficiary.String(), event.Beneficiary)
 				s.Require().Equal(tc.expBeneficiaryRev.String(), event.BeneficiaryRevenue)
 			} else {
@@ -143,7 +152,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 	}
 }
 
-func (s *KeeperTestSuite) ExtractChargeFeeEvent(events []sdk.Event, eventName string) types.EventChargeFee {
+func (s *KeeperTestSuite) extractChargeFeeEvent(events []sdk.Event, eventName string) types.EventChargeFee {
 	event, found := s.FindLastEventOfType(events, eventName)
 	s.Require().True(found)
 	chargeFee := types.EventChargeFee{}
