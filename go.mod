@@ -52,7 +52,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogoproto v1.7.0
-	github.com/cosmos/ibc-go/v7 v7.5.1
+	github.com/cosmos/ibc-go/v7 v7.5.1 // indirect
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
