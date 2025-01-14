@@ -7,7 +7,7 @@ import (
 	db "github.com/cometbft/cometbft-db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/cosmos/cosmos-sdk/store"
+	"cosmossdk.io/store"
 	"github.com/cosmos/gogoproto/proto"
 )
 

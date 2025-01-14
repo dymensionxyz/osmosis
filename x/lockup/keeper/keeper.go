@@ -7,7 +7,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/x/lockup/types"
 
-	stroretypes "github.com/cosmos/cosmos-sdk/store/types"
+	stroretypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
