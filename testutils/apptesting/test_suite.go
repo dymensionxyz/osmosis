@@ -1,52 +1,23 @@
 package apptesting
 
 import (
-	"fmt"
-	"time"
-
-	"cosmossdk.io/store/rootmulti"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
-	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
-	dbm "github.com/cometbft/cometbft-db"
-	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/crypto/ed25519"
-	"github.com/cometbft/cometbft/libs/log"
-	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/suite"
-
-	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
-
-	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
-
-	"github.com/osmosis-labs/osmosis/v15/app"
-
-	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
-	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
-
-	lockupkeeper "github.com/osmosis-labs/osmosis/v15/x/lockup/keeper"
-	lockuptypes "github.com/osmosis-labs/osmosis/v15/x/lockup/types"
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
-
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 )
 
 type KeeperTestHelper struct {
 	suite.Suite
 
-	App         *app.App
+	App         *runtime.AppI
 	Ctx         sdk.Context
 	QueryHelper *baseapp.QueryServiceTestHelper
 	TestAccs    []sdk.AccAddress
 }
 
+/*
 var (
 	SecondaryDenom  = "uion"
 	SecondaryAmount = sdk.NewInt(100000000)
@@ -401,3 +372,4 @@ func GenerateTestAddrs() (string, string) {
 	invalidAddr := sdk.AccAddress("invalid").String()
 	return validAddr, invalidAddr
 }
+*/
