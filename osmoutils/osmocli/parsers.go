@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/pflag"
@@ -346,7 +347,7 @@ func ParseSdkInt(arg string, fieldName string) (sdk.Int, error) {
 func ParseSdkDec(arg, fieldName string) (sdk.Dec, error) {
 	i, err := sdk.NewDecFromStr(arg)
 	if err != nil {
-		return sdk.Dec{}, fmt.Errorf("could not parse %s as sdk.Dec for field %s: %w", arg, fieldName, err)
+		return math.LegacyDec{}, fmt.Errorf("could not parse %s as sdk.Dec for field %s: %w", arg, fieldName, err)
 	}
 	return i, nil
 }

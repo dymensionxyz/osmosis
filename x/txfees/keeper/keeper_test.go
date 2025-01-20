@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,13 +26,13 @@ func (suite *KeeperTestSuite) SetupTest() {
 	for _, acc := range suite.TestAccs {
 		suite.FundAcc(acc,
 			sdk.NewCoins(
-				sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(10000000000)),
-				sdk.NewCoin("uosmo", sdk.NewInt(100000000000000000)), // Needed for pool creation fee
-				sdk.NewCoin("uion", sdk.NewInt(10000000)),
-				sdk.NewCoin("atom", sdk.NewInt(10000000)),
-				sdk.NewCoin("ust", sdk.NewInt(10000000)),
-				sdk.NewCoin("foo", sdk.NewInt(10000000)),
-				sdk.NewCoin("bar", sdk.NewInt(10000000)),
+				sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(10000000000)),
+				sdk.NewCoin("uosmo", math.NewInt(100000000000000000)), // Needed for pool creation fee
+				sdk.NewCoin("uion", math.NewInt(10000000)),
+				sdk.NewCoin("atom", math.NewInt(10000000)),
+				sdk.NewCoin("ust", math.NewInt(10000000)),
+				sdk.NewCoin("foo", math.NewInt(10000000)),
+				sdk.NewCoin("bar", math.NewInt(10000000)),
 			))
 	}
 }

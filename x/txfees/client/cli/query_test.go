@@ -4,6 +4,8 @@ import (
 	gocontext "context"
 	"testing"
 
+	math "cosmossdk.io/math"
+
 	"github.com/stretchr/testify/suite"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -23,8 +25,8 @@ func (s *QueryTestSuite) SetupSuite() {
 
 	// set up pool
 	poolAssets := []sdk.Coin{
-		sdk.NewInt64Coin("uosmo", 1000000),
-		sdk.NewInt64Coin("adym", 120000000),
+		math.NewInt64Coin("uosmo", 1000000),
+		math.NewInt64Coin("adym", 120000000),
 	}
 	s.PrepareBalancerPoolWithCoins(poolAssets...)
 	err := s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})

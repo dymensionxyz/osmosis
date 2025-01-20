@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -11,7 +12,7 @@ import (
 // SpotPriceCalculator defines the contract that must be fulfilled by a spot price calculator
 // The x/gamm keeper is expected to satisfy this interface.
 type SpotPriceCalculator interface {
-	CalculateSpotPrice(ctx sdk.Context, poolId uint64, quoteDenom, baseDenom string) (sdk.Dec, error)
+	CalculateSpotPrice(ctx sdk.Context, poolId uint64, quoteDenom, baseDenom string) (math.LegacyDec, error)
 	GetPoolDenoms(ctx sdk.Context, poolId uint64) ([]string, error)
 }
 
@@ -22,7 +23,7 @@ type PoolManager interface {
 		sender sdk.AccAddress,
 		routes []poolmanagertypes.SwapAmountInRoute,
 		tokenIn sdk.Coin,
-		tokenOutMinAmount sdk.Int) (tokenOutAmount sdk.Int, err error)
+		tokenOutMinAmount math.Int) (tokenOutAmount math.Int, err error)
 }
 
 type EpochKeeper interface {
@@ -65,5 +66,5 @@ type CommunityPoolKeeper interface {
 
 // FeeMarketKeeper defines the expected interface needed to get min gas price
 type FeeMarketKeeper interface {
-	GetMinGasPrice(ctx sdk.Context) sdk.Dec
+	GetMinGasPrice(ctx sdk.Context) math.LegacyDec
 }

@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
@@ -24,17 +25,17 @@ func NewParams(poolCreationFee sdk.Coins) Params {
 	return Params{
 		PoolCreationFee:      poolCreationFee,
 		EnableGlobalPoolFees: false,
-		GlobalFees:           GlobalFees{sdk.ZeroDec(), sdk.ZeroDec()},
-		TakerFee:             sdk.ZeroDec(),
+		GlobalFees:           GlobalFees{math.LegacyZeroDec(), math.LegacyZeroDec()},
+		TakerFee:             math.LegacyZeroDec(),
 	}
 }
 
 // default gamm module parameters.
 func DefaultParams() Params {
 	return Params{
-		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
+		PoolCreationFee:      sdk.Coins{math.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
 		EnableGlobalPoolFees: false,
-		GlobalFees:           GlobalFees{sdk.MustNewDecFromStr("0.02"), sdk.ZeroDec()},
+		GlobalFees:           GlobalFees{sdk.MustNewDecFromStr("0.02"), math.LegacyZeroDec()},
 		TakerFee:             sdk.MustNewDecFromStr("0.01"),
 	}
 }
@@ -102,7 +103,7 @@ func validateGlobalFees(i interface{}) error {
 }
 
 func validateTakerFees(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}

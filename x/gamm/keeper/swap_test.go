@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
@@ -19,8 +20,8 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountIn() {
 	type param struct {
 		tokenIn           sdk.Coin
 		tokenOutDenom     string
-		tokenOutMinAmount sdk.Int
-		expectedTokenOut  sdk.Int
+		tokenOutMinAmount math.Int
+		expectedTokenOut  math.Int
 	}
 
 	tests := []struct {
@@ -28,40 +29,40 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountIn() {
 		param param
 		// Note: by default swap fee is zero in all tests
 		// It is only set to non-zero when this overwrite is non-nil
-		swapFeeOverwrite sdk.Dec
+		swapFeeOverwrite math.LegacyDec
 		// Note: this is the value by which the original swap fee is divided
 		// by if it is non-nil. This is done to test the case where the given
 		// parameter swap fee is reduced by more than allowed (max factor of 0.5)
-		swapFeeOverwriteQuotient sdk.Dec
+		swapFeeOverwriteQuotient math.LegacyDec
 		expectPass               bool
 	}{
 		{
 			name: "Proper swap",
 			param: param{
-				tokenIn:           sdk.NewCoin("foo", sdk.NewInt(100000)),
+				tokenIn:           sdk.NewCoin("foo", math.NewInt(100000)),
 				tokenOutDenom:     "bar",
-				tokenOutMinAmount: sdk.NewInt(1),
-				expectedTokenOut:  sdk.NewInt(49262),
+				tokenOutMinAmount: math.NewInt(1),
+				expectedTokenOut:  math.NewInt(49262),
 			},
 			expectPass: true,
 		},
 		{
 			name: "Proper swap2",
 			param: param{
-				tokenIn:           sdk.NewCoin("bar", sdk.NewInt(2451783)),
+				tokenIn:           sdk.NewCoin("bar", math.NewInt(2451783)),
 				tokenOutDenom:     "baz",
-				tokenOutMinAmount: sdk.NewInt(1),
-				expectedTokenOut:  sdk.NewInt(1167843),
+				tokenOutMinAmount: math.NewInt(1),
+				expectedTokenOut:  math.NewInt(1167843),
 			},
 			expectPass: true,
 		},
 		{
 			name: "boundary valid swap fee given (= 0.5 pool swap fee)",
 			param: param{
-				tokenIn:           sdk.NewCoin("foo", sdk.NewInt(100000)),
+				tokenIn:           sdk.NewCoin("foo", math.NewInt(100000)),
 				tokenOutDenom:     "bar",
-				tokenOutMinAmount: sdk.NewInt(1),
-				expectedTokenOut:  sdk.NewInt(46833),
+				tokenOutMinAmount: math.NewInt(1),
+				expectedTokenOut:  math.NewInt(46833),
 			},
 			swapFeeOverwrite:         sdk.MustNewDecFromStr("0.1"),
 			swapFeeOverwriteQuotient: sdk.MustNewDecFromStr("2"),
@@ -70,10 +71,10 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountIn() {
 		{
 			name: "invalid swap fee given (< 0.5 pool swap fee)",
 			param: param{
-				tokenIn:           sdk.NewCoin("foo", sdk.NewInt(100000)),
+				tokenIn:           sdk.NewCoin("foo", math.NewInt(100000)),
 				tokenOutDenom:     "bar",
-				tokenOutMinAmount: sdk.NewInt(1),
-				expectedTokenOut:  sdk.NewInt(49262),
+				tokenOutMinAmount: math.NewInt(1),
+				expectedTokenOut:  math.NewInt(49262),
 			},
 			swapFeeOverwrite:         sdk.MustNewDecFromStr("0.1"),
 			swapFeeOverwriteQuotient: sdk.MustNewDecFromStr("3"),
@@ -82,36 +83,36 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountIn() {
 		{
 			name: "out is lesser than min amount",
 			param: param{
-				tokenIn:           sdk.NewCoin("bar", sdk.NewInt(2451783)),
+				tokenIn:           sdk.NewCoin("bar", math.NewInt(2451783)),
 				tokenOutDenom:     "baz",
-				tokenOutMinAmount: sdk.NewInt(9000000),
+				tokenOutMinAmount: math.NewInt(9000000),
 			},
 			expectPass: false,
 		},
 		{
 			name: "in and out denom are same",
 			param: param{
-				tokenIn:           sdk.NewCoin("bar", sdk.NewInt(2451783)),
+				tokenIn:           sdk.NewCoin("bar", math.NewInt(2451783)),
 				tokenOutDenom:     "bar",
-				tokenOutMinAmount: sdk.NewInt(1),
+				tokenOutMinAmount: math.NewInt(1),
 			},
 			expectPass: false,
 		},
 		{
 			name: "unknown in denom",
 			param: param{
-				tokenIn:           sdk.NewCoin("bara", sdk.NewInt(2451783)),
+				tokenIn:           sdk.NewCoin("bara", math.NewInt(2451783)),
 				tokenOutDenom:     "bar",
-				tokenOutMinAmount: sdk.NewInt(1),
+				tokenOutMinAmount: math.NewInt(1),
 			},
 			expectPass: false,
 		},
 		{
 			name: "unknown out denom",
 			param: param{
-				tokenIn:           sdk.NewCoin("bar", sdk.NewInt(2451783)),
+				tokenIn:           sdk.NewCoin("bar", math.NewInt(2451783)),
 				tokenOutDenom:     "bara",
-				tokenOutMinAmount: sdk.NewInt(1),
+				tokenOutMinAmount: math.NewInt(1),
 			},
 			expectPass: false,
 		},
@@ -122,13 +123,13 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountIn() {
 		suite.Run(test.name, func() {
 			// Init suite for each test.
 			suite.SetupTest()
-			swapFee := sdk.ZeroDec()
+			swapFee := math.LegacyZeroDec()
 			if !test.swapFeeOverwrite.IsNil() {
 				swapFee = test.swapFeeOverwrite
 			}
 			poolId := suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
 				SwapFee: swapFee,
-				ExitFee: sdk.ZeroDec(),
+				ExitFee: math.LegacyZeroDec(),
 			})
 			if !test.swapFeeOverwriteQuotient.IsNil() {
 				swapFee = swapFee.Quo(test.swapFeeOverwriteQuotient)
@@ -190,7 +191,7 @@ func (suite *KeeperTestSuite) TestCalcOutAmtGivenIn() {
 			name: "balancer",
 			param: param{
 				poolType:      "balancer",
-				tokenIn:       sdk.NewCoin("foo", sdk.NewInt(100000)),
+				tokenIn:       sdk.NewCoin("foo", math.NewInt(100000)),
 				tokenOutDenom: "bar",
 			},
 			expectPass: true,
@@ -243,7 +244,7 @@ func (suite *KeeperTestSuite) TestCalcInAmtGivenOut() {
 			name: "balancer",
 			param: param{
 				poolType:     "balancer",
-				tokenOut:     sdk.NewCoin("foo", sdk.NewInt(100000)),
+				tokenOut:     sdk.NewCoin("foo", math.NewInt(100000)),
 				tokenInDenom: "bar",
 			},
 			expectPass: true,
@@ -281,9 +282,9 @@ func (suite *KeeperTestSuite) TestCalcInAmtGivenOut() {
 func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 	type param struct {
 		tokenInDenom          string
-		tokenInMaxAmount      sdk.Int
+		tokenInMaxAmount      math.Int
 		tokenOut              sdk.Coin
-		expectedTokenInAmount sdk.Int
+		expectedTokenInAmount math.Int
 	}
 
 	tests := []struct {
@@ -295,9 +296,9 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "Proper swap",
 			param: param{
 				tokenInDenom:          "foo",
-				tokenInMaxAmount:      sdk.NewInt(900000000),
-				tokenOut:              sdk.NewCoin("bar", sdk.NewInt(100000)),
-				expectedTokenInAmount: sdk.NewInt(206165),
+				tokenInMaxAmount:      math.NewInt(900000000),
+				tokenOut:              sdk.NewCoin("bar", math.NewInt(100000)),
+				expectedTokenInAmount: math.NewInt(206165),
 			},
 			expectPass: true,
 		},
@@ -305,9 +306,9 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "Proper swap2",
 			param: param{
 				tokenInDenom:          "foo",
-				tokenInMaxAmount:      sdk.NewInt(900000000),
-				tokenOut:              sdk.NewCoin("baz", sdk.NewInt(316721)),
-				expectedTokenInAmount: sdk.NewInt(1084571),
+				tokenInMaxAmount:      math.NewInt(900000000),
+				tokenOut:              sdk.NewCoin("baz", math.NewInt(316721)),
+				expectedTokenInAmount: math.NewInt(1084571),
 			},
 			expectPass: true,
 		},
@@ -315,8 +316,8 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "in is greater than max",
 			param: param{
 				tokenInDenom:     "foo",
-				tokenInMaxAmount: sdk.NewInt(100),
-				tokenOut:         sdk.NewCoin("baz", sdk.NewInt(316721)),
+				tokenInMaxAmount: math.NewInt(100),
+				tokenOut:         sdk.NewCoin("baz", math.NewInt(316721)),
 			},
 			expectPass: false,
 		},
@@ -324,8 +325,8 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "pool doesn't have enough token to out",
 			param: param{
 				tokenInDenom:     "foo",
-				tokenInMaxAmount: sdk.NewInt(900000000),
-				tokenOut:         sdk.NewCoin("baz", sdk.NewInt(99316721)),
+				tokenInMaxAmount: math.NewInt(900000000),
+				tokenOut:         sdk.NewCoin("baz", math.NewInt(99316721)),
 			},
 			expectPass: false,
 		},
@@ -333,8 +334,8 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "unknown in denom",
 			param: param{
 				tokenInDenom:     "fooz",
-				tokenInMaxAmount: sdk.NewInt(900000000),
-				tokenOut:         sdk.NewCoin("bar", sdk.NewInt(100000)),
+				tokenInMaxAmount: math.NewInt(900000000),
+				tokenOut:         sdk.NewCoin("bar", math.NewInt(100000)),
 			},
 			expectPass: false,
 		},
@@ -342,8 +343,8 @@ func (suite *KeeperTestSuite) TestBalancerPoolSimpleSwapExactAmountOut() {
 			name: "unknown out denom",
 			param: param{
 				tokenInDenom:     "foo",
-				tokenInMaxAmount: sdk.NewInt(900000000),
-				tokenOut:         sdk.NewCoin("barz", sdk.NewInt(100000)),
+				tokenInMaxAmount: math.NewInt(900000000),
+				tokenOut:         sdk.NewCoin("barz", math.NewInt(100000)),
 			},
 			expectPass: false,
 		},
@@ -411,8 +412,8 @@ func (suite *KeeperTestSuite) TestActiveBalancerPoolSwap() {
 			suite.FundAcc(acc, defaultAcctFunds)
 
 			poolId := suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
-				SwapFee: sdk.NewDec(0),
-				ExitFee: sdk.NewDec(0),
+				SwapFee: math.LegacyNewDec(0),
+				ExitFee: math.LegacyNewDec(0),
 			})
 
 			suite.Ctx = suite.Ctx.WithBlockTime(tc.blockTime)
@@ -420,17 +421,17 @@ func (suite *KeeperTestSuite) TestActiveBalancerPoolSwap() {
 			suite.Require().NoError(err)
 			swapFee := pool.GetSwapFee(suite.Ctx)
 
-			foocoin := sdk.NewCoin("foo", sdk.NewInt(10))
+			foocoin := sdk.NewCoin("foo", math.NewInt(10))
 
 			if tc.expectPass {
-				_, err := suite.App.GAMMKeeper.SwapExactAmountIn(suite.Ctx, suite.TestAccs[0], pool, foocoin, "bar", sdk.ZeroInt(), swapFee)
+				_, err := suite.App.GAMMKeeper.SwapExactAmountIn(suite.Ctx, suite.TestAccs[0], pool, foocoin, "bar", math.ZeroInt(), swapFee)
 				suite.Require().NoError(err)
-				_, err = suite.App.GAMMKeeper.SwapExactAmountOut(suite.Ctx, suite.TestAccs[0], pool, "bar", sdk.NewInt(1000000000000000000), foocoin, swapFee)
+				_, err = suite.App.GAMMKeeper.SwapExactAmountOut(suite.Ctx, suite.TestAccs[0], pool, "bar", math.NewInt(1000000000000000000), foocoin, swapFee)
 				suite.Require().NoError(err)
 			} else {
-				_, err := suite.App.GAMMKeeper.SwapExactAmountIn(suite.Ctx, suite.TestAccs[0], pool, foocoin, "bar", sdk.ZeroInt(), swapFee)
+				_, err := suite.App.GAMMKeeper.SwapExactAmountIn(suite.Ctx, suite.TestAccs[0], pool, foocoin, "bar", math.ZeroInt(), swapFee)
 				suite.Require().Error(err)
-				_, err = suite.App.GAMMKeeper.SwapExactAmountOut(suite.Ctx, suite.TestAccs[0], pool, "bar", sdk.NewInt(1000000000000000000), foocoin, swapFee)
+				_, err = suite.App.GAMMKeeper.SwapExactAmountOut(suite.Ctx, suite.TestAccs[0], pool, "bar", math.NewInt(1000000000000000000), foocoin, swapFee)
 				suite.Require().Error(err)
 			}
 		}
@@ -446,7 +447,7 @@ func (suite *KeeperTestSuite) TestActiveBalancerPoolSwap() {
 func (suite *KeeperTestSuite) TestInactivePoolFreezeSwaps() {
 	// Setup test
 	suite.SetupTest()
-	testCoin := sdk.NewCoin("foo", sdk.NewInt(10))
+	testCoin := sdk.NewCoin("foo", math.NewInt(10))
 	suite.FundAcc(suite.TestAccs[0], defaultAcctFunds)
 
 	// Setup active pool
@@ -489,7 +490,7 @@ func (suite *KeeperTestSuite) TestInactivePoolFreezeSwaps() {
 					},
 				},
 				testCoin,
-				sdk.ZeroInt(),
+				math.ZeroInt(),
 			)
 
 			_, swapOutErr := suite.App.PoolManagerKeeper.RouteExactAmountOut(
@@ -501,7 +502,7 @@ func (suite *KeeperTestSuite) TestInactivePoolFreezeSwaps() {
 						TokenInDenom: "bar",
 					},
 				},
-				sdk.NewInt(1000000000000000000),
+				math.NewInt(1000000000000000000),
 				testCoin,
 			)
 

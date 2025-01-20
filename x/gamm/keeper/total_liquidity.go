@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"cosmossdk.io/math"
 	"cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -22,7 +23,7 @@ func (k Keeper) setTotalLiquidity(ctx sdk.Context, coins sdk.Coins) {
 	}
 }
 
-func (k Keeper) setDenomLiquidity(ctx sdk.Context, denom string, amount sdk.Int) {
+func (k Keeper) setDenomLiquidity(ctx sdk.Context, denom string, amount math.Int) {
 	store := ctx.KVStore(k.storeKey)
 	bz, err := amount.Marshal()
 	if err != nil {
@@ -31,14 +32,14 @@ func (k Keeper) setDenomLiquidity(ctx sdk.Context, denom string, amount sdk.Int)
 	store.Set(types.GetDenomPrefix(denom), bz)
 }
 
-func (k Keeper) GetDenomLiquidity(ctx sdk.Context, denom string) sdk.Int {
+func (k Keeper) GetDenomLiquidity(ctx sdk.Context, denom string) math.Int {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(types.GetDenomPrefix(denom))
 	if bz == nil {
-		return sdk.NewInt(0)
+		return math.NewInt(0)
 	}
 
-	var amount sdk.Int
+	var amount math.Int
 	if err := amount.Unmarshal(bz); err != nil {
 		panic(err)
 	}
@@ -53,7 +54,7 @@ func (k Keeper) IterateDenomLiquidity(ctx sdk.Context, cb func(sdk.Coin) bool) {
 	defer iterator.Close() //nolint:errcheck
 
 	for ; iterator.Valid(); iterator.Next() {
-		var amount sdk.Int
+		var amount math.Int
 		if err := amount.Unmarshal(iterator.Value()); err != nil {
 			panic(err)
 		}

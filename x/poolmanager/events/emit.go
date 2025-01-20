@@ -3,18 +3,19 @@ package events
 import (
 	"strconv"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )
 
-func EmitSwapEvent(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice, takerFee, swapFee sdk.Dec) {
+func EmitSwapEvent(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice, takerFee, swapFee math.LegacyDec) {
 	ctx.EventManager().EmitEvents(sdk.Events{
 		newSwapEvent(sender, poolId, input, output, spotPrice, takerFee, swapFee),
 	})
 }
 
-func newSwapEvent(sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice, takerFee, swapFee sdk.Dec) sdk.Event {
+func newSwapEvent(sender sdk.AccAddress, poolId uint64, input, output sdk.Coins, spotPrice, takerFee, swapFee math.LegacyDec) sdk.Event {
 	return sdk.NewEvent(
 		types.TypeEvtTokenSwapped,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),

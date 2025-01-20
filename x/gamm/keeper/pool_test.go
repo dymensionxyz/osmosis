@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
 
@@ -16,14 +17,14 @@ import (
 
 var (
 	defaultPoolAssetsStableSwap = sdk.Coins{
-		sdk.NewCoin("atom", sdk.NewInt(100)),
-		sdk.NewCoin("osmo", sdk.NewInt(100)),
+		sdk.NewCoin("atom", math.NewInt(100)),
+		sdk.NewCoin("osmo", math.NewInt(100)),
 	}
 	defaultPoolId                        = uint64(1)
 	defaultAcctFundsStableSwap sdk.Coins = sdk.NewCoins(
-		sdk.NewCoin("adym", sdk.NewInt(10000000000)),
-		sdk.NewCoin("atom", sdk.NewInt(100)),
-		sdk.NewCoin("osmo", sdk.NewInt(100)),
+		sdk.NewCoin("adym", math.NewInt(10000000000)),
+		sdk.NewCoin("atom", math.NewInt(100)),
+		sdk.NewCoin("osmo", math.NewInt(100)),
 	)
 )
 
@@ -42,11 +43,11 @@ func (suite *KeeperTestSuite) TestGetPoolAndPoke() {
 
 	startPoolWeightAssets := []balancertypes.PoolAsset{
 		{
-			Weight: defaultPoolAssets[0].Weight.Quo(sdk.NewInt(2)),
+			Weight: defaultPoolAssets[0].Weight.Quo(math.NewInt(2)),
 			Token:  defaultPoolAssets[0].Token,
 		},
 		{
-			Weight: defaultPoolAssets[1].Weight.Mul(sdk.NewInt(3)),
+			Weight: defaultPoolAssets[1].Weight.Mul(math.NewInt(3)),
 			Token:  defaultPoolAssets[1].Token,
 		},
 	}

@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
@@ -26,15 +27,15 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 	testcases := map[string]struct {
 		routes                []poolmanagertypes.SwapAmountInRoute
 		tokenIn               sdk.Coin
-		tokenOutMinAmount     sdk.Int
+		tokenOutMinAmount     math.Int
 		expectError           bool
 		expectedSwapEvents    int
 		expectedMessageEvents int
 	}{
 		"zero hops": {
 			routes:            []poolmanagertypes.SwapAmountInRoute{},
-			tokenIn:           sdk.NewCoin("foo", sdk.NewInt(tokenIn)),
-			tokenOutMinAmount: sdk.NewInt(tokenInMinAmount),
+			tokenIn:           sdk.NewCoin("foo", math.NewInt(tokenIn)),
+			tokenOutMinAmount: math.NewInt(tokenInMinAmount),
 			expectError:       true,
 		},
 		"one hop": {
@@ -44,8 +45,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:               sdk.NewCoin("adym", sdk.NewInt(tokenIn)),
-			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
+			tokenIn:               sdk.NewCoin("adym", math.NewInt(tokenIn)),
+			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    1,
 			expectedMessageEvents: 1,
 		},
@@ -56,8 +57,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:               sdk.NewCoin("baz", sdk.NewInt(tokenIn)),
-			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
+			tokenIn:               sdk.NewCoin("baz", math.NewInt(tokenIn)),
+			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
@@ -72,8 +73,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "baz",
 				},
 			},
-			tokenIn:               sdk.NewCoin("adym", sdk.NewInt(tokenIn)),
-			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
+			tokenIn:               sdk.NewCoin("adym", math.NewInt(tokenIn)),
+			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    2,
 			expectedMessageEvents: 1,
 		},
@@ -88,8 +89,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "adym",
 				},
 			},
-			tokenIn:               sdk.NewCoin("foo", sdk.NewInt(tokenIn)),
-			tokenOutMinAmount:     sdk.NewInt(tokenInMinAmount),
+			tokenIn:               sdk.NewCoin("foo", math.NewInt(tokenIn)),
+			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
@@ -104,8 +105,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "baz",
 				},
 			},
-			tokenIn:           sdk.NewCoin(doesNotExistDenom, sdk.NewInt(tokenIn)),
-			tokenOutMinAmount: sdk.NewInt(tokenInMinAmount),
+			tokenIn:           sdk.NewCoin(doesNotExistDenom, math.NewInt(tokenIn)),
+			tokenOutMinAmount: math.NewInt(tokenInMinAmount),
 			expectError:       true,
 		},
 	}
@@ -117,17 +118,17 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
@@ -165,7 +166,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 	testcases := map[string]struct {
 		routes                []poolmanagertypes.SwapAmountOutRoute
 		tokenOut              sdk.Coin
-		tokenInMaxAmount      sdk.Int
+		tokenInMaxAmount      math.Int
 		expectError           bool
 		expectedSwapEvents    int
 		expectedMessageEvents int
@@ -177,8 +178,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:              sdk.NewCoin("adym", sdk.NewInt(tokenOut)),
-			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
+			tokenOut:              sdk.NewCoin("adym", math.NewInt(tokenOut)),
+			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    2, // 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
@@ -193,8 +194,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
-			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
+			tokenOut:              sdk.NewCoin("foo", math.NewInt(tokenOut)),
+			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    2,
 			expectedMessageEvents: 1,
 		},
@@ -209,8 +210,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "adym",
 				},
 			},
-			tokenOut:              sdk.NewCoin("foo", sdk.NewInt(tokenOut)),
-			tokenInMaxAmount:      sdk.NewInt(tokenInMaxAmount),
+			tokenOut:              sdk.NewCoin("foo", math.NewInt(tokenOut)),
+			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
 		},
@@ -225,8 +226,8 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "baz",
 				},
 			},
-			tokenOut:         sdk.NewCoin(doesNotExistDenom, sdk.NewInt(tokenOut)),
-			tokenInMaxAmount: sdk.NewInt(tokenInMaxAmount),
+			tokenOut:         sdk.NewCoin(doesNotExistDenom, math.NewInt(tokenOut)),
+			tokenInMaxAmount: math.NewInt(tokenInMaxAmount),
 			expectError:      true,
 		},
 	}
@@ -238,17 +239,17 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("foo", sdk.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("adym", sdk.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(100000)), sdk.NewCoin("baz", sdk.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
@@ -285,7 +286,7 @@ func (suite *KeeperTestSuite) TestJoinPool_Events() {
 
 	testcases := map[string]struct {
 		poolId                     uint64
-		shareOutAmount             sdk.Int
+		shareOutAmount             math.Int
 		tokenInMaxs                sdk.Coins
 		expectError                bool
 		expectedAddLiquidityEvents int
@@ -293,20 +294,20 @@ func (suite *KeeperTestSuite) TestJoinPool_Events() {
 	}{
 		"successful join": {
 			poolId:         1,
-			shareOutAmount: sdk.NewInt(shareOut),
+			shareOutAmount: math.NewInt(shareOut),
 			tokenInMaxs: sdk.NewCoins(
-				sdk.NewCoin("foo", sdk.NewInt(tokenInMaxAmount)),
-				sdk.NewCoin("bar", sdk.NewInt(tokenInMaxAmount)),
-				sdk.NewCoin("baz", sdk.NewInt(tokenInMaxAmount)),
-				sdk.NewCoin("adym", sdk.NewInt(tokenInMaxAmount)),
+				sdk.NewCoin("foo", math.NewInt(tokenInMaxAmount)),
+				sdk.NewCoin("bar", math.NewInt(tokenInMaxAmount)),
+				sdk.NewCoin("baz", math.NewInt(tokenInMaxAmount)),
+				sdk.NewCoin("adym", math.NewInt(tokenInMaxAmount)),
 			),
 			expectedAddLiquidityEvents: 1,
 			expectedMessageEvents:      3, // 1 gamm + 2 events emitted by other keeper methods.
 		},
 		"tokenInMaxs do not match all tokens in pool - invalid join": {
 			poolId:         1,
-			shareOutAmount: sdk.NewInt(shareOut),
-			tokenInMaxs:    sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(tokenInMaxAmount))),
+			shareOutAmount: math.NewInt(shareOut),
+			tokenInMaxs:    sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(tokenInMaxAmount))),
 			expectError:    true,
 		},
 	}
@@ -352,7 +353,7 @@ func (suite *KeeperTestSuite) TestExitPool_Events() {
 
 	testcases := map[string]struct {
 		poolId                        uint64
-		shareInAmount                 sdk.Int
+		shareInAmount                 math.Int
 		tokenOutMins                  sdk.Coins
 		expectError                   bool
 		expectedRemoveLiquidityEvents int
@@ -360,15 +361,15 @@ func (suite *KeeperTestSuite) TestExitPool_Events() {
 	}{
 		"successful exit": {
 			poolId:                        1,
-			shareInAmount:                 sdk.NewInt(shareIn),
+			shareInAmount:                 math.NewInt(shareIn),
 			tokenOutMins:                  sdk.NewCoins(),
 			expectedRemoveLiquidityEvents: 1,
 			expectedMessageEvents:         3, // 1 gamm + 2 events emitted by other keeper methods.
 		},
 		"invalid tokenOutMins": {
 			poolId:        1,
-			shareInAmount: sdk.NewInt(shareIn),
-			tokenOutMins:  sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(tokenOutMinAmount))),
+			shareInAmount: math.NewInt(shareIn),
+			tokenOutMins:  sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(tokenOutMinAmount))),
 			expectError:   true,
 		},
 	}
@@ -387,12 +388,12 @@ func (suite *KeeperTestSuite) TestExitPool_Events() {
 			joinPoolResponse, err := msgServer.JoinPool(sdk.WrapSDKContext(ctx), &types.MsgJoinPool{
 				Sender:         sender,
 				PoolId:         tc.poolId,
-				ShareOutAmount: sdk.NewInt(shareIn),
+				ShareOutAmount: math.NewInt(shareIn),
 				TokenInMaxs: sdk.NewCoins(
-					sdk.NewCoin("foo", sdk.NewInt(int64Max)),
-					sdk.NewCoin("bar", sdk.NewInt(int64Max)),
-					sdk.NewCoin("baz", sdk.NewInt(int64Max)),
-					sdk.NewCoin("adym", sdk.NewInt(int64Max)),
+					sdk.NewCoin("foo", math.NewInt(int64Max)),
+					sdk.NewCoin("bar", math.NewInt(int64Max)),
+					sdk.NewCoin("baz", math.NewInt(int64Max)),
+					sdk.NewCoin("adym", math.NewInt(int64Max)),
 				),
 			})
 			suite.Require().NoError(err)

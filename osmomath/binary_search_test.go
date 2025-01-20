@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -320,9 +321,9 @@ func TestBinarySearchRoundingBehavior(t *testing.T) {
 }
 
 func TestErrTolerance_Compare(t *testing.T) {
-	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: sdk.Dec{}}
-	NonZeroErrAdditive := ErrTolerance{AdditiveTolerance: sdk.NewDec(10), MultiplicativeTolerance: sdk.Dec{}}
-	NonZeroErrMultiplicative := ErrTolerance{AdditiveTolerance: sdk.Dec{}, MultiplicativeTolerance: sdk.NewDec(10)}
+	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: math.LegacyDec{}}
+	NonZeroErrAdditive := ErrTolerance{AdditiveTolerance: sdk.NewDec(10), MultiplicativeTolerance: math.LegacyDec{}}
+	NonZeroErrMultiplicative := ErrTolerance{AdditiveTolerance: math.LegacyDec{}, MultiplicativeTolerance: sdk.NewDec(10)}
 	NonZeroErrBoth := ErrTolerance{AdditiveTolerance: sdk.NewDec(1), MultiplicativeTolerance: sdk.NewDec(10)}
 	tests := []struct {
 		name         string

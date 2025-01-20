@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"cosmossdk.io/math"
+
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	balancertypes "github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -14,13 +16,13 @@ import (
 var (
 	defaultAddr       sdk.AccAddress = sdk.AccAddress([]byte("addr1---------------"))
 	defaultCoins      sdk.Coins      = sdk.Coins{}
-	minShareOutAmount sdk.Int        = sdk.NewIntFromBigInt(types.OneShare.MulRaw(50).BigInt())
+	minShareOutAmount math.Int       = math.NewIntFromBigInt(types.OneShare.MulRaw(50).BigInt())
 )
 
 func (suite *KeeperTestSuite) measureJoinPoolGas(
 	addr sdk.AccAddress,
 	poolID uint64,
-	shareOutAmountMax sdk.Int, maxCoins sdk.Coins,
+	shareOutAmountMax math.Int, maxCoins sdk.Coins,
 ) uint64 {
 	alreadySpent := suite.Ctx.GasMeter().GasConsumed()
 	_, _, err := suite.App.GAMMKeeper.JoinPoolNoSwap(suite.Ctx, addr, poolID, shareOutAmountMax, maxCoins)
@@ -36,7 +38,7 @@ func (suite *KeeperTestSuite) measureAvgAndMaxJoinPoolGas(
 	numIterations int,
 	addr sdk.AccAddress,
 	poolIDFn func(int) uint64,
-	shareOutAmountMaxFn func(int) sdk.Int,
+	shareOutAmountMaxFn func(int) math.Int,
 	maxCoinsFn func(int) sdk.Coins,
 ) (avg uint64, maxGas uint64) {
 	runningTotal := uint64(0)
@@ -59,17 +61,17 @@ func (suite *KeeperTestSuite) TestJoinPoolGas() {
 	poolId := suite.PrepareBalancerPool()
 
 	poolIDFn := func(int) uint64 { return poolId }
-	minShareOutAmountFn := func(int) sdk.Int { return minShareOutAmount }
+	minShareOutAmountFn := func(int) math.Int { return minShareOutAmount }
 	maxCoinsFn := func(int) sdk.Coins { return defaultCoins }
 	startAveragingAt := 1000
 	totalNumJoins := 10000
 
 	// mint some assets to the accounts
 	suite.FundAcc(defaultAddr, sdk.NewCoins(
-		sdk.NewCoin("adym", sdk.NewInt(10000000000000)),
-		sdk.NewCoin("foo", sdk.NewInt(10000000000000000)),
-		sdk.NewCoin("bar", sdk.NewInt(10000000000000000)),
-		sdk.NewCoin("baz", sdk.NewInt(10000000000000000)),
+		sdk.NewCoin("adym", math.NewInt(10000000000000)),
+		sdk.NewCoin("foo", math.NewInt(10000000000000000)),
+		sdk.NewCoin("bar", math.NewInt(10000000000000000)),
+		sdk.NewCoin("baz", math.NewInt(10000000000000000)),
 	))
 
 	//This test been modified, as GAS increased vs osmosis
@@ -92,7 +94,7 @@ func (suite *KeeperTestSuite) TestRepeatedJoinPoolDistinctDenom() {
 
 	// mint some usomo to account
 	suite.FundAcc(defaultAddr, sdk.NewCoins(
-		sdk.NewCoin("adym", sdk.NewInt(1000000000000000000)),
+		sdk.NewCoin("adym", math.NewInt(1000000000000000000)),
 	))
 
 	// number of distinct denom to test
@@ -100,28 +102,28 @@ func (suite *KeeperTestSuite) TestRepeatedJoinPoolDistinctDenom() {
 
 	// create pools prior to testing JoinPool using distinct denom
 	coins := sdk.NewCoins(
-		sdk.NewCoin("randToken1", sdk.NewInt(100)),
+		sdk.NewCoin("randToken1", math.NewInt(100)),
 	)
 	suite.FundAcc(defaultAddr, coins)
 	defaultPoolParams := balancertypes.PoolParams{
-		SwapFee: sdk.NewDec(0),
-		ExitFee: sdk.NewDec(0),
+		SwapFee: math.LegacyNewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	}
 	for i := 1; i <= denomNumber; i++ {
 		randToken := "randToken" + strconv.Itoa(i+1)
 		prevRandToken := "randToken" + strconv.Itoa(i)
-		coins := sdk.NewCoins(sdk.NewCoin(randToken, sdk.NewInt(100)))
+		coins := sdk.NewCoins(sdk.NewCoin(randToken, math.NewInt(100)))
 
 		suite.FundAcc(defaultAddr, coins)
 
 		poolAssets := []balancertypes.PoolAsset{
 			{
-				Weight: sdk.NewInt(100),
-				Token:  sdk.NewCoin(prevRandToken, sdk.NewInt(10)),
+				Weight: math.NewInt(100),
+				Token:  sdk.NewCoin(prevRandToken, math.NewInt(10)),
 			},
 			{
-				Weight: sdk.NewInt(100),
-				Token:  sdk.NewCoin(randToken, sdk.NewInt(10)),
+				Weight: math.NewInt(100),
+				Token:  sdk.NewCoin(randToken, math.NewInt(10)),
 			},
 		}
 		msg := balancer.NewMsgCreateBalancerPool(defaultAddr, defaultPoolParams, poolAssets, "")

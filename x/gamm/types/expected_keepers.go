@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
@@ -52,25 +53,25 @@ type PoolManager interface {
 		sender sdk.AccAddress,
 		routes []poolmanagertypes.SwapAmountInRoute,
 		tokenIn sdk.Coin,
-		tokenOutMinAmount sdk.Int) (tokenOutAmount sdk.Int, err error)
+		tokenOutMinAmount math.Int) (tokenOutAmount math.Int, err error)
 
 	RouteExactAmountOut(ctx sdk.Context,
 		sender sdk.AccAddress,
 		routes []poolmanagertypes.SwapAmountOutRoute,
-		tokenInMaxAmount sdk.Int,
+		tokenInMaxAmount math.Int,
 		tokenOut sdk.Coin,
-	) (tokenInAmount sdk.Int, err error)
+	) (tokenInAmount math.Int, err error)
 
 	MultihopEstimateOutGivenExactAmountIn(
 		ctx sdk.Context,
 		routes []poolmanagertypes.SwapAmountInRoute,
 		tokenIn sdk.Coin,
-	) (tokenOutAmount sdk.Int, err error)
+	) (tokenOutAmount math.Int, err error)
 
 	MultihopEstimateInGivenExactAmountOut(
 		ctx sdk.Context,
 		routes []poolmanagertypes.SwapAmountOutRoute,
-		tokenOut sdk.Coin) (tokenInAmount sdk.Int, err error)
+		tokenOut sdk.Coin) (tokenInAmount math.Int, err error)
 
 	GetPoolModule(ctx sdk.Context, poolId uint64) (poolmanagertypes.SwapI, error)
 }

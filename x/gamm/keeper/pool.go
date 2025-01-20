@@ -5,8 +5,8 @@ import (
 
 	gogotypes "github.com/cosmos/gogoproto/types"
 
+	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"

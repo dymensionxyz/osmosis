@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -33,9 +34,9 @@ type SwapI interface {
 		pool PoolI,
 		tokenIn sdk.Coin,
 		tokenOutDenom string,
-		tokenOutMinAmount sdk.Int,
-		swapFee sdk.Dec,
-	) (sdk.Int, error)
+		tokenOutMinAmount math.Int,
+		swapFee math.LegacyDec,
+	) (math.Int, error)
 	// CalcOutAmtGivenIn calculates the amount of tokenOut given tokenIn and the pool's current state.
 	// Returns error if the given pool is not a CFMM pool. Returns error on internal calculations.
 	CalcOutAmtGivenIn(
@@ -43,7 +44,7 @@ type SwapI interface {
 		poolI PoolI,
 		tokenIn sdk.Coin,
 		tokenOutDenom string,
-		swapFee sdk.Dec,
+		swapFee math.LegacyDec,
 	) (tokenOut sdk.Coin, err error)
 
 	SwapExactAmountOut(
@@ -51,10 +52,10 @@ type SwapI interface {
 		sender sdk.AccAddress,
 		pool PoolI,
 		tokenInDenom string,
-		tokenInMaxAmount sdk.Int,
+		tokenInMaxAmount math.Int,
 		tokenOut sdk.Coin,
-		swapFee sdk.Dec,
-	) (tokenInAmount sdk.Int, err error)
+		swapFee math.LegacyDec,
+	) (tokenInAmount math.Int, err error)
 	// CalcInAmtGivenOut calculates the amount of tokenIn given tokenOut and the pool's current state.
 	// Returns error if the given pool is not a CFMM pool. Returns error on internal calculations.
 	CalcInAmtGivenOut(
@@ -62,6 +63,6 @@ type SwapI interface {
 		poolI PoolI,
 		tokenOut sdk.Coin,
 		tokenInDenom string,
-		swapFee sdk.Dec,
+		swapFee math.LegacyDec,
 	) (tokenIn sdk.Coin, err error)
 }

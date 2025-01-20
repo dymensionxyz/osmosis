@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -301,15 +302,15 @@ func (s *decimalTestSuite) TestBigDecFromSdkDecSlice() {
 		want     []osmomath.BigDec
 		expPanic bool
 	}{
-		{[]sdk.Dec{sdk.MustNewDecFromStr("0.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(0)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("0.000000000000000000"), sdk.MustNewDecFromStr("1.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(0), osmomath.NewBigDec(1)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("1.000000000000000000"), sdk.MustNewDecFromStr("0.000000000000000000"), sdk.MustNewDecFromStr("0.000123400000000000")}, []osmomath.BigDec{osmomath.NewBigDec(1), osmomath.NewBigDec(0), osmomath.NewDecWithPrec(12340, 8)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("10.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(10)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(12340)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("1.234000000000000000"), sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 4), osmomath.NewBigDec(12340)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("0.123400000000000000"), sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 5), osmomath.NewBigDec(12340)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("0.000123400000000000"), sdk.MustNewDecFromStr("10.090090090090090090")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 8), osmomath.NewDecWithPrec(1009009009009009009, 17)}, false},
-		{[]sdk.Dec{sdk.MustNewDecFromStr("10.090090090090090090"), sdk.MustNewDecFromStr("10.090090090090090090")}, []osmomath.BigDec{osmomath.NewDecWithPrec(1009009009009009009, 17), osmomath.NewDecWithPrec(1009009009009009009, 17)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("0.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(0)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("0.000000000000000000"), sdk.MustNewDecFromStr("1.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(0), osmomath.NewBigDec(1)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("1.000000000000000000"), sdk.MustNewDecFromStr("0.000000000000000000"), sdk.MustNewDecFromStr("0.000123400000000000")}, []osmomath.BigDec{osmomath.NewBigDec(1), osmomath.NewBigDec(0), osmomath.NewDecWithPrec(12340, 8)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("10.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(10)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewBigDec(12340)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("1.234000000000000000"), sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 4), osmomath.NewBigDec(12340)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("0.123400000000000000"), sdk.MustNewDecFromStr("12340.000000000000000000")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 5), osmomath.NewBigDec(12340)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("0.000123400000000000"), sdk.MustNewDecFromStr("10.090090090090090090")}, []osmomath.BigDec{osmomath.NewDecWithPrec(12340, 8), osmomath.NewDecWithPrec(1009009009009009009, 17)}, false},
+		{[]math.LegacyDec{sdk.MustNewDecFromStr("10.090090090090090090"), sdk.MustNewDecFromStr("10.090090090090090090")}, []osmomath.BigDec{osmomath.NewDecWithPrec(1009009009009009009, 17), osmomath.NewDecWithPrec(1009009009009009009, 17)}, false},
 	}
 	for tcIndex, tc := range tests {
 		if tc.expPanic {

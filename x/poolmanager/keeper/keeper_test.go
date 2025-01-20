@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -43,12 +44,12 @@ func (suite *KeeperTestSuite) createPoolFromType(poolType types.PoolType) {
 // createBalancerPoolsFromCoinsWithSwapFee creates balancer pools from given sets of coins and respective swap fees.
 // Where element 1 of the input corresponds to the first pool created,
 // element 2 to the second pool created, up until the last element.
-func (suite *KeeperTestSuite) createBalancerPoolsFromCoinsWithSwapFee(poolCoins []sdk.Coins, swapFee []sdk.Dec) {
+func (suite *KeeperTestSuite) createBalancerPoolsFromCoinsWithSwapFee(poolCoins []sdk.Coins, swapFee []math.LegacyDec) {
 	for i, curPoolCoins := range poolCoins {
 		suite.FundAcc(suite.TestAccs[0], curPoolCoins)
 		suite.PrepareCustomBalancerPoolFromCoins(curPoolCoins, balancer.PoolParams{
 			SwapFee: swapFee[i],
-			ExitFee: sdk.ZeroDec(),
+			ExitFee: math.LegacyZeroDec(),
 		})
 	}
 }

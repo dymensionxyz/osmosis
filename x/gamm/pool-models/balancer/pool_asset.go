@@ -9,18 +9,19 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
+	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 type poolAssetPretty struct {
-	Token  sdk.Coin `json:"token" yaml:"token"`
-	Weight sdk.Dec  `json:"weight" yaml:"weight"`
+	Token  sdk.Coin       `json:"token" yaml:"token"`
+	Weight math.LegacyDec `json:"weight" yaml:"weight"`
 }
 
 // validates a pool asset, to check if it has a valid weight.
 func (pa PoolAsset) validateWeight() error {
-	if pa.Weight.LTE(sdk.ZeroInt()) {
+	if pa.Weight.LTE(math.ZeroInt()) {
 		return fmt.Errorf("a token's weight in the pool must be greater than 0")
 	}
 

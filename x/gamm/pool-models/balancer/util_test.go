@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	"cosmossdk.io/store/rootmulti"
 	dbm "github.com/cometbft/cometbft-db"
 	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -16,7 +17,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 )
 
-func createTestPool(t *testing.T, swapFee, exitFee sdk.Dec, poolAssets ...balancer.PoolAsset) *balancer.Pool {
+func createTestPool(t *testing.T, swapFee, exitFee math.LegacyDec, poolAssets ...balancer.PoolAsset) *balancer.Pool {
 	pool, err := balancer.NewBalancerPool(
 		1,
 		balancer.NewPoolParams(swapFee, exitFee, nil),
@@ -38,7 +39,7 @@ func createTestContext(t *testing.T) sdk.Context {
 	return sdk.NewContext(ms, tmtypes.Header{}, false, logger)
 }
 
-func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares sdk.Int) {
+func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares math.Int) {
 	allowedErrRatioDec, err := sdk.NewDecFromStr(allowedErrRatio)
 	require.NoError(t, err)
 

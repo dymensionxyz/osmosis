@@ -102,6 +102,11 @@ type AppModule struct {
 	keeper keeper.Keeper
 }
 
+// IsAppModule implements module.AppModule.
+func (am AppModule) IsAppModule() {}
+
+func (AppModule) IsOnePerModuleType() {}
+
 func NewAppModule(keeper keeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(),

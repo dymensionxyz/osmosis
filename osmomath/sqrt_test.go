@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -100,7 +101,7 @@ func TestSqrtMonotinicity(t *testing.T) {
 // and then setting x = sqrt(v)
 // this is because this is the set of values whose squares are perfectly representable.
 func TestPerfectSquares(t *testing.T) {
-	cases := []sdk.Dec{
+	cases := []math.LegacyDec{
 		sdk.NewDec(100),
 	}
 	r := rand.New(rand.NewSource(rand.Int63()))
@@ -127,7 +128,7 @@ func TestPerfectSquares(t *testing.T) {
 }
 
 func TestSqrtRounding(t *testing.T) {
-	testCases := []sdk.Dec{
+	testCases := []math.LegacyDec{
 		// TODO: uncomment when SDK supports dec from str with bigger bitlenghths.
 		// it works if you override the sdk panic locally.
 		// sdk.MustNewDecFromStr("11662930532952632574132537947829685675668532938920838254939577167671385459971.396347723368091000"),

@@ -4,8 +4,9 @@ import (
 	gocontext "context"
 	"errors"
 
+	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
@@ -18,36 +19,36 @@ func (suite *KeeperTestSuite) TestCalcExitPoolCoinsFromShares() {
 	queryClient := suite.queryClient
 	ctx := suite.Ctx
 	poolId := suite.PrepareBalancerPool()
-	exitFee := sdk.ZeroDec()
+	exitFee := math.LegacyZeroDec()
 
 	testCases := []struct {
 		name          string
 		poolId        uint64
-		shareInAmount sdk.Int
+		shareInAmount math.Int
 		expectedErr   error
 	}{
 		{
 			"valid test case",
 			poolId,
-			sdk.NewInt(1000000000000000000),
+			math.NewInt(1000000000000000000),
 			nil,
 		},
 		{
 			"pool id does not exist",
 			poolId + 1,
-			sdk.NewInt(1000000000000000000),
+			math.NewInt(1000000000000000000),
 			types.ErrPoolNotFound,
 		},
 		{
 			"zero share in amount",
 			poolId,
-			sdk.ZeroInt(),
+			math.ZeroInt(),
 			sdkerrors.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
 		},
 		{
 			"negative share in amount",
 			poolId,
-			sdk.NewInt(-10000),
+			math.NewInt(-10000),
 			sdkerrors.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative"),
 		},
 	}
@@ -94,7 +95,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 	queryClient := suite.queryClient
 	ctx := suite.Ctx
 	poolId := suite.PrepareBalancerPool()
-	swapFee := sdk.ZeroDec()
+	swapFee := math.LegacyZeroDec()
 
 	testCases := []struct {
 		name        string
@@ -105,37 +106,37 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 		{
 			"valid uneven multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(5000000)), sdk.NewCoin("bar", math.NewInt(5000000)), sdk.NewCoin("baz", math.NewInt(5000000)), sdk.NewCoin("adym", math.NewInt(5000000))),
 			nil,
 		},
 		{
 			"valid even multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("adym", sdk.NewInt(2000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(500000)), sdk.NewCoin("bar", math.NewInt(1000000)), sdk.NewCoin("baz", math.NewInt(1500000)), sdk.NewCoin("adym", math.NewInt(2000000))),
 			nil,
 		},
 		{
 			"invalid single asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(1000000))),
 			errors.New("no-swap joins require LP'ing with all assets in pool"),
 		},
 		{
 			"pool id does not exist",
 			poolId + 1,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(1000000))),
 			types.PoolDoesNotExistError{PoolId: poolId + 1},
 		},
 		{
 			"token in denom does not exist",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("random", math.NewInt(10000))),
 			sdkerrors.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
 		},
 		{
 			"join pool with incorrect amount of assets",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(10000)), sdk.NewCoin("bar", math.NewInt(10000))),
 			errors.New("no-swap joins require LP'ing with all assets in pool"),
 		},
 	}
@@ -170,14 +171,14 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolNoSwapShares() {
 func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 	var (
 		defaultAcctFunds sdk.Coins = sdk.NewCoins(
-			sdk.NewCoin("adym", sdk.NewInt(10000000000)),
-			sdk.NewCoin("foo", sdk.NewInt(10000000)),
-			sdk.NewCoin("bar", sdk.NewInt(10000000)),
-			sdk.NewCoin("baz", sdk.NewInt(10000000)),
+			sdk.NewCoin("adym", math.NewInt(10000000000)),
+			sdk.NewCoin("foo", math.NewInt(10000000)),
+			sdk.NewCoin("bar", math.NewInt(10000000)),
+			sdk.NewCoin("baz", math.NewInt(10000000)),
 		)
 		defaultPoolParams = balancer.PoolParams{
-			SwapFee: sdk.ZeroDec(),
-			ExitFee: sdk.ZeroDec(),
+			SwapFee: math.LegacyZeroDec(),
+			ExitFee: math.LegacyZeroDec(),
 		}
 	)
 
@@ -198,12 +199,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			pool_type:                   "Balancer",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -215,12 +216,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			min_liquidity:               "500000000foo, 500000000bar",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -233,12 +234,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			pool_type:                   "balaswap",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -251,12 +252,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			pool_type:                   "Balancer",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -268,12 +269,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			min_liquidity:               "500whoami",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -285,12 +286,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			min_liquidity:               "0foo,0bar",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -302,12 +303,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			pool_type:                   "Balancer",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: false,
@@ -320,12 +321,12 @@ func (suite *KeeperTestSuite) TestPoolsWithFilter() {
 			pool_type:                   "Balancer",
 			poolAssets: []balancertypes.PoolAsset{
 				{
-					Weight: sdk.NewInt(100),
-					Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+					Weight: math.NewInt(100),
+					Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 				},
 				{
-					Weight: sdk.NewInt(200),
-					Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+					Weight: math.NewInt(200),
+					Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 				},
 			},
 			expectedErr: true,
@@ -358,7 +359,7 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolShares() {
 	queryClient := suite.queryClient
 	ctx := suite.Ctx
 	poolId := suite.PrepareBalancerPool()
-	swapFee := sdk.ZeroDec()
+	swapFee := math.LegacyZeroDec()
 
 	testCases := []struct {
 		name        string
@@ -369,37 +370,37 @@ func (suite *KeeperTestSuite) TestCalcJoinPoolShares() {
 		{
 			"valid uneven multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(5000000)), sdk.NewCoin("bar", math.NewInt(5000000)), sdk.NewCoin("baz", math.NewInt(5000000)), sdk.NewCoin("adym", math.NewInt(5000000))),
 			nil,
 		},
 		{
 			"valid even multi asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("bar", sdk.NewInt(1000000)), sdk.NewCoin("baz", sdk.NewInt(1500000)), sdk.NewCoin("adym", sdk.NewInt(2000000))),
+			sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(500000)), sdk.NewCoin("bar", math.NewInt(1000000)), sdk.NewCoin("baz", math.NewInt(1500000)), sdk.NewCoin("adym", math.NewInt(2000000))),
 			nil,
 		},
 		{
 			"valid single asset join test case",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(1000000))),
 			nil,
 		},
 		{
 			"pool id does not exist",
 			poolId + 1,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(1000000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(1000000))),
 			types.PoolDoesNotExistError{PoolId: poolId + 1},
 		},
 		{
 			"token in denom does not exist",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("random", math.NewInt(10000))),
 			sdkerrors.Wrapf(types.ErrDenomNotFoundInPool, "input denoms must already exist in the pool (%s)", "random"),
 		},
 		{
 			"join pool with incorrect amount of assets",
 			poolId,
-			sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(10000)), sdk.NewCoin("bar", sdk.NewInt(10000))),
+			sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(10000)), sdk.NewCoin("bar", math.NewInt(10000))),
 			errors.New("balancer pool only supports LP'ing with one asset or all assets in pool"),
 		},
 	}
@@ -536,7 +537,7 @@ func (suite *KeeperTestSuite) TestQueryTotalPoolLiquidity() {
 
 	res, err := queryClient.TotalPoolLiquidity(gocontext.Background(), &types.QueryTotalPoolLiquidityRequest{PoolId: poolId})
 	suite.Require().NoError(err)
-	expectedCoins := sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(5000000)), sdk.NewCoin("bar", sdk.NewInt(5000000)), sdk.NewCoin("baz", sdk.NewInt(5000000)), sdk.NewCoin("adym", sdk.NewInt(5000000)))
+	expectedCoins := sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(5000000)), sdk.NewCoin("bar", math.NewInt(5000000)), sdk.NewCoin("baz", math.NewInt(5000000)), sdk.NewCoin("adym", math.NewInt(5000000)))
 	suite.Require().Equal(res.Liquidity, expectedCoins)
 }
 
@@ -598,24 +599,24 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolTotalLiquidity() {
 
 // 	/*
 // 		{
-// 			Weight: sdk.NewInt(200 * GuaranteedWeightPrecision),
-// 			Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+// 			Weight: math.NewInt(200 * GuaranteedWeightPrecision),
+// 			Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 // 		},
 // 		{
-// 			Weight: sdk.NewInt(300 * GuaranteedWeightPrecision),
-// 			Token:  sdk.NewCoin("baz", sdk.NewInt(5000000)),
+// 			Weight: math.NewInt(300 * GuaranteedWeightPrecision),
+// 			Token:  sdk.NewCoin("baz", math.NewInt(5000000)),
 // 		},
 // 		{
-// 			Weight: sdk.NewInt(100 * GuaranteedWeightPrecision),
-// 			Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+// 			Weight: math.NewInt(100 * GuaranteedWeightPrecision),
+// 			Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 // 		},
 // 	*/
 // 	PoolAssets := res.PoolAssets
 // 	suite.Require().Equal(3, len(PoolAssets))
 
-// 	suite.Require().Equal(sdk.NewInt(200*types.GuaranteedWeightPrecision), PoolAssets[0].Weight)
-// 	suite.Require().Equal(sdk.NewInt(300*types.GuaranteedWeightPrecision), PoolAssets[1].Weight)
-// 	suite.Require().Equal(sdk.NewInt(100*types.GuaranteedWeightPrecision), PoolAssets[2].Weight)
+// 	suite.Require().Equal(math.NewInt(200*types.GuaranteedWeightPrecision), PoolAssets[0].Weight)
+// 	suite.Require().Equal(math.NewInt(300*types.GuaranteedWeightPrecision), PoolAssets[1].Weight)
+// 	suite.Require().Equal(math.NewInt(100*types.GuaranteedWeightPrecision), PoolAssets[2].Weight)
 
 // 	suite.Require().Equal("5000000bar", PoolAssets[0].Token.String())
 // 	suite.Require().Equal("5000000baz", PoolAssets[1].Token.String())
@@ -669,7 +670,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "foo",
 				QuoteAssetDenom: "bar",
 			},
-			result: sdk.NewDec(2).String(),
+			result: math.LegacyNewDec(2).String(),
 		},
 		{
 			name: "valid request for bar/baz",
@@ -709,11 +710,11 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 	v2queryClient := v2types.NewQueryClient(suite.QueryHelper)
 	coins := sdk.NewCoins(
-		sdk.NewInt64Coin("tokenA", 1000),
-		sdk.NewInt64Coin("tokenB", 2000),
-		sdk.NewInt64Coin("tokenC", 3000),
-		sdk.NewInt64Coin("tokenD", 4000),
-		sdk.NewInt64Coin("tokenE", 4000), // 4000 intentional
+		math.NewInt64Coin("tokenA", 1000),
+		math.NewInt64Coin("tokenB", 2000),
+		math.NewInt64Coin("tokenC", 3000),
+		math.NewInt64Coin("tokenD", 4000),
+		math.NewInt64Coin("tokenE", 4000), // 4000 intentional
 	)
 	poolID := suite.PrepareBalancerPoolWithCoins(coins...)
 
@@ -760,7 +761,7 @@ func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "tokenA",
 				QuoteAssetDenom: "tokenB",
 			},
-			result: sdk.NewDec(2).String(),
+			result: math.LegacyNewDec(2).String(),
 		},
 		{
 			name: "tokenB in terms of tokenA",

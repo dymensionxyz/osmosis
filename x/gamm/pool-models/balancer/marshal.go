@@ -3,6 +3,7 @@ package balancer
 import (
 	"encoding/json"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -11,7 +12,7 @@ type balancerPoolPretty struct {
 	Id                 uint64         `json:"id" yaml:"id"`
 	PoolParams         PoolParams     `json:"pool_params" yaml:"pool_params"`
 	FuturePoolGovernor string         `json:"future_pool_governor" yaml:"future_pool_governor"`
-	TotalWeight        sdk.Dec        `json:"total_weight" yaml:"total_weight"`
+	TotalWeight        math.LegacyDec `json:"total_weight" yaml:"total_weight"`
 	TotalShares        sdk.Coin       `json:"total_shares" yaml:"total_shares"`
 	PoolAssets         []PoolAsset    `json:"pool_assets" yaml:"pool_assets"`
 }

@@ -274,23 +274,23 @@ func NewBuildCreateBalancerPoolMsg(clientCtx client.Context, fs *flag.FlagSet) (
 	return msg, nil
 }
 
-func shareAmountInParser(fs *flag.FlagSet) (sdk.Int, error) {
+func shareAmountInParser(fs *flag.FlagSet) (math.Int, error) {
 	return sdkIntParser(FlagShareAmountIn, fs)
 }
 
-func shareAmountOutParser(fs *flag.FlagSet) (sdk.Int, error) {
+func shareAmountOutParser(fs *flag.FlagSet) (math.Int, error) {
 	return sdkIntParser(FlagShareAmountOut, fs)
 }
 
-func sdkIntParser(flagName string, fs *flag.FlagSet) (sdk.Int, error) {
+func sdkIntParser(flagName string, fs *flag.FlagSet) (math.Int, error) {
 	amountStr, err := fs.GetString(flagName)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return math.ZeroInt(), err
 	}
 
-	res, ok := sdk.NewIntFromString(amountStr)
+	res, ok := math.NewIntFromString(amountStr)
 	if !ok {
-		return sdk.ZeroInt(), errors.New("invalid share amount")
+		return math.ZeroInt(), errors.New("invalid share amount")
 	}
 	return res, nil
 }
@@ -394,7 +394,7 @@ func NewBuildSwapExactAmountOutMsg(clientCtx client.Context, args []string, fs *
 		return nil, err
 	}
 
-	tokenInMaxAmount, ok := sdk.NewIntFromString(tokenInMaxAmountStr)
+	tokenInMaxAmount, ok := math.NewIntFromString(tokenInMaxAmountStr)
 	if !ok {
 		return nil, errors.New("invalid token in max amount")
 	}
@@ -410,7 +410,7 @@ func NewBuildSwapExactAmountOutMsg(clientCtx client.Context, args []string, fs *
 // Returns error if parsing fails.
 func ParseCoinsNoSort(coinsStr string) (sdk.Coins, error) {
 	coinStrs := strings.Split(coinsStr, ",")
-	decCoins := make(sdk.DecCoins, len(coinStrs))
+	decCoins := make(math.LegacyDecCoins, len(coinStrs))
 	for i, coinStr := range coinStrs {
 		coin, err := sdk.ParseDecCoin(coinStr)
 		if err != nil {

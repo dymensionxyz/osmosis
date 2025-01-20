@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/log"
+	"cosmossdk.io/math"
 	"cosmossdk.io/store/rootmulti"
 	dbm "github.com/cometbft/cometbft-db"
 	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -39,10 +40,10 @@ func TestCalculateAmountOutAndIn_InverseRelationship(
 	assetInDenom string,
 	assetOutDenom string,
 	initialCalcOut int64,
-	swapFee sdk.Dec,
+	swapFee math.LegacyDec,
 	errTolerance osmomath.ErrTolerance,
 ) {
-	initialOut := sdk.NewInt64Coin(assetOutDenom, initialCalcOut)
+	initialOut := math.NewInt64Coin(assetOutDenom, initialCalcOut)
 	initialOutCoins := sdk.NewCoins(initialOut)
 
 	actualTokenIn, err := pool.CalcInAmtGivenOut(ctx, initialOutCoins, assetInDenom, swapFee)
@@ -139,7 +140,7 @@ func TestSlippageRelationInGivenOut(
 	for !isWithinBounds(ctx, curPool, swapOutAmt, swapInDenom, fee) {
 		// increase pool liquidity by 10x
 		for i, coin := range initLiquidity {
-			curLiquidity[i] = sdk.NewCoin(coin.Denom, coin.Amount.Mul(sdk.NewInt(10)))
+			curLiquidity[i] = sdk.NewCoin(coin.Denom, coin.Amount.Mul(math.NewInt(10)))
 		}
 		curPool = createPoolWithLiquidity(ctx, curLiquidity)
 	}
@@ -164,7 +165,7 @@ func TestSlippageRelationInGivenOut(
 }
 
 // returns true if the pool can accommodate an InGivenOut swap with `tokenOut` amount out, false otherwise
-func isWithinBounds(ctx sdk.Context, pool types.CFMMPoolI, tokenOut sdk.Coins, tokenInDenom string, swapFee sdk.Dec) (b bool) {
+func isWithinBounds(ctx sdk.Context, pool types.CFMMPoolI, tokenOut sdk.Coins, tokenInDenom string, swapFee math.LegacyDec) (b bool) {
 	b = true
 	defer func() {
 		if r := recover(); r != nil {

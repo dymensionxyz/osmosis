@@ -185,8 +185,8 @@ func TestNewJoinPoolCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgJoinPool{
 				Sender:         testAddresses[0].String(),
 				PoolId:         1,
-				ShareOutAmount: sdk.NewIntFromUint64(100),
-				TokenInMaxs:    sdk.NewCoins(sdk.NewInt64Coin("stake", 100)),
+				ShareOutAmount: math.NewIntFromUint64(100),
+				TokenInMaxs:    sdk.NewCoins(math.NewInt64Coin("stake", 100)),
 			},
 		},
 	}
@@ -201,8 +201,8 @@ func TestNewExitPoolCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgExitPool{
 				Sender:        testAddresses[0].String(),
 				PoolId:        1,
-				ShareInAmount: sdk.NewIntFromUint64(10),
-				TokenOutMins:  sdk.NewCoins(sdk.NewInt64Coin("stake", 100)),
+				ShareInAmount: math.NewIntFromUint64(10),
+				TokenOutMins:  sdk.NewCoins(math.NewInt64Coin("stake", 100)),
 			},
 		},
 	}
@@ -217,8 +217,8 @@ func TestNewSwapExactAmountOutCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgSwapExactAmountOut{
 				Sender:           testAddresses[0].String(),
 				Routes:           []poolmanagertypes.SwapAmountOutRoute{{PoolId: 1, TokenInDenom: "node0token"}},
-				TokenInMaxAmount: sdk.NewIntFromUint64(20),
-				TokenOut:         sdk.NewInt64Coin("stake", 10),
+				TokenInMaxAmount: math.NewIntFromUint64(20),
+				TokenOut:         math.NewInt64Coin("stake", 10),
 			},
 		},
 	}
@@ -233,8 +233,8 @@ func TestNewSwapExactAmountInCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgSwapExactAmountIn{
 				Sender:            testAddresses[0].String(),
 				Routes:            []poolmanagertypes.SwapAmountInRoute{{PoolId: 1, TokenOutDenom: "node0token"}},
-				TokenIn:           sdk.NewInt64Coin("stake", 10),
-				TokenOutMinAmount: sdk.NewIntFromUint64(3),
+				TokenIn:           math.NewInt64Coin("stake", 10),
+				TokenOutMinAmount: math.NewIntFromUint64(3),
 			},
 		},
 	}
@@ -249,8 +249,8 @@ func TestNewJoinSwapExternAmountInCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgJoinSwapExternAmountIn{
 				Sender:            testAddresses[0].String(),
 				PoolId:            1,
-				TokenIn:           sdk.NewInt64Coin("stake", 10),
-				ShareOutMinAmount: sdk.NewIntFromUint64(1),
+				TokenIn:           math.NewInt64Coin("stake", 10),
+				ShareOutMinAmount: math.NewIntFromUint64(1),
 			},
 		},
 	}
@@ -266,8 +266,8 @@ func TestNewJoinSwapShareAmountOutCmd(t *testing.T) {
 				Sender:           testAddresses[0].String(),
 				PoolId:           1,
 				TokenInDenom:     "stake",
-				ShareOutAmount:   sdk.NewIntFromUint64(10),
-				TokenInMaxAmount: sdk.NewIntFromUint64(1),
+				ShareOutAmount:   math.NewIntFromUint64(10),
+				TokenInMaxAmount: math.NewIntFromUint64(1),
 			},
 		},
 	}
@@ -282,8 +282,8 @@ func TestNewExitSwapExternAmountOutCmd(t *testing.T) {
 			ExpectedMsg: &types.MsgExitSwapExternAmountOut{
 				Sender:           testAddresses[0].String(),
 				PoolId:           1,
-				TokenOut:         sdk.NewInt64Coin("stake", 10),
-				ShareInMaxAmount: sdk.NewIntFromUint64(1),
+				TokenOut:         math.NewInt64Coin("stake", 10),
+				ShareInMaxAmount: math.NewIntFromUint64(1),
 			},
 		},
 	}
@@ -299,8 +299,8 @@ func TestNewExitSwapShareAmountInCmd(t *testing.T) {
 				Sender:            testAddresses[0].String(),
 				PoolId:            1,
 				TokenOutDenom:     "stake",
-				ShareInAmount:     sdk.NewIntFromUint64(10),
-				TokenOutMinAmount: sdk.NewIntFromUint64(1),
+				ShareInAmount:     math.NewIntFromUint64(10),
+				TokenOutMinAmount: math.NewIntFromUint64(1),
 			},
 		},
 	}

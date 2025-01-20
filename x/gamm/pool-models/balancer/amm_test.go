@@ -3,6 +3,7 @@ package balancer_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -25,8 +26,8 @@ func TestBalancerPoolParams(t *testing.T) {
 	// errors or succeeds as intended. Furthermore, it checks that
 	// NewPool panics in the error case.
 	tests := []struct {
-		SwapFee   sdk.Dec
-		ExitFee   sdk.Dec
+		SwapFee   math.LegacyDec
+		ExitFee   math.LegacyDec
 		shouldErr bool
 	}{
 		// Should work
@@ -34,13 +35,13 @@ func TestBalancerPoolParams(t *testing.T) {
 		// Can't set the swap fee as negative
 		{sdk.NewDecWithPrec(-1, 2), defaultExitFee, wantErr},
 		// Can't set the swap fee as 1
-		{sdk.NewDec(1), defaultExitFee, wantErr},
+		{math.LegacyNewDec(1), defaultExitFee, wantErr},
 		// Can't set the swap fee above 1
 		{sdk.NewDecWithPrec(15, 1), defaultExitFee, wantErr},
 		// Can't set the exit fee as negative
 		{defaultSwapFee, sdk.NewDecWithPrec(-1, 2), wantErr},
 		// Can't set the exit fee as 1
-		{defaultSwapFee, sdk.NewDec(1), wantErr},
+		{defaultSwapFee, math.LegacyNewDec(1), wantErr},
 		// Can't set the exit fee above 1
 		{defaultSwapFee, sdk.NewDecWithPrec(15, 1), wantErr},
 	}

@@ -13,6 +13,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/cosmos/iavl v1.2.2
+	github.com/dymensionxyz/gerr-cosmos v1.0.0
 	github.com/dymensionxyz/sdk-utils v0.2.12
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
@@ -30,7 +31,7 @@ require (
 )
 
 require (
-	cosmossdk.io/errors v1.0.1 // indirect
+	cosmossdk.io/errors v1.0.1
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
@@ -85,6 +86,7 @@ require (
 	github.com/cosmos/ics23/go v0.11.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.13.3 // indirect
 	github.com/danieljoos/wincred v1.1.2 // indirect
+	github.com/danwt/gerr v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect

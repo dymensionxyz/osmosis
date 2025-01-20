@@ -3,12 +3,13 @@ package balancer
 import (
 	"errors"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )
 
-func NewPoolParams(swapFee, exitFee sdk.Dec, params *SmoothWeightChangeParams) PoolParams {
+func NewPoolParams(swapFee, exitFee math.LegacyDec, params *SmoothWeightChangeParams) PoolParams {
 	return PoolParams{
 		SwapFee:                  swapFee,
 		ExitFee:                  exitFee,
@@ -69,10 +70,10 @@ func (params PoolParams) Validate(poolWeights []PoolAsset) error {
 	return nil
 }
 
-func (params PoolParams) GetPoolSwapFee() sdk.Dec {
+func (params PoolParams) GetPoolSwapFee() math.LegacyDec {
 	return params.SwapFee
 }
 
-func (params PoolParams) GetPoolExitFee() sdk.Dec {
+func (params PoolParams) GetPoolExitFee() math.LegacyDec {
 	return params.ExitFee
 }

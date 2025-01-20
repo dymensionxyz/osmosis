@@ -3,6 +3,7 @@ package balancer_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -22,12 +23,12 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 	createMsg := func(after func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
 		testPoolAsset := []balancer.PoolAsset{
 			{
-				Weight: sdk.NewInt(100),
-				Token:  sdk.NewCoin("test", sdk.NewInt(100)),
+				Weight: math.NewInt(100),
+				Token:  sdk.NewCoin("test", math.NewInt(100)),
 			},
 			{
-				Weight: sdk.NewInt(100),
-				Token:  sdk.NewCoin("test2", sdk.NewInt(100)),
+				Weight: math.NewInt(100),
+				Token:  sdk.NewCoin("test2", math.NewInt(100)),
 			},
 		}
 
@@ -107,7 +108,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		{
 			name: "has the PoolAsset that includes 0 weight",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-				msg.PoolAssets[0].Weight = sdk.NewInt(0)
+				msg.PoolAssets[0].Weight = math.NewInt(0)
 				return msg
 			}),
 			expectPass: false,
@@ -115,7 +116,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		{
 			name: "has a PoolAsset that includes a negative weight",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-				msg.PoolAssets[0].Weight = sdk.NewInt(-10)
+				msg.PoolAssets[0].Weight = math.NewInt(-10)
 				return msg
 			}),
 			expectPass: false,
@@ -123,7 +124,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		{
 			name: "has a PoolAsset that includes a negative weight",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-				msg.PoolAssets[0].Weight = sdk.NewInt(-10)
+				msg.PoolAssets[0].Weight = math.NewInt(-10)
 				return msg
 			}),
 			expectPass: false,
@@ -131,7 +132,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		{
 			name: "has a PoolAsset that includes a zero coin",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-				msg.PoolAssets[0].Token = sdk.NewCoin("test1", sdk.NewInt(0))
+				msg.PoolAssets[0].Token = sdk.NewCoin("test1", math.NewInt(0))
 				return msg
 			}),
 			expectPass: false,
@@ -141,7 +142,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
 				msg.PoolAssets[0].Token = sdk.Coin{
 					Denom:  "test1",
-					Amount: sdk.NewInt(-10),
+					Amount: math.NewInt(-10),
 				}
 				return msg
 			}),
@@ -204,7 +205,7 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		{
 			name: "too large of a weight",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-				msg.PoolAssets[0].Weight = sdk.NewInt(1 << 21)
+				msg.PoolAssets[0].Weight = math.NewInt(1 << 21)
 				return msg
 			}),
 			expectPass: false,
@@ -217,12 +218,12 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		// 			Duration:  time.Hour,
 		// 			TargetPoolWeights: []PoolAsset{
 		// 				{
-		// 					Weight: sdk.NewInt(200),
-		// 					Token:  sdk.NewCoin("test", sdk.NewInt(1)),
+		// 					Weight: math.NewInt(200),
+		// 					Token:  sdk.NewCoin("test", math.NewInt(1)),
 		// 				},
 		// 				{
-		// 					Weight: sdk.NewInt(50),
-		// 					Token:  sdk.NewCoin("test2", sdk.NewInt(1)),
+		// 					Weight: math.NewInt(50),
+		// 					Token:  sdk.NewCoin("test2", math.NewInt(1)),
 		// 				},
 		// 			},
 		// 		}

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	proto "github.com/cosmos/gogoproto/proto"
 )
@@ -16,21 +17,21 @@ type PoolI interface {
 	// Pools may choose to make their swap fees dependent upon state
 	// (prior TWAPs, network downtime, other pool states, etc.)
 	// hence Context is provided as an argument.
-	GetSwapFee(ctx sdk.Context) sdk.Dec
+	GetSwapFee(ctx sdk.Context) math.LegacyDec
 	// GetExitFee returns the pool's exit fee, based on the current state.
 	// Pools may choose to make their exit fees dependent upon state.
-	GetExitFee(ctx sdk.Context) sdk.Dec
+	GetExitFee(ctx sdk.Context) math.LegacyDec
 	// Returns whether the pool has swaps enabled at the moment
 	IsActive(ctx sdk.Context) bool
 	// GetTotalShares returns the total number of LP shares in the pool
-	GetTotalShares() sdk.Int
+	GetTotalShares() math.Int
 	// GetTotalPoolLiquidity returns the coins in the pool owned by all LPs
 	GetTotalPoolLiquidity(ctx sdk.Context) sdk.Coins
 	// Returns the spot price of the 'base asset' in terms of the 'quote asset' in the pool,
 	// errors if either baseAssetDenom, or quoteAssetDenom does not exist.
 	// For example, if this was a UniV2 50-50 pool, with 2 ETH, and 8000 UST
 	// pool.SpotPrice(ctx, "eth", "ust") = 4000.00
-	SpotPrice(ctx sdk.Context, quoteAssetDenom string, baseAssetDenom string) (sdk.Dec, error)
+	SpotPrice(ctx sdk.Context, quoteAssetDenom string, baseAssetDenom string) (math.LegacyDec, error)
 	// GetType returns the type of the pool (Balancer, Stableswap, Concentrated, etc.)
 	GetType() PoolType
 }

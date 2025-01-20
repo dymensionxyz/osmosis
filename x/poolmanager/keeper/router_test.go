@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"reflect"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	gamm "github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
@@ -19,10 +20,10 @@ const (
 )
 
 var (
-	defaultInitPoolAmount     = sdk.NewInt(1000000000000)
-	DefaultExponentAtPriceOne = sdk.NewInt(-4)
+	defaultInitPoolAmount     = math.NewInt(1000000000000)
+	DefaultExponentAtPriceOne = math.NewInt(-4)
 	defaultPoolSwapFee        = sdk.NewDecWithPrec(1, 2) // 1% pool swap fee default
-	defaultSwapAmount         = sdk.NewInt(1000000)
+	defaultSwapAmount         = math.NewInt(1000000)
 	gammKeeperType            = reflect.TypeOf(&gamm.Keeper{})
 )
 
@@ -84,27 +85,27 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 	tests := []struct {
 		name                    string
 		poolCoins               []sdk.Coins
-		poolFee                 []sdk.Dec
+		poolFee                 []math.LegacyDec
 		routes                  []poolmanagertypes.SwapAmountInRoute
 		incentivizedGauges      []uint64
 		tokenIn                 sdk.Coin
-		tokenOutMinAmount       sdk.Int
-		swapFee                 sdk.Dec
+		tokenOutMinAmount       math.Int
+		swapFee                 math.LegacyDec
 		expectError             bool
 		expectReducedFeeApplied bool
 	}{
 		{
 			name:      "One route: Swap - [foo -> bar], 1 percent fee",
 			poolCoins: []sdk.Coins{sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(bar, defaultInitPoolAmount))},
-			poolFee:   []sdk.Dec{defaultPoolSwapFee},
+			poolFee:   []math.LegacyDec{defaultPoolSwapFee},
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
 					PoolId:        1,
 					TokenOutDenom: bar,
 				},
 			},
-			tokenIn:           sdk.NewCoin(foo, sdk.NewInt(100000)),
-			tokenOutMinAmount: sdk.NewInt(1),
+			tokenIn:           sdk.NewCoin(foo, math.NewInt(100000)),
+			tokenOutMinAmount: math.NewInt(1),
 		},
 		{
 			name: "Two routes: Swap - [foo -> bar](pool 1) - [bar -> baz](pool 2), both pools 1 percent fee",
@@ -112,7 +113,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(bar, defaultInitPoolAmount)), // pool 1.
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount)), // pool 2.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []poolmanagertypes.SwapAmountInRoute{
 				{
 					PoolId:        1,
@@ -124,8 +125,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				},
 			},
 			incentivizedGauges: []uint64{},
-			tokenIn:            sdk.NewCoin(foo, sdk.NewInt(100000)),
-			tokenOutMinAmount:  sdk.NewInt(1),
+			tokenIn:            sdk.NewCoin(foo, math.NewInt(100000)),
+			tokenOutMinAmount:  math.NewInt(1),
 		},
 		{
 			name: "Three routes: Swap - [foo -> uosmo](pool 1) - [uosmo -> baz](pool 2) - [baz -> bar](pool 3), all pools 1 percent fee",
@@ -134,7 +135,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				sdk.NewCoins(sdk.NewCoin(baz, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount)),   // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountInRoute{
 				{
 					PoolId:        1,
@@ -150,8 +151,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-			tokenIn:                 sdk.NewCoin(foo, sdk.NewInt(100000)),
-			tokenOutMinAmount:       sdk.NewInt(1),
+			tokenIn:                 sdk.NewCoin(foo, math.NewInt(100000)),
+			tokenOutMinAmount:       math.NewInt(1),
 			expectReducedFeeApplied: false,
 		},
 		{
@@ -162,7 +163,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount),
 					sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.                                                                                     // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountInRoute{
 				{
 					PoolId:        1,
@@ -174,8 +175,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-			tokenIn:                 sdk.NewCoin(foo, sdk.NewInt(100000)),
-			tokenOutMinAmount:       sdk.NewInt(1),
+			tokenIn:                 sdk.NewCoin(foo, math.NewInt(100000)),
+			tokenOutMinAmount:       math.NewInt(1),
 			expectReducedFeeApplied: false,
 		},
 		{
@@ -188,7 +189,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount),
 					sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 3.                                                                                      // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountInRoute{
 				{
 					PoolId:        1,
@@ -204,8 +205,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountIn() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-			tokenIn:                 sdk.NewCoin(foo, sdk.NewInt(100000)),
-			tokenOutMinAmount:       sdk.NewInt(1),
+			tokenIn:                 sdk.NewCoin(foo, math.NewInt(100000)),
+			tokenOutMinAmount:       math.NewInt(1),
 			expectReducedFeeApplied: false,
 		},
 		// TODO:
@@ -251,26 +252,26 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 	tests := []struct {
 		name                    string
 		poolCoins               []sdk.Coins
-		poolFee                 []sdk.Dec
+		poolFee                 []math.LegacyDec
 		routes                  []poolmanagertypes.SwapAmountOutRoute
 		incentivizedGauges      []uint64
 		tokenOut                sdk.Coin
-		tokenInMaxAmount        sdk.Int
-		swapFee                 sdk.Dec
+		tokenInMaxAmount        math.Int
+		swapFee                 math.LegacyDec
 		expectError             bool
 		expectReducedFeeApplied bool
 	}{
 		{
 			name:      "One route: Swap - [foo -> bar], 1 percent fee",
 			poolCoins: []sdk.Coins{sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(bar, defaultInitPoolAmount))},
-			poolFee:   []sdk.Dec{defaultPoolSwapFee},
+			poolFee:   []math.LegacyDec{defaultPoolSwapFee},
 			routes: []poolmanagertypes.SwapAmountOutRoute{
 				{
 					PoolId:       1,
 					TokenInDenom: bar,
 				},
 			},
-			tokenInMaxAmount: sdk.NewInt(90000000),
+			tokenInMaxAmount: math.NewInt(90000000),
 			tokenOut:         sdk.NewCoin(foo, defaultSwapAmount),
 		},
 		{
@@ -279,7 +280,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(bar, defaultInitPoolAmount)), // pool 1.
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount)), // pool 2.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountOutRoute{
 				{
 					PoolId:       1,
@@ -292,8 +293,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 			},
 			incentivizedGauges: []uint64{},
 
-			tokenInMaxAmount: sdk.NewInt(90000000),
-			tokenOut:         sdk.NewCoin(baz, sdk.NewInt(100000)),
+			tokenInMaxAmount: math.NewInt(90000000),
+			tokenOut:         sdk.NewCoin(baz, math.NewInt(100000)),
 		},
 		// {
 		// 	name: "Two routes: Swap - [foo -> uosmo](pool 1) - [uosmo -> baz](pool 2) with a half fee applied, both pools 1 percent fee",
@@ -301,7 +302,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 1.
 		// 		sdk.NewCoins(sdk.NewCoin(baz, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.
 		// 	},
-		// 	poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+		// 	poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 		// 	routes: []types.SwapAmountOutRoute{
 		// 		{
 		// 			PoolId:       1,
@@ -313,8 +314,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		},
 		// 	},
 		// 	incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-		// 	tokenInMaxAmount:        sdk.NewInt(90000000),
-		// 	tokenOut:                sdk.NewCoin(baz, sdk.NewInt(100000)),
+		// 	tokenInMaxAmount:        math.NewInt(90000000),
+		// 	tokenOut:                sdk.NewCoin(baz, math.NewInt(100000)),
 		// 	expectReducedFeeApplied: true,
 		// },
 		// {
@@ -323,7 +324,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 1.
 		// 		sdk.NewCoins(sdk.NewCoin(baz, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.
 		// 	},
-		// 	poolFee: []sdk.Dec{defaultPoolSwapFee, sdk.NewDecWithPrec(1, 1)},
+		// 	poolFee: []math.LegacyDec{defaultPoolSwapFee, sdk.NewDecWithPrec(1, 1)},
 		// 	routes: []types.SwapAmountOutRoute{
 		// 		{
 		// 			PoolId:       1,
@@ -335,8 +336,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		},
 		// 	},
 		// 	incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-		// 	tokenInMaxAmount:        sdk.NewInt(90000000),
-		// 	tokenOut:                sdk.NewCoin(baz, sdk.NewInt(100000)),
+		// 	tokenInMaxAmount:        math.NewInt(90000000),
+		// 	tokenOut:                sdk.NewCoin(baz, math.NewInt(100000)),
 		// 	expectReducedFeeApplied: true,
 		// },
 		{
@@ -346,7 +347,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				sdk.NewCoins(sdk.NewCoin(baz, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount)),   // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountOutRoute{
 				{
 					PoolId:       1,
@@ -362,8 +363,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-			tokenInMaxAmount:        sdk.NewInt(90000000),
-			tokenOut:                sdk.NewCoin(bar, sdk.NewInt(100000)),
+			tokenInMaxAmount:        math.NewInt(90000000),
+			tokenOut:                sdk.NewCoin(bar, math.NewInt(100000)),
 			expectReducedFeeApplied: false,
 		},
 		{
@@ -374,7 +375,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount),
 					sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.                                                                                     // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountOutRoute{
 				{
 					PoolId:       1,
@@ -386,8 +387,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-			tokenOut:                sdk.NewCoin(baz, sdk.NewInt(100000)),
-			tokenInMaxAmount:        sdk.NewInt(90000000),
+			tokenOut:                sdk.NewCoin(baz, math.NewInt(100000)),
+			tokenInMaxAmount:        math.NewInt(90000000),
 			expectReducedFeeApplied: false,
 		},
 		// {
@@ -398,7 +399,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount),
 		// 			sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.                                                                                     // pool 3.
 		// 	},
-		// 	poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee},
+		// 	poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee},
 		// 	routes: []types.SwapAmountOutRoute{
 		// 		{
 		// 			PoolId:       1,
@@ -410,8 +411,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		},
 		// 	},
 		// 	incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6},
-		// 	tokenOut:                sdk.NewCoin(baz, sdk.NewInt(100000)),
-		// 	tokenInMaxAmount:        sdk.NewInt(90000000),
+		// 	tokenOut:                sdk.NewCoin(baz, math.NewInt(100000)),
+		// 	tokenInMaxAmount:        math.NewInt(90000000),
 		// 	expectReducedFeeApplied: true,
 		// },
 		{
@@ -424,7 +425,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				sdk.NewCoins(sdk.NewCoin(bar, defaultInitPoolAmount), sdk.NewCoin(baz, defaultInitPoolAmount),
 					sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 3.                                                                                    // pool 3.
 			},
-			poolFee: []sdk.Dec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
+			poolFee: []math.LegacyDec{defaultPoolSwapFee, defaultPoolSwapFee, defaultPoolSwapFee},
 			routes: []types.SwapAmountOutRoute{
 				{
 					PoolId:       1,
@@ -440,8 +441,8 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 				},
 			},
 			incentivizedGauges:      []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-			tokenOut:                sdk.NewCoin(bar, sdk.NewInt(100000)),
-			tokenInMaxAmount:        sdk.NewInt(90000000),
+			tokenOut:                sdk.NewCoin(bar, math.NewInt(100000)),
+			tokenInMaxAmount:        math.NewInt(90000000),
 			expectReducedFeeApplied: false,
 		},
 		// TODO:
@@ -490,7 +491,7 @@ func (suite *KeeperTestSuite) TestMultihopEstimateOutGivenExactAmountIn() {
 		routes            []types.SwapAmountInRoute
 		estimateRoutes    []types.SwapAmountInRoute
 		tokenIn           sdk.Coin
-		tokenOutMinAmount sdk.Int
+		tokenOutMinAmount math.Int
 	}
 
 	tests := []struct {
@@ -522,8 +523,8 @@ func (suite *KeeperTestSuite) TestMultihopEstimateOutGivenExactAmountIn() {
 						TokenOutDenom: baz,
 					},
 				},
-				tokenIn:           sdk.NewCoin(foo, sdk.NewInt(100000)),
-				tokenOutMinAmount: sdk.NewInt(1),
+				tokenIn:           sdk.NewCoin(foo, math.NewInt(100000)),
+				tokenOutMinAmount: math.NewInt(1),
 			},
 			expectPass: true,
 		},
@@ -550,8 +551,8 @@ func (suite *KeeperTestSuite) TestMultihopEstimateOutGivenExactAmountIn() {
 						TokenOutDenom: baz,
 					},
 				},
-				tokenIn:           sdk.NewCoin(foo, sdk.NewInt(100000)),
-				tokenOutMinAmount: sdk.NewInt(1),
+				tokenIn:           sdk.NewCoin(foo, math.NewInt(100000)),
+				tokenOutMinAmount: math.NewInt(1),
 			},
 			expectPass: true,
 		},
@@ -611,7 +612,7 @@ func (suite *KeeperTestSuite) TestMultihopEstimateInGivenExactAmountOut() {
 	type param struct {
 		routes           []types.SwapAmountOutRoute
 		estimateRoutes   []types.SwapAmountOutRoute
-		tokenInMaxAmount sdk.Int
+		tokenInMaxAmount math.Int
 		tokenOut         sdk.Coin
 	}
 
@@ -645,8 +646,8 @@ func (suite *KeeperTestSuite) TestMultihopEstimateInGivenExactAmountOut() {
 						TokenInDenom: bar,
 					},
 				},
-				tokenInMaxAmount: sdk.NewInt(90000000),
-				tokenOut:         sdk.NewCoin(baz, sdk.NewInt(100000)),
+				tokenInMaxAmount: math.NewInt(90000000),
+				tokenOut:         sdk.NewCoin(baz, math.NewInt(100000)),
 			},
 			expectPass: true,
 		},
@@ -673,8 +674,8 @@ func (suite *KeeperTestSuite) TestMultihopEstimateInGivenExactAmountOut() {
 						TokenInDenom: uosmo,
 					},
 				},
-				tokenInMaxAmount: sdk.NewInt(90000000),
-				tokenOut:         sdk.NewCoin(baz, sdk.NewInt(100000)),
+				tokenInMaxAmount: math.NewInt(90000000),
+				tokenOut:         sdk.NewCoin(baz, math.NewInt(100000)),
 			},
 			expectPass:        true,
 			reducedFeeApplied: true,
@@ -741,7 +742,7 @@ func (suite *KeeperTestSuite) calcOutAmountAsSeparateSwaps(osmoFeeReduced bool, 
 			suite.Require().NoError(err)
 			swapFee := hopPool.GetSwapFee(cacheCtx)
 			// we then do individual swaps until we reach the end of the swap route
-			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountOut(cacheCtx, suite.TestAccs[0], hopPool, hop.TokenInDenom, sdk.NewInt(100000000), nextTokenOut, swapFee)
+			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountOut(cacheCtx, suite.TestAccs[0], hopPool, hop.TokenInDenom, math.NewInt(100000000), nextTokenOut, swapFee)
 			suite.Require().NoError(err)
 			nextTokenOut = sdk.NewCoin(hop.TokenInDenom, tokenOut)
 		}
@@ -753,7 +754,7 @@ func (suite *KeeperTestSuite) calcOutAmountAsSeparateSwaps(osmoFeeReduced bool, 
 			hopPool, err := suite.App.GAMMKeeper.GetPoolAndPoke(cacheCtx, hop.PoolId)
 			suite.Require().NoError(err)
 			updatedPoolSwapFee := hopPool.GetSwapFee(cacheCtx)
-			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountOut(cacheCtx, suite.TestAccs[0], hopPool, hop.TokenInDenom, sdk.NewInt(100000000), nextTokenOut, updatedPoolSwapFee)
+			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountOut(cacheCtx, suite.TestAccs[0], hopPool, hop.TokenInDenom, math.NewInt(100000000), nextTokenOut, updatedPoolSwapFee)
 			suite.Require().NoError(err)
 			nextTokenOut = sdk.NewCoin(hop.TokenInDenom, tokenOut)
 		}
@@ -791,27 +792,27 @@ func (suite *KeeperTestSuite) calcInAmountAsSeparateSwaps(osmoFeeReduced bool, r
 }
 
 // setupPools creates pools of desired type and returns their IDs
-func (suite *KeeperTestSuite) setupPools(poolType types.PoolType, poolDefaultSwapFee sdk.Dec) (firstEstimatePoolId, secondEstimatePoolId uint64) {
+func (suite *KeeperTestSuite) setupPools(poolType types.PoolType, poolDefaultSwapFee math.LegacyDec) (firstEstimatePoolId, secondEstimatePoolId uint64) {
 	// Prepare 4 pools,
 	// Two pools for calculating `MultihopSwapExactAmountOut`
 	// and two pools for calculating `EstimateMultihopSwapExactAmountOut`
 	suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
 		SwapFee: poolDefaultSwapFee, // 1%
-		ExitFee: sdk.NewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	})
 	suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
 		SwapFee: poolDefaultSwapFee,
-		ExitFee: sdk.NewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	})
 
 	firstEstimatePoolId = suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
 		SwapFee: poolDefaultSwapFee, // 1%
-		ExitFee: sdk.NewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	})
 
 	secondEstimatePoolId = suite.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
 		SwapFee: poolDefaultSwapFee,
-		ExitFee: sdk.NewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	})
 	return
 }

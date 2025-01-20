@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
@@ -15,7 +16,7 @@ import (
 )
 
 // a helper function used to multiply coins
-func mulCoins(coins sdk.Coins, multiplier sdk.Dec) sdk.Coins {
+func mulCoins(coins sdk.Coins, multiplier math.LegacyDec) sdk.Coins {
 	outCoins := sdk.Coins{}
 	for _, coin := range coins {
 		outCoin := sdk.NewCoin(coin.Denom, multiplier.MulInt(coin.Amount).TruncateInt())
@@ -30,20 +31,20 @@ func TestCalcExitPool(t *testing.T) {
 	emptyContext := sdk.Context{}
 
 	twoStablePoolAssets := []balancer.PoolAsset{
-		{Token: sdk.NewInt64Coin("foo", 1000000000), Weight: sdk.NewIntFromUint64(5)},
-		{Token: sdk.NewInt64Coin("bar", 1000000000), Weight: sdk.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("foo", 1000000000), Weight: math.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("bar", 1000000000), Weight: math.NewIntFromUint64(5)},
 	}
 
 	threeBalancerPoolAssets := []balancer.PoolAsset{
-		{Token: sdk.NewInt64Coin("foo", 2000000000), Weight: sdk.NewIntFromUint64(5)},
-		{Token: sdk.NewInt64Coin("bar", 3000000000), Weight: sdk.NewIntFromUint64(5)},
-		{Token: sdk.NewInt64Coin("baz", 4000000000), Weight: sdk.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("foo", 2000000000), Weight: math.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("bar", 3000000000), Weight: math.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("baz", 4000000000), Weight: math.NewIntFromUint64(5)},
 	}
 
 	// create these pools used for testing
 	twoAssetPool, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.ZeroDec()},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyZeroDec()},
 		twoStablePoolAssets,
 		"",
 		time.Now(),
@@ -52,7 +53,7 @@ func TestCalcExitPool(t *testing.T) {
 
 	threeAssetPool, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.ZeroDec()},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyZeroDec()},
 		threeBalancerPoolAssets,
 		"",
 		time.Now(),
@@ -61,7 +62,7 @@ func TestCalcExitPool(t *testing.T) {
 
 	twoAssetPoolWithExitFee, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0001")},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0001")},
 		twoStablePoolAssets,
 		"",
 		time.Now(),
@@ -70,7 +71,7 @@ func TestCalcExitPool(t *testing.T) {
 
 	threeAssetPoolWithExitFee, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0002")},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0002")},
 		threeBalancerPoolAssets,
 		"",
 		time.Now(),
@@ -80,7 +81,7 @@ func TestCalcExitPool(t *testing.T) {
 	tests := []struct {
 		name          string
 		pool          gammtypes.CFMMPoolI
-		exitingShares sdk.Int
+		exitingShares math.Int
 		expError      bool
 	}{
 		{
@@ -104,7 +105,7 @@ func TestCalcExitPool(t *testing.T) {
 		{
 			name:          "three-asset pool, valid exiting shares",
 			pool:          &threeAssetPool,
-			exitingShares: sdk.NewIntFromUint64(3000000000000),
+			exitingShares: math.NewIntFromUint64(3000000000000),
 			expError:      false,
 		},
 		{
@@ -116,7 +117,7 @@ func TestCalcExitPool(t *testing.T) {
 		{
 			name:          "three-asset pool with exit fee, valid exiting shares",
 			pool:          &threeAssetPoolWithExitFee,
-			exitingShares: sdk.NewIntFromUint64(7000000000000),
+			exitingShares: math.NewIntFromUint64(7000000000000),
 			expError:      false,
 		},
 	}
@@ -141,15 +142,15 @@ func TestMaximalExactRatioJoin(t *testing.T) {
 	emptyContext := sdk.Context{}
 
 	balancerPoolAsset := []balancer.PoolAsset{
-		{Token: sdk.NewInt64Coin("foo", 100), Weight: sdk.NewIntFromUint64(5)},
-		{Token: sdk.NewInt64Coin("bar", 100), Weight: sdk.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("foo", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: math.NewInt64Coin("bar", 100), Weight: math.NewIntFromUint64(5)},
 	}
 
 	tests := []struct {
 		name        string
 		pool        func() poolmanagertypes.PoolI
 		tokensIn    sdk.Coins
-		expNumShare sdk.Int
+		expNumShare math.Int
 		expRemCoin  sdk.Coins
 	}{
 		{
@@ -157,7 +158,7 @@ func TestMaximalExactRatioJoin(t *testing.T) {
 			pool: func() poolmanagertypes.PoolI {
 				balancerPool, err := balancer.NewBalancerPool(
 					1,
-					balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.ZeroDec()},
+					balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyZeroDec()},
 					balancerPoolAsset,
 					"",
 					time.Now(),
@@ -165,8 +166,8 @@ func TestMaximalExactRatioJoin(t *testing.T) {
 				require.NoError(t, err)
 				return &balancerPool
 			},
-			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(10)), sdk.NewCoin("bar", sdk.NewInt(10))),
-			expNumShare: sdk.NewIntFromUint64(10000000000000000000),
+			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(10)), sdk.NewCoin("bar", math.NewInt(10))),
+			expNumShare: math.NewIntFromUint64(10000000000000000000),
 			expRemCoin:  sdk.Coins{},
 		},
 		{
@@ -174,7 +175,7 @@ func TestMaximalExactRatioJoin(t *testing.T) {
 			pool: func() poolmanagertypes.PoolI {
 				balancerPool, err := balancer.NewBalancerPool(
 					1,
-					balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.ZeroDec()},
+					balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyZeroDec()},
 					balancerPoolAsset,
 					"",
 					time.Now(),
@@ -182,16 +183,16 @@ func TestMaximalExactRatioJoin(t *testing.T) {
 				require.NoError(t, err)
 				return &balancerPool
 			},
-			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", sdk.NewInt(10)), sdk.NewCoin("bar", sdk.NewInt(11))),
-			expNumShare: sdk.NewIntFromUint64(10000000000000000000),
-			expRemCoin:  sdk.NewCoins(sdk.NewCoin("bar", sdk.NewIntFromUint64(1))),
+			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(10)), sdk.NewCoin("bar", math.NewInt(11))),
+			expNumShare: math.NewIntFromUint64(10000000000000000000),
+			expRemCoin:  sdk.NewCoins(sdk.NewCoin("bar", math.NewIntFromUint64(1))),
 		},
 	}
 
 	for _, test := range tests {
 		balancerPool, err := balancer.NewBalancerPool(
 			1,
-			balancer.PoolParams{SwapFee: sdk.ZeroDec(), ExitFee: sdk.ZeroDec()},
+			balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyZeroDec()},
 			balancerPoolAsset,
 			"",
 			time.Now(),

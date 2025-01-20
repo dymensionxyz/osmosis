@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"reflect"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
@@ -12,14 +13,14 @@ import (
 // TestCreatePool tests that all possible pools are created correctly.
 func (suite *KeeperTestSuite) TestCreatePool() {
 
-	validBalancerPoolMsg := balancer.NewMsgCreateBalancerPool(suite.TestAccs[0], balancer.NewPoolParams(sdk.ZeroDec(), sdk.ZeroDec(), nil), []balancer.PoolAsset{
+	validBalancerPoolMsg := balancer.NewMsgCreateBalancerPool(suite.TestAccs[0], balancer.NewPoolParams(math.LegacyZeroDec(), math.LegacyZeroDec(), nil), []balancer.PoolAsset{
 		{
 			Token:  sdk.NewCoin(foo, defaultInitPoolAmount),
-			Weight: sdk.NewInt(1),
+			Weight: math.NewInt(1),
 		},
 		{
 			Token:  sdk.NewCoin(bar, defaultInitPoolAmount),
-			Weight: sdk.NewInt(1),
+			Weight: math.NewInt(1),
 		},
 	}, "")
 
@@ -32,13 +33,13 @@ func (suite *KeeperTestSuite) TestCreatePool() {
 	}{
 		{
 			name:               "first balancer pool - success",
-			creatorFundAmount:  sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount.Mul(sdk.NewInt(2))), sdk.NewCoin(bar, defaultInitPoolAmount.Mul(sdk.NewInt(2)))),
+			creatorFundAmount:  sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount.Mul(math.NewInt(2))), sdk.NewCoin(bar, defaultInitPoolAmount.Mul(math.NewInt(2)))),
 			msg:                validBalancerPoolMsg,
 			expectedModuleType: gammKeeperType,
 		},
 		{
 			name:               "second balancer pool - success",
-			creatorFundAmount:  sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount.Mul(sdk.NewInt(2))), sdk.NewCoin(bar, defaultInitPoolAmount.Mul(sdk.NewInt(2)))),
+			creatorFundAmount:  sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount.Mul(math.NewInt(2))), sdk.NewCoin(bar, defaultInitPoolAmount.Mul(math.NewInt(2)))),
 			msg:                validBalancerPoolMsg,
 			expectedModuleType: gammKeeperType,
 		},

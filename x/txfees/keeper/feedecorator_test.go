@@ -16,10 +16,10 @@ import (
 
 // mockFeeMarketKeeper implements the FeeMarketKeeper interface for testing
 type mockFeeMarketKeeper struct {
-	minGasPrice sdk.Dec
+	minGasPrice math.LegacyDec
 }
 
-func (m mockFeeMarketKeeper) GetMinGasPrice(ctx sdk.Context) sdk.Dec {
+func (m mockFeeMarketKeeper) GetMinGasPrice(ctx sdk.Context) math.LegacyDec {
 	return m.minGasPrice
 }
 
@@ -36,9 +36,9 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 	type testcase struct {
 		name              string
 		txFee             sdk.Coins
-		minGasPrices      sdk.DecCoins // if blank, set to 0
-		feeMarketMinPrice sdk.Dec      // if blank, no feemarket keeper is used
-		gasRequested      uint64       // if blank, set to base gas
+		minGasPrices      math.LegacyDecCoins // if blank, set to 0
+		feeMarketMinPrice math.LegacyDec      // if blank, no feemarket keeper is used
+		gasRequested      uint64              // if blank, set to base gas
 		isCheckTx         bool
 		isSimulate        bool // if blank, is false
 		expectPass        bool
@@ -50,7 +50,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 		tests = append(tests, []testcase{
 			{
 				name:       fmt.Sprintf("no min gas price - %s", txType[isCheckTx]),
-				txFee:      sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 1000)),
+				txFee:      sdk.NewCoins(math.NewInt64Coin(baseDenom, 1000)),
 				isCheckTx:  isCheckTx == 1,
 				expectPass: true,
 			},
@@ -62,13 +62,13 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 			},
 			{
 				name:       fmt.Sprintf("no min gas price, invalid fee token - %s", txType[isCheckTx]),
-				txFee:      sdk.NewCoins(sdk.NewInt64Coin("uatom", 1000)),
+				txFee:      sdk.NewCoins(math.NewInt64Coin("uatom", 1000)),
 				isCheckTx:  isCheckTx == 1,
 				expectPass: true,
 			},
 			{
 				name:         fmt.Sprintf("multiple fee coins - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 1), sdk.NewInt64Coin(uion, 1)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(baseDenom, 1), math.NewInt64Coin(uion, 1)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   false,
@@ -82,65 +82,65 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 			},
 			{
 				name:         fmt.Sprintf("works with valid basedenom fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 1000)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(baseDenom, 1000)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
 			},
 			{
 				name:         fmt.Sprintf("insufficient valid basedenom fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 10)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(baseDenom, 10)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   isCheckTx != 1, //should pass on deliverTx, fail on checkTx
 			},
 			{
 				name:         fmt.Sprintf("works with valid converted fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1000)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(uion, 1000)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
 			},
 			{
 				name:         fmt.Sprintf("insufficient valid converted fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 10)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(uion, 10)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   isCheckTx != 1,
 			},
 			{
 				name:         fmt.Sprintf("invalid fee denom - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin("moooooo", 1000)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin("moooooo", 1000)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   isCheckTx != 1, //should pass on deliverTx, fail on checkTx,
 			},
 			{
 				name:         "min gas price not containing basedenom gets treated as min gas price 0",
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1000)),
-				minGasPrices: sdk.NewDecCoins(sdk.NewInt64DecCoin(uion, 1000000)),
+				txFee:        sdk.NewCoins(math.NewInt64Coin(uion, 1000)),
+				minGasPrices: sdk.NewDecCoins(math.NewInt64DecCoin(uion, 1000000)),
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
 			},
 			{
 				name:              fmt.Sprintf("works with feemarket min gas price higher than chain min - %s", txType[isCheckTx]),
-				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
-				minGasPrices:      point1BaseDenomMinGasPrices,                     // 0.1
-				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                   // 0.2
+				txFee:             sdk.NewCoins(math.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
+				minGasPrices:      point1BaseDenomMinGasPrices,                      // 0.1
+				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                    // 0.2
 				isCheckTx:         isCheckTx == 1,
 				expectPass:        true,
 			},
 			{
 				name:              fmt.Sprintf("fails with feemarket min gas price higher than chain min - insufficient fee - %s", txType[isCheckTx]),
-				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 1000)), // 0.1 * 10000
-				minGasPrices:      point1BaseDenomMinGasPrices,                     // 0.1
-				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                   // 0.2
+				txFee:             sdk.NewCoins(math.NewInt64Coin(baseDenom, 1000)), // 0.1 * 10000
+				minGasPrices:      point1BaseDenomMinGasPrices,                      // 0.1
+				feeMarketMinPrice: point2BaseDenomFeeMarketPrice,                    // 0.2
 				isCheckTx:         isCheckTx == 1,
 				expectPass:        isCheckTx != 1, // should pass on deliverTx, fail on checkTx
 			},
 			{
 				name:              fmt.Sprintf("works with chain min gas price higher than feemarket - %s", txType[isCheckTx]),
-				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
+				txFee:             sdk.NewCoins(math.NewInt64Coin(baseDenom, 2000)),                                 // 0.2 * 10000
 				minGasPrices:      sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom, point2BaseDenomFeeMarketPrice)), // 0.2
 				feeMarketMinPrice: sdk.MustNewDecFromStr("0.1"),                                                     // 0.1
 				isCheckTx:         isCheckTx == 1,
@@ -155,8 +155,8 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 
 		// setup uion with 1:1 fee
 		suite.PrepareBalancerPoolWithCoins(
-			sdk.NewInt64Coin(sdk.DefaultBondDenom, 500),
-			sdk.NewInt64Coin(uion, 500),
+			math.NewInt64Coin(sdk.DefaultBondDenom, 500),
+			math.NewInt64Coin(uion, 500),
 		)
 
 		if tc.minGasPrices == nil {

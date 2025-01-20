@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/stretchr/testify/require"
 
@@ -15,12 +16,12 @@ import (
 
 var ymlAssetTest = []balancer.PoolAsset{
 	{
-		Weight: sdk.NewInt(200),
-		Token:  sdk.NewCoin("test2", sdk.NewInt(50000)),
+		Weight: math.NewInt(200),
+		Token:  sdk.NewCoin("test2", math.NewInt(50000)),
 	},
 	{
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("test1", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("test1", math.NewInt(10000)),
 	},
 }
 
@@ -29,12 +30,12 @@ func TestPoolJson(t *testing.T) {
 
 	jsonAssetTest := []balancer.PoolAsset{
 		{
-			Weight: sdk.NewInt(200),
-			Token:  sdk.NewCoin("test2", sdk.NewInt(50000)),
+			Weight: math.NewInt(200),
+			Token:  sdk.NewCoin("test2", math.NewInt(50000)),
 		},
 		{
-			Weight: sdk.NewInt(100),
-			Token:  sdk.NewCoin("test1", sdk.NewInt(10000)),
+			Weight: math.NewInt(100),
+			Token:  sdk.NewCoin("test1", math.NewInt(10000)),
 		},
 	}
 	pacc, err := balancer.NewBalancerPool(poolId, balancer.PoolParams{
@@ -68,21 +69,21 @@ func TestPoolProtoMarshal(t *testing.T) {
 	require.Equal(t, pool2.PoolParams.SwapFee, defaultSwapFee)
 	require.Equal(t, pool2.PoolParams.ExitFee, defaultExitFee)
 	require.Equal(t, pool2.FuturePoolGovernor, "")
-	require.Equal(t, pool2.TotalShares, sdk.Coin{Denom: "gamm/pool/10", Amount: sdk.ZeroInt()})
+	require.Equal(t, pool2.TotalShares, sdk.Coin{Denom: "gamm/pool/10", Amount: math.ZeroInt()})
 	require.Equal(t, pool2.PoolAssets, []balancer.PoolAsset{
 		{
 			Token: sdk.Coin{
 				Denom:  "test1",
-				Amount: sdk.NewInt(10000),
+				Amount: math.NewInt(10000),
 			},
-			Weight: sdk.NewInt(107374182400),
+			Weight: math.NewInt(107374182400),
 		},
 		{
 			Token: sdk.Coin{
 				Denom:  "test2",
-				Amount: sdk.NewInt(50000),
+				Amount: math.NewInt(50000),
 			},
-			Weight: sdk.NewInt(214748364800),
+			Weight: math.NewInt(214748364800),
 		},
 	})
 }

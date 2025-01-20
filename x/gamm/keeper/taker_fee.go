@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -51,7 +52,7 @@ func (k Keeper) chargeTakerFee(
 
 // swapTakerFee swaps the taker fee coin to the base denom on the first pool
 func (k Keeper) swapTakerFee(ctx sdk.Context, sender sdk.AccAddress, route poolmanagertypes.SwapAmountInRoute, tokenIn sdk.Coin) (sdk.Coin, error) {
-	minAmountOut := sdk.ZeroInt()
+	minAmountOut := math.ZeroInt()
 	swapRoutes := poolmanagertypes.SwapAmountInRoutes{route}
 	out, err := k.poolManager.RouteExactAmountIn(ctx, sender, swapRoutes, tokenIn, minAmountOut)
 	if err != nil {
@@ -106,7 +107,7 @@ func (k Keeper) getTakerFeeBeneficiary(ctx sdk.Context, inDenom, outDenom string
 /* ---------------------------------- Utils --------------------------------- */
 // Returns remaining amount in to swap, and takerFeeCoins.
 // returns (1 - takerFee) * tokenIn, takerFee * tokenIn
-func (k Keeper) SubTakerFee(tokenIn sdk.Coin, takerFee sdk.Dec) (sdk.Coin, sdk.Coin) {
+func (k Keeper) SubTakerFee(tokenIn sdk.Coin, takerFee math.LegacyDec) (sdk.Coin, sdk.Coin) {
 	amountInAfterSubTakerFee := sdk.NewDecFromInt(tokenIn.Amount).MulTruncate(sdk.OneDec().Sub(takerFee))
 	tokenInAfterSubTakerFee := sdk.NewCoin(tokenIn.Denom, amountInAfterSubTakerFee.TruncateInt())
 	takerFeeCoin := sdk.NewCoin(tokenIn.Denom, tokenIn.Amount.Sub(tokenInAfterSubTakerFee.Amount))
@@ -114,7 +115,7 @@ func (k Keeper) SubTakerFee(tokenIn sdk.Coin, takerFee sdk.Dec) (sdk.Coin, sdk.C
 }
 
 // here we need the output to be (tokenIn / (1 - takerFee), takerFee * tokenIn)
-func (k Keeper) AddTakerFee(tokenIn sdk.Coin, takerFee sdk.Dec) (sdk.Coin, sdk.Coin) {
+func (k Keeper) AddTakerFee(tokenIn sdk.Coin, takerFee math.LegacyDec) (sdk.Coin, sdk.Coin) {
 	amountInAfterAddTakerFee := sdk.NewDecFromInt(tokenIn.Amount).Quo(sdk.OneDec().Sub(takerFee))
 	tokenInAfterAddTakerFee := sdk.NewCoin(tokenIn.Denom, amountInAfterAddTakerFee.Ceil().TruncateInt())
 	takerFeeCoin := sdk.NewCoin(tokenIn.Denom, tokenInAfterAddTakerFee.Amount.Sub(tokenIn.Amount))

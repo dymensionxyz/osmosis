@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/dymensionxyz/sdk-utils/utils/uevent"
 
@@ -151,7 +152,7 @@ func (k Keeper) swapFeeToBaseDenom(
 
 	// Swap the coin to base denom
 	var (
-		tokenOutAmount = sdk.ZeroInt() // Token amount in base denom
+		tokenOutAmount = math.ZeroInt() // Token amount in base denom
 		route          = []poolmanagertypes.SwapAmountInRoute{{
 			PoolId:        feetoken.PoolID,
 			TokenOutDenom: baseDenom,
@@ -159,7 +160,7 @@ func (k Keeper) swapFeeToBaseDenom(
 	)
 
 	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
-		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, sdk.ZeroInt())
+		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, math.ZeroInt())
 		return err
 	})
 	if err != nil {

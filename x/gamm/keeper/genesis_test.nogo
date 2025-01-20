@@ -31,12 +31,12 @@ func TestGammInitGenesis(t *testing.T) {
 		ExitFee: sdk.NewDecWithPrec(1, 2),
 	}, []balancer.PoolAsset{
 		{
-			Weight: sdk.NewInt(1),
-			Token:  sdk.NewInt64Coin(sdk.DefaultBondDenom, 10),
+			Weight: math.NewInt(1),
+			Token:  math.NewInt64Coin(sdk.DefaultBondDenom, 10),
 		},
 		{
-			Weight: sdk.NewInt(1),
-			Token:  sdk.NewInt64Coin("nodetoken", 10),
+			Weight: math.NewInt(1),
+			Token:  math.NewInt64Coin("nodetoken", 10),
 		},
 	}, "", ctx.BlockTime())
 	require.NoError(t, err)
@@ -48,13 +48,13 @@ func TestGammInitGenesis(t *testing.T) {
 		Pools:          []*codectypes.Any{any},
 		NextPoolNumber: 2,
 		Params: types.Params{
-			PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
+			PoolCreationFee:      sdk.Coins{math.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
 			EnableGlobalPoolFees: false,
 			GlobalFees: types.GlobalFees{
-				SwapFee: sdk.ZeroDec(),
-				ExitFee: sdk.ZeroDec(),
+				SwapFee: math.LegacyZeroDec(),
+				ExitFee: math.LegacyZeroDec(),
 			},
-			TakerFee: sdk.ZeroDec(),
+			TakerFee: math.LegacyZeroDec(),
 		},
 	}, app.AppCodec())
 
@@ -74,7 +74,7 @@ func TestGammInitGenesis(t *testing.T) {
 	require.Error(t, err)
 
 	liquidity := app.GAMMKeeper.GetTotalLiquidity(ctx)
-	expectedValue := sdk.Coins{sdk.NewInt64Coin("nodetoken", 10), sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)}
+	expectedValue := sdk.Coins{math.NewInt64Coin("nodetoken", 10), math.NewInt64Coin(sdk.DefaultBondDenom, 10)}
 	require.Equal(t, liquidity, expectedValue.Sort())
 }
 
@@ -84,9 +84,9 @@ func TestGammExportGenesis(t *testing.T) {
 
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
 	err := bankutil.FundAccount(app.BankKeeper, ctx, acc1, sdk.NewCoins(
-		sdk.NewCoin("adym", sdk.NewInt(10000000000)),
-		sdk.NewInt64Coin("foo", 100000),
-		sdk.NewInt64Coin("bar", 100000),
+		sdk.NewCoin("adym", math.NewInt(10000000000)),
+		math.NewInt64Coin("foo", 100000),
+		math.NewInt64Coin("bar", 100000),
 	))
 	require.NoError(t, err)
 
@@ -94,11 +94,11 @@ func TestGammExportGenesis(t *testing.T) {
 		SwapFee: sdk.NewDecWithPrec(1, 2),
 		ExitFee: sdk.NewDecWithPrec(1, 2),
 	}, []balancer.PoolAsset{{
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("foo", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("foo", math.NewInt(10000)),
 	}, {
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("bar", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("bar", math.NewInt(10000)),
 	}}, "")
 	_, err = app.PoolManagerKeeper.CreatePool(ctx, msg)
 	require.NoError(t, err)
@@ -107,11 +107,11 @@ func TestGammExportGenesis(t *testing.T) {
 		SwapFee: sdk.NewDecWithPrec(1, 2),
 		ExitFee: sdk.NewDecWithPrec(1, 2),
 	}, []balancer.PoolAsset{{
-		Weight: sdk.NewInt(70),
-		Token:  sdk.NewCoin("foo", sdk.NewInt(10000)),
+		Weight: math.NewInt(70),
+		Token:  sdk.NewCoin("foo", math.NewInt(10000)),
 	}, {
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("bar", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("bar", math.NewInt(10000)),
 	}}, "")
 	_, err = app.PoolManagerKeeper.CreatePool(ctx, msg)
 	require.NoError(t, err)
@@ -135,9 +135,9 @@ func TestMarshalUnmarshalGenesis(t *testing.T) {
 	am := gamm.NewAppModule(appCodec, *app.GAMMKeeper, app.AccountKeeper, app.BankKeeper)
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
 	err := bankutil.FundAccount(app.BankKeeper, ctx, acc1, sdk.NewCoins(
-		sdk.NewCoin("adym", sdk.NewInt(10000000000)),
-		sdk.NewInt64Coin("foo", 100000),
-		sdk.NewInt64Coin("bar", 100000),
+		sdk.NewCoin("adym", math.NewInt(10000000000)),
+		math.NewInt64Coin("foo", 100000),
+		math.NewInt64Coin("bar", 100000),
 	))
 	require.NoError(t, err)
 
@@ -145,11 +145,11 @@ func TestMarshalUnmarshalGenesis(t *testing.T) {
 		SwapFee: sdk.NewDecWithPrec(1, 2),
 		ExitFee: sdk.NewDecWithPrec(1, 2),
 	}, []balancer.PoolAsset{{
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("foo", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("foo", math.NewInt(10000)),
 	}, {
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("bar", sdk.NewInt(10000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("bar", math.NewInt(10000)),
 	}}, "")
 	_, err = app.PoolManagerKeeper.CreatePool(ctx, msg)
 	require.NoError(t, err)

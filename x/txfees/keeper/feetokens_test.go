@@ -12,8 +12,8 @@ func (suite *KeeperTestSuite) TestBaseDenom() {
 	suite.Require().NoError(err)
 	suite.Require().Equal(sdk.DefaultBondDenom, baseDenom)
 
-	converted, err := suite.App.TxFeesKeeper.ConvertToBaseToken(suite.Ctx, sdk.NewInt64Coin(sdk.DefaultBondDenom, 10))
-	suite.Require().True(converted.IsEqual(sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)))
+	converted, err := suite.App.TxFeesKeeper.ConvertToBaseToken(suite.Ctx, math.NewInt64Coin(sdk.DefaultBondDenom, 10))
+	suite.Require().True(converted.IsEqual(math.NewInt64Coin(sdk.DefaultBondDenom, 10)))
 	suite.Require().NoError(err)
 }
 
@@ -30,36 +30,36 @@ func (suite *KeeperTestSuite) TestFeeTokenConversions() {
 	}{
 		{
 			name:                "equal value",
-			baseDenomPoolInput:  sdk.NewInt64Coin(baseDenom, 100),
-			feeTokenPoolInput:   sdk.NewInt64Coin("uion", 100),
-			inputFee:            sdk.NewInt64Coin("uion", 10),
-			expectedOutput:      sdk.NewInt64Coin(baseDenom, 10),
+			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
+			feeTokenPoolInput:   math.NewInt64Coin("uion", 100),
+			inputFee:            math.NewInt64Coin("uion", 10),
+			expectedOutput:      math.NewInt64Coin(baseDenom, 10),
 			expectedConvertable: true,
 		},
 		{
 			name:               "unequal value",
-			baseDenomPoolInput: sdk.NewInt64Coin(baseDenom, 100),
-			feeTokenPoolInput:  sdk.NewInt64Coin("foo", 200),
-			inputFee:           sdk.NewInt64Coin("foo", 10),
+			baseDenomPoolInput: math.NewInt64Coin(baseDenom, 100),
+			feeTokenPoolInput:  math.NewInt64Coin("foo", 200),
+			inputFee:           math.NewInt64Coin("foo", 10),
 			// expected to get approximately 5 base denom
 			// foo supply / stake supply =  200 / 100 = 2 foo for 1 stake
 			// 10 foo in / 2 foo for 1 stake = 5 base denom
-			expectedOutput:      sdk.NewInt64Coin(baseDenom, 5),
+			expectedOutput:      math.NewInt64Coin(baseDenom, 5),
 			expectedConvertable: true,
 		},
 		{
 			name:                "basedenom value",
-			baseDenomPoolInput:  sdk.NewInt64Coin(baseDenom, 100),
-			feeTokenPoolInput:   sdk.NewInt64Coin("foo", 200),
-			inputFee:            sdk.NewInt64Coin(baseDenom, 10),
-			expectedOutput:      sdk.NewInt64Coin(baseDenom, 10),
+			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
+			feeTokenPoolInput:   math.NewInt64Coin("foo", 200),
+			inputFee:            math.NewInt64Coin(baseDenom, 10),
+			expectedOutput:      math.NewInt64Coin(baseDenom, 10),
 			expectedConvertable: true,
 		},
 		{
 			name:                "convert non-existent",
-			baseDenomPoolInput:  sdk.NewInt64Coin(baseDenom, 100),
-			feeTokenPoolInput:   sdk.NewInt64Coin("uion", 200),
-			inputFee:            sdk.NewInt64Coin("foo", 10),
+			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
+			feeTokenPoolInput:   math.NewInt64Coin("uion", 200),
+			inputFee:            math.NewInt64Coin("foo", 10),
 			expectedOutput:      sdk.Coin{},
 			expectedConvertable: false,
 		},

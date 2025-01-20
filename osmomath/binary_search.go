@@ -17,7 +17,7 @@ import (
 //
 // Each check is respectively ignored if the entry is nil.
 // So AdditiveTolerance = sdk.Int{} or sdk.ZeroInt()
-// MultiplicativeTolerance = sdk.Dec{}
+// MultiplicativeTolerance = math.LegacyDec{}
 // RoundingDir = RoundUnconstrained.
 // Note that if AdditiveTolerance == 0, then this is equivalent to a standard compare.
 type ErrTolerance struct {
