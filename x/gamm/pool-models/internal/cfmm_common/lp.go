@@ -25,10 +25,10 @@ func CalcExitPool(ctx sdk.Context, pool types.CFMMPoolI, exitingShares math.Int,
 	var refundedShares math.LegacyDec
 	if !exitFee.IsZero() {
 		// exitingShares * (1 - exit fee)
-		oneSubExitFee := sdk.OneDec().SubMut(exitFee)
+		oneSubExitFee := math.LegacyOneDec().SubMut(exitFee)
 		refundedShares = oneSubExitFee.MulIntMut(exitingShares)
 	} else {
-		refundedShares = sdk.NewDecFromInt(exitingShares)
+		refundedShares = math.LegacyNewDecFromInt(exitingShares)
 	}
 
 	shareOutRatio := refundedShares.QuoInt(totalShares)
@@ -65,7 +65,7 @@ func CalcExitPool(ctx sdk.Context, pool types.CFMMPoolI, exitingShares math.Int,
 //  3. calculate the number of shares that could be joined (total share * min share ratio), return the remaining coins
 func MaximalExactRatioJoin(p types.CFMMPoolI, ctx sdk.Context, tokensIn sdk.Coins) (numShares math.Int, remCoins sdk.Coins, err error) {
 	coinShareRatios := make([]math.LegacyDec, len(tokensIn))
-	minShareRatio := sdk.MaxSortableDec
+	minShareRatio := math.LegacyMaxSortableDec
 	maxShareRatio := math.LegacyZeroDec()
 
 	poolLiquidity := p.GetTotalPoolLiquidity(ctx)
@@ -75,7 +75,7 @@ func MaximalExactRatioJoin(p types.CFMMPoolI, ctx sdk.Context, tokensIn sdk.Coin
 		// Note: QuoInt implements floor division, unlike Quo
 		// This is because it calls the native golang routine big.Int.Quo
 		// https://pkg.go.dev/math/big#Int.Quo
-		shareRatio := sdk.NewDecFromInt(coin.Amount).QuoInt(poolLiquidity.AmountOfNoDenomValidation(coin.Denom))
+		shareRatio := math.LegacyNewDecFromInt(coin.Amount).QuoInt(poolLiquidity.AmountOfNoDenomValidation(coin.Denom))
 		if shareRatio.LT(minShareRatio) {
 			minShareRatio = shareRatio
 		}
@@ -85,7 +85,7 @@ func MaximalExactRatioJoin(p types.CFMMPoolI, ctx sdk.Context, tokensIn sdk.Coin
 		coinShareRatios[i] = shareRatio
 	}
 
-	if minShareRatio.Equal(sdk.MaxSortableDec) {
+	if minShareRatio.Equal(math.LegacyMaxSortableDec) {
 		return numShares, remCoins, errors.New("unexpected error in MaximalExactRatioJoin")
 	}
 
@@ -136,7 +136,7 @@ func BinarySearchSingleAssetJoin(
 	existingTokenLiquidity := pool.GetTotalPoolLiquidity(ctx).AmountOf(tokenIn.Denom)
 	existingLPShares := pool.GetTotalShares()
 
-	LPShareUpperBound := sdk.NewDecFromInt(existingLPShares.Mul(tokenIn.Amount)).QuoInt(existingTokenLiquidity).Ceil().TruncateInt()
+	LPShareUpperBound := math.LegacyNewDecFromInt(existingLPShares.Mul(tokenIn.Amount)).QuoInt(existingTokenLiquidity).Ceil().TruncateInt()
 	LPShareLowerBound := math.ZeroInt()
 
 	// Creates a pool with tokenIn liquidity added, where it created `sharesIn` number of shares.
@@ -156,7 +156,7 @@ func BinarySearchSingleAssetJoin(
 	}
 
 	// We accept an additive tolerance of 1 LP share error and round down
-	errTolerance := osmomath.ErrTolerance{AdditiveTolerance: sdk.OneDec(), MultiplicativeTolerance: math.LegacyDec{}, RoundingDir: osmomath.RoundDown}
+	errTolerance := osmomath.ErrTolerance{AdditiveTolerance: math.LegacyOneDec(), MultiplicativeTolerance: math.LegacyDec{}, RoundingDir: osmomath.RoundDown}
 
 	numLPShares, err = osmomath.BinarySearch(
 		estimateCoinOutGivenShares,

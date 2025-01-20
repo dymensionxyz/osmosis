@@ -7,8 +7,8 @@ import (
 	"cosmossdk.io/log"
 	"cosmossdk.io/math"
 	"cosmossdk.io/store/rootmulti"
-	dbm "github.com/cometbft/cometbft-db"
 	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
+	dbm "github.com/cosmos/cosmos-db"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -28,7 +28,7 @@ func (suite *CfmmCommonTestSuite) CreateTestContext() sdk.Context {
 	db := dbm.NewMemDB()
 	logger := log.NewNopLogger()
 
-	ms := rootmulti.NewStore(db, logger)
+	ms := rootmulti.NewStore(db, logger, nil)
 
 	return sdk.NewContext(ms, tmtypes.Header{}, false, logger)
 }
@@ -43,32 +43,32 @@ func TestCalculateAmountOutAndIn_InverseRelationship(
 	swapFee math.LegacyDec,
 	errTolerance osmomath.ErrTolerance,
 ) {
-	initialOut := math.NewInt64Coin(assetOutDenom, initialCalcOut)
+	initialOut := sdk.NewInt64Coin(assetOutDenom, initialCalcOut)
 	initialOutCoins := sdk.NewCoins(initialOut)
 
 	actualTokenIn, err := pool.CalcInAmtGivenOut(ctx, initialOutCoins, assetInDenom, swapFee)
 	require.NoError(t, err)
 
 	// we expect that any output less than 1 will always be rounded up
-	require.True(t, actualTokenIn.Amount.GTE(sdk.OneInt()))
+	require.True(t, actualTokenIn.Amount.GTE(math.OneInt()))
 
 	inverseTokenOut, err := pool.CalcOutAmtGivenIn(ctx, sdk.NewCoins(actualTokenIn), assetOutDenom, swapFee)
 	require.NoError(t, err)
 
 	require.Equal(t, initialOut.Denom, inverseTokenOut.Denom)
 
-	expected := sdk.NewDecFromInt(initialOut.Amount)
-	actual := sdk.NewDecFromInt(inverseTokenOut.Amount)
+	expected := math.LegacyNewDecFromInt(initialOut.Amount)
+	actual := math.LegacyNewDecFromInt(inverseTokenOut.Amount)
 
 	// If the pool is extremely imbalanced (specifically in the case of stableswap),
 	// we expect there to be drastically amplified error that will fall outside our usual bounds.
 	// Since these cases are effectively unusable by design, we only really care about whether
 	// they are safe i.e. round correctly.
-	preFeeTokenIn := sdk.NewDecFromInt(actualTokenIn.Amount).Mul((sdk.OneDec().Sub(swapFee))).Ceil().TruncateInt()
-	if preFeeTokenIn.Equal(sdk.OneInt()) {
+	preFeeTokenIn := math.LegacyNewDecFromInt(actualTokenIn.Amount).Mul((math.LegacyOneDec().Sub(swapFee))).Ceil().TruncateInt()
+	if preFeeTokenIn.Equal(math.OneInt()) {
 		require.True(t, actual.GT(expected))
 	} else {
-		if expected.Sub(actual).Abs().GT(sdk.OneDec()) {
+		if expected.Sub(actual).Abs().GT(math.LegacyOneDec()) {
 			compRes := errTolerance.CompareBigDec(osmomath.BigDecFromSDKDec(expected), osmomath.BigDecFromSDKDec(actual))
 			require.True(t, compRes == 0, "expected %s, actual %s, not within error tolerance %v",
 				expected, actual, errTolerance)

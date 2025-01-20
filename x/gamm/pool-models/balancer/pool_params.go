@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 )
@@ -22,7 +21,7 @@ func (params PoolParams) Validate(poolWeights []PoolAsset) error {
 		return types.ErrNegativeExitFee
 	}
 
-	if params.ExitFee.GTE(sdk.OneDec()) {
+	if params.ExitFee.GTE(math.LegacyOneDec()) {
 		return types.ErrTooMuchExitFee
 	}
 
@@ -30,7 +29,7 @@ func (params PoolParams) Validate(poolWeights []PoolAsset) error {
 		return types.ErrNegativeSwapFee
 	}
 
-	if params.SwapFee.GTE(sdk.OneDec()) {
+	if params.SwapFee.GTE(math.LegacyOneDec()) {
 		return types.ErrTooMuchSwapFee
 	}
 

@@ -455,7 +455,7 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountIn() {
 			suite.Require().True(multihopTokenOutAmount.GT(estimateMultihopTokenOutAmountWithTakerFee.TokenOutAmount))
 
 			// Now reducing taker fee from the input, we expect the estimation to be the same
-			reducedTokenIn := sdk.NewDecFromInt(test.param.tokenIn.Amount).MulTruncate(sdk.OneDec().Sub(suite.App.GAMMKeeper.GetParams(suite.Ctx).TakerFee))
+			reducedTokenIn := math.LegacyNewDecFromInt(test.param.tokenIn.Amount).MulTruncate(math.LegacyOneDec().Sub(suite.App.GAMMKeeper.GetParams(suite.Ctx).TakerFee))
 			reducedTokenInCoin := sdk.NewCoin(test.param.tokenIn.Denom, reducedTokenIn.TruncateInt())
 
 			multihopTokenOutAmountTakerFeeReduced, errMultihop := poolmanagerKeeper.MultihopEstimateOutGivenExactAmountIn(
@@ -560,7 +560,7 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountOut() {
 			suite.Require().True(multihopTokenInAmount.LT(estimateMultihopTokenInAmountWithTakerFee.TokenInAmount))
 
 			takerFee := suite.App.GAMMKeeper.GetParams(suite.Ctx).TakerFee
-			tokensAfterTakerFeeReduction := sdk.NewDecFromInt(estimateMultihopTokenInAmountWithTakerFee.TokenInAmount).MulTruncate(sdk.OneDec().Sub(takerFee))
+			tokensAfterTakerFeeReduction := math.LegacyNewDecFromInt(estimateMultihopTokenInAmountWithTakerFee.TokenInAmount).MulTruncate(math.LegacyOneDec().Sub(takerFee))
 
 			// Now reducing taker fee from the input, we expect the estimation to be the same
 			suite.Require().Equal(tokensAfterTakerFeeReduction.TruncateInt(), multihopTokenInAmount)

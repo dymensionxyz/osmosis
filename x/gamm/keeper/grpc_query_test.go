@@ -679,7 +679,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "bar",
 				QuoteAssetDenom: "baz",
 			},
-			result: sdk.NewDecWithPrec(15, 1).String(),
+			result: math.LegacyNewDecWithPrec(15, 1).String(),
 		},
 		{
 			name: "valid request for baz/foo",
@@ -688,7 +688,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "baz",
 				QuoteAssetDenom: "foo",
 			},
-			result: sdk.MustNewDecFromStr("0.333333330000000000").String(),
+			result: math.LegacyMustNewDecFromStr("0.333333330000000000").String(),
 		},
 	}
 
@@ -770,7 +770,7 @@ func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "tokenB",
 				QuoteAssetDenom: "tokenA",
 			},
-			result: sdk.NewDecWithPrec(5, 1).String(),
+			result: math.LegacyNewDecWithPrec(5, 1).String(),
 		},
 		{
 			name: "tokenC in terms of tokenD (rounded decimal of 4/3)",
@@ -779,7 +779,7 @@ func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "tokenC",
 				QuoteAssetDenom: "tokenD",
 			},
-			result: sdk.MustNewDecFromStr("1.333333330000000000").String(),
+			result: math.LegacyMustNewDecFromStr("1.333333330000000000").String(),
 		},
 		{
 			name: "tokenD in terms of tokenE (1)",
@@ -788,7 +788,7 @@ func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 				BaseAssetDenom:  "tokenD",
 				QuoteAssetDenom: "tokenE",
 			},
-			result: sdk.OneDec().String(),
+			result: math.LegacyOneDec().String(),
 		},
 	}
 

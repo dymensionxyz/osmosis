@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	defaultSwapFee            = sdk.MustNewDecFromStr("0.025")
-	defaultExitFee            = sdk.MustNewDecFromStr("0.025")
+	defaultSwapFee            = math.LegacyMustNewDecFromStr("0.025")
+	defaultExitFee            = math.LegacyMustNewDecFromStr("0.025")
 	defaultPoolId             = uint64(10)
 	defaultBalancerPoolParams = balancer.PoolParams{
 		SwapFee: defaultSwapFee,
@@ -136,7 +136,7 @@ func TestCalcSingleAssetJoin(t *testing.T) {
 	for _, tc := range calcSingleAssetJoinTestCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			pool := createTestPool(t, tc.swapFee, sdk.MustNewDecFromStr("0"), tc.poolAssets...)
+			pool := createTestPool(t, tc.swapFee, math.LegacyMustNewDecFromStr("0"), tc.poolAssets...)
 
 			tokenIn := tc.tokensIn[0]
 
@@ -200,7 +200,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			// 	Full solution: https://www.wolframalpha.com/input?i=100000000000000000000*%28%281+%2B+%2850000%2F1000000000000%29%29%5E0.5+-+1%29
 			// 	Simplified:  P_issued = 2,499,999,968,750
 			name:         "one token in - equal weights with zero swap fee",
-			swapFee:      sdk.MustNewDecFromStr("0"),
+			swapFee:      math.LegacyMustNewDecFromStr("0"),
 			poolAssets:   oneTrillionEvenPoolAssets,
 			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
 			expectShares: math.NewInt(2_499_999_968_750),
@@ -220,7 +220,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			// 	Full solution: https://www.wolframalpha.com/input?i=100000000000000000000*%28%281+%2B+%2850000%2F1000000000000%29%29%5E0.5+-+1%29
 			// 	Simplified:  P_issued = 2,499,999,968,750
 			name:         "two tokens in - equal weights with zero swap fee",
-			swapFee:      sdk.MustNewDecFromStr("0"),
+			swapFee:      math.LegacyMustNewDecFromStr("0"),
 			poolAssets:   oneTrillionEvenPoolAssets,
 			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin("uatom", 50_000)),
 			expectShares: math.NewInt(2_499_999_968_750 * 2),
@@ -242,7 +242,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-0.5%29+*+0.01%29%2F1000000000000%29%29%5E0.5+-+1%29
 			// 	Simplified:  P_issued = 2_487_500_000_000
 			name:         "one token in - equal weights with swap fee of 0.01",
-			swapFee:      sdk.MustNewDecFromStr("0.01"),
+			swapFee:      math.LegacyMustNewDecFromStr("0.01"),
 			poolAssets:   oneTrillionEvenPoolAssets,
 			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
 			expectShares: math.NewInt(2_487_500_000_000),
@@ -264,7 +264,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-0.5%29+*+0.01%29%2F1000000000000%29%29%5E0.5+-+1%29
 			// 	Simplified:  P_issued = 2_487_500_000_000
 			name:         "two tokens in - equal weights with swap fee of 0.01",
-			swapFee:      sdk.MustNewDecFromStr("0.01"),
+			swapFee:      math.LegacyMustNewDecFromStr("0.01"),
 			poolAssets:   oneTrillionEvenPoolAssets,
 			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin("uatom", 50_000)),
 			expectShares: math.NewInt(2_487_500_000_000 * 2),
@@ -307,7 +307,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%28100000*%281+-+%281-%28100+%2F+%28500+%2B+100%29%29%29+*+0.03%29%2F1000000000000%29%29%5E%28100+%2F+%28500+%2B+100%29%29+-+1%29
 			// 	Simplified:  P_issued = 1_624_999_900_000
 			name:    "two varying tokens in, varying weights, with swap fee of 0.03",
-			swapFee: sdk.MustNewDecFromStr("0.03"),
+			swapFee: math.LegacyMustNewDecFromStr("0.03"),
 			poolAssets: []balancer.PoolAsset{
 				{
 					Token:  math.NewInt64Coin("adym", 2_000_000_000),
@@ -323,7 +323,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 		},
 		{
 			name:         "no tokens in",
-			swapFee:      sdk.MustNewDecFromStr("0.03"),
+			swapFee:      math.LegacyMustNewDecFromStr("0.03"),
 			poolAssets:   oneTrillionEvenPoolAssets,
 			tokensIn:     sdk.NewCoins(),
 			expectShares: math.NewInt(0),
@@ -560,17 +560,17 @@ func (suite *BalancerTestSuite) TestBalancerCalculateAmountOutAndIn_InverseRelat
 					Weight: math.NewInt(tc.initialWeightIn),
 				}
 
-				swapFeeDec, err := sdk.NewDecFromStr(swapFee)
+				swapFeeDec, err := math.LegacyNewDecFromStr(swapFee)
 				suite.Require().NoError(err)
 
-				exitFeeDec, err := sdk.NewDecFromStr("0")
+				exitFeeDec, err := math.LegacyNewDecFromStr("0")
 				suite.Require().NoError(err)
 
 				pool := createTestPool(suite.T(), swapFeeDec, exitFeeDec, poolAssetOut, poolAssetIn)
 				suite.Require().NotNil(pool)
 
 				errTolerance := osmomath.ErrTolerance{
-					AdditiveTolerance: sdk.OneDec(), MultiplicativeTolerance: math.LegacyDec{}}
+					AdditiveTolerance: math.LegacyOneDec(), MultiplicativeTolerance: math.LegacyDec{}}
 				sut := func() {
 					test_helpers.TestCalculateAmountOutAndIn_InverseRelationship(suite.T(), ctx, pool, poolAssetIn.Token.Denom, poolAssetOut.Token.Denom, tc.initialCalcOut, swapFeeDec, errTolerance)
 				}
@@ -658,7 +658,7 @@ func TestCalcSingleAssetInAndOut_InverseRelationship(t *testing.T) {
 	for _, tc := range testcases {
 		for _, swapFee := range swapFeeCases {
 			t.Run(getTestCaseName(tc, swapFee), func(t *testing.T) {
-				swapFeeDec, err := sdk.NewDecFromStr(swapFee)
+				swapFeeDec, err := math.LegacyNewDecFromStr(swapFee)
 				require.NoError(t, err)
 
 				initialPoolBalanceOut := math.NewInt(tc.initialPoolOut)

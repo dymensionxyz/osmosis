@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	defaultSwapFee    = sdk.MustNewDecFromStr("0.025")
-	defaultExitFee    = sdk.MustNewDecFromStr("0.025")
+	defaultSwapFee    = math.LegacyMustNewDecFromStr("0.025")
+	defaultExitFee    = math.LegacyMustNewDecFromStr("0.025")
 	defaultPoolParams = balancer.PoolParams{
 		SwapFee: defaultSwapFee,
 		ExitFee: defaultExitFee,
@@ -157,32 +157,32 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}, {
 			name: "create a pool with negative swap fee",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(-1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(-1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, defaultPoolAssets, defaultFutureGovernor),
 			emptySender: false,
 			expectPass:  false,
 		}, {
 			name: "create a pool with negative exit fee",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(-1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(-1, 2),
 			}, defaultPoolAssets, defaultFutureGovernor),
 			emptySender: false,
 			expectPass:  false,
 		}, {
 			name: "create the pool with empty PoolAssets",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{}, defaultFutureGovernor),
 			emptySender: false,
 			expectPass:  false,
 		}, {
 			name: "create the pool with 0 weighted PoolAsset",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{{
 				Weight: math.NewInt(0),
 				Token:  sdk.NewCoin("adym", math.NewInt(10000)),
@@ -195,8 +195,8 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}, {
 			name: "create the pool with negative weighted PoolAsset",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{{
 				Weight: math.NewInt(-1),
 				Token:  sdk.NewCoin("foo", math.NewInt(10000)),
@@ -209,8 +209,8 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}, {
 			name: "create the pool with 0 balance PoolAsset",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{{
 				Weight: math.NewInt(100),
 				Token:  sdk.NewCoin("adym", math.NewInt(0)),
@@ -223,8 +223,8 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}, {
 			name: "create the pool with negative balance PoolAsset",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{{
 				Weight: math.NewInt(100),
 				Token: sdk.Coin{
@@ -240,8 +240,8 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}, {
 			name: "create the pool with duplicated PoolAssets",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, []balancertypes.PoolAsset{{
 				Weight: math.NewInt(100),
 				Token:  sdk.NewCoin("adym", math.NewInt(10000)),
@@ -431,8 +431,8 @@ func (suite *KeeperTestSuite) TestSpotPriceOverflow() {
 		panics          bool
 	}{
 		"uniV2marginalOverflow": {
-			poolLiquidity: sdk.NewCoins(sdk.NewCoin(denomA, types.MaxSpotPrice.TruncateInt().Add(sdk.OneInt())),
-				sdk.NewCoin(denomB, sdk.OneInt())),
+			poolLiquidity: sdk.NewCoins(sdk.NewCoin(denomA, types.MaxSpotPrice.TruncateInt().Add(math.OneInt())),
+				sdk.NewCoin(denomB, math.OneInt())),
 			poolWeights:     []int64{1, 1},
 			quoteAssetDenom: denomA,
 			baseAssetDenom:  denomB,
@@ -440,7 +440,7 @@ func (suite *KeeperTestSuite) TestSpotPriceOverflow() {
 		},
 		"uniV2 internal error": {
 			poolLiquidity: sdk.NewCoins(sdk.NewCoin(denomA, math.LegacyNewDec(2).Power(250).TruncateInt()),
-				sdk.NewCoin(denomB, sdk.OneInt())),
+				sdk.NewCoin(denomB, math.OneInt())),
 			poolWeights:     []int64{1, 1 << 19},
 			quoteAssetDenom: denomB,
 			baseAssetDenom:  denomA,
@@ -560,8 +560,8 @@ func (suite *KeeperTestSuite) TestJoinPoolNoSwap() {
 
 		// Create the pool at first
 		msg := balancer.NewMsgCreateBalancerPool(testAccount, balancer.PoolParams{
-			SwapFee: sdk.NewDecWithPrec(1, 2),
-			ExitFee: sdk.NewDecWithPrec(1, 2),
+			SwapFee: math.LegacyNewDecWithPrec(1, 2),
+			ExitFee: math.LegacyNewDecWithPrec(1, 2),
 		}, defaultPoolAssets, defaultFutureGovernor)
 		poolId, err := poolmanagerKeeper.CreatePool(suite.Ctx, msg)
 		suite.Require().NoError(err, "test: %v", test.name)
@@ -671,7 +671,7 @@ func (suite *KeeperTestSuite) TestExitPool() {
 
 			// Create the pool at first
 			msg := balancer.NewMsgCreateBalancerPool(test.txSender, balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
 				ExitFee: math.LegacyNewDec(0),
 			}, defaultPoolAssets, defaultFutureGovernor)
 			poolId, err := poolmanagerKeeper.CreatePool(ctx, msg)
@@ -882,7 +882,7 @@ func (suite *KeeperTestSuite) TestJoinSwapExactAmountInConsistency() {
 		// Ref: https://github.com/osmosis-labs/osmosis/issues/1196
 		// {
 		// 	name:              "single coin with positive swap fee and zero exit fee",
-		// 	poolSwapFee:       sdk.NewDecWithPrec(1, 2),
+		// 	poolSwapFee:       math.LegacyNewDecWithPrec(1, 2),
 		// 	poolExitFee:       math.LegacyZeroDec(),
 		// 	tokensIn:          sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(1000000))),
 		// 	shareOutMinAmount: math.ZeroInt(),
@@ -933,7 +933,7 @@ func (suite *KeeperTestSuite) TestJoinSwapExactAmountInConsistency() {
 			suite.Require().NoError(err)
 
 			// require swapTokenOutAmt <= (tokenInAmt * (1 - tc.poolSwapFee))
-			oneMinusSwapFee := sdk.OneDec().Sub(tc.poolSwapFee)
+			oneMinusSwapFee := math.LegacyOneDec().Sub(tc.poolSwapFee)
 			swapFeeAdjustedAmount := oneMinusSwapFee.MulInt(tc.tokensIn[0].Amount).RoundInt()
 			suite.Require().True(tokenOutAmt.LTE(swapFeeAdjustedAmount))
 
@@ -997,24 +997,24 @@ func (suite *KeeperTestSuite) TestPoolCreationFee() {
 			name:            "no pool creation fee for default asset pool",
 			poolCreationFee: sdk.Coins{},
 			msg: balancer.NewMsgCreateBalancerPool(suite.TestAccs[0], balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, defaultPoolAssets, ""),
 			expectPass: true,
 		}, {
 			name:            "nil pool creation fee on basic pool",
 			poolCreationFee: nil,
 			msg: balancer.NewMsgCreateBalancerPool(suite.TestAccs[0], balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, defaultPoolAssets, ""),
 			expectPass: true,
 		}, {
 			name:            "attempt pool creation without sufficient funds for fees",
 			poolCreationFee: sdk.Coins{sdk.NewCoin("testcoin", math.NewInt(10000))},
 			msg: balancer.NewMsgCreateBalancerPool(suite.TestAccs[0], balancer.PoolParams{
-				SwapFee: sdk.NewDecWithPrec(1, 2),
-				ExitFee: sdk.NewDecWithPrec(1, 2),
+				SwapFee: math.LegacyNewDecWithPrec(1, 2),
+				ExitFee: math.LegacyNewDecWithPrec(1, 2),
 			}, defaultPoolAssets, ""),
 			expectPass: false,
 		},

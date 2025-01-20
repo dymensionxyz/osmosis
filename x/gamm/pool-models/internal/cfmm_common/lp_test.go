@@ -62,7 +62,7 @@ func TestCalcExitPool(t *testing.T) {
 
 	twoAssetPoolWithExitFee, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0001")},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyMustNewDecFromStr("0.0001")},
 		twoStablePoolAssets,
 		"",
 		time.Now(),
@@ -71,7 +71,7 @@ func TestCalcExitPool(t *testing.T) {
 
 	threeAssetPoolWithExitFee, err := balancer.NewBalancerPool(
 		1,
-		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: sdk.MustNewDecFromStr("0.0002")},
+		balancer.PoolParams{SwapFee: math.LegacyZeroDec(), ExitFee: math.LegacyMustNewDecFromStr("0.0002")},
 		threeBalancerPoolAssets,
 		"",
 		time.Now(),
@@ -132,7 +132,7 @@ func TestCalcExitPool(t *testing.T) {
 			require.NoError(t, err, "test: %v", test.name)
 
 			// exitCoins = ( (1 - exitFee) * exitingShares / poolTotalShares ) * poolTotalLiquidity
-			expExitCoins := mulCoins(test.pool.GetTotalPoolLiquidity(emptyContext), (sdk.OneDec().Sub(exitFee)).MulInt(test.exitingShares).QuoInt(test.pool.GetTotalShares()))
+			expExitCoins := mulCoins(test.pool.GetTotalPoolLiquidity(emptyContext), (math.LegacyOneDec().Sub(exitFee)).MulInt(test.exitingShares).QuoInt(test.pool.GetTotalShares()))
 			require.Equal(t, expExitCoins.Sort().String(), exitCoins.Sort().String(), "test: %v", test.name)
 		}
 	}

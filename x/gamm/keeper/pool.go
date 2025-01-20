@@ -3,10 +3,12 @@ package keeper
 import (
 	"fmt"
 
+	storetypes "cosmossdk.io/store/types"
 	gogotypes "github.com/cosmos/gogoproto/types"
 
-	sdkerrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
@@ -60,14 +62,14 @@ func (k Keeper) getPoolForSwap(ctx sdk.Context, poolId uint64) (types.CFMMPoolI,
 	}
 
 	if !pool.IsActive(ctx) {
-		return &balancer.Pool{}, sdkerrors.Wrapf(types.ErrPoolLocked, "swap on inactive pool")
+		return &balancer.Pool{}, errorsmod.Wrapf(types.ErrPoolLocked, "swap on inactive pool")
 	}
 	return pool, nil
 }
 
-func (k Keeper) iterator(ctx sdk.Context, prefix []byte) sdk.Iterator {
+func (k Keeper) iterator(ctx sdk.Context, prefix []byte) storetypes.Iterator {
 	store := ctx.KVStore(k.storeKey)
-	return sdk.KVStorePrefixIterator(store, prefix)
+	return storetypes.KVStorePrefixIterator(store, prefix)
 }
 
 func (k Keeper) GetPoolsAndPoke(ctx sdk.Context) (res []types.CFMMPoolI, err error) {
@@ -166,7 +168,7 @@ func (k Keeper) GetPoolType(ctx sdk.Context, poolId uint64) (poolmanagertypes.Po
 		return poolmanagertypes.Balancer, nil
 	default:
 		errMsg := fmt.Sprintf("unrecognized %s pool type: %T", types.ModuleName, pool)
-		return -1, sdkerrors.Wrap(sdkerrors.ErrUnpackAny, errMsg)
+		return -1, errorsmod.Wrap(sdkerrors.ErrUnpackAny, errMsg)
 	}
 }
 

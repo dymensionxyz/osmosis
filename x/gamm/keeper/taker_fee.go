@@ -108,7 +108,7 @@ func (k Keeper) getTakerFeeBeneficiary(ctx sdk.Context, inDenom, outDenom string
 // Returns remaining amount in to swap, and takerFeeCoins.
 // returns (1 - takerFee) * tokenIn, takerFee * tokenIn
 func (k Keeper) SubTakerFee(tokenIn sdk.Coin, takerFee math.LegacyDec) (sdk.Coin, sdk.Coin) {
-	amountInAfterSubTakerFee := sdk.NewDecFromInt(tokenIn.Amount).MulTruncate(sdk.OneDec().Sub(takerFee))
+	amountInAfterSubTakerFee := math.LegacyNewDecFromInt(tokenIn.Amount).MulTruncate(math.LegacyOneDec().Sub(takerFee))
 	tokenInAfterSubTakerFee := sdk.NewCoin(tokenIn.Denom, amountInAfterSubTakerFee.TruncateInt())
 	takerFeeCoin := sdk.NewCoin(tokenIn.Denom, tokenIn.Amount.Sub(tokenInAfterSubTakerFee.Amount))
 	return tokenInAfterSubTakerFee, takerFeeCoin
@@ -116,7 +116,7 @@ func (k Keeper) SubTakerFee(tokenIn sdk.Coin, takerFee math.LegacyDec) (sdk.Coin
 
 // here we need the output to be (tokenIn / (1 - takerFee), takerFee * tokenIn)
 func (k Keeper) AddTakerFee(tokenIn sdk.Coin, takerFee math.LegacyDec) (sdk.Coin, sdk.Coin) {
-	amountInAfterAddTakerFee := sdk.NewDecFromInt(tokenIn.Amount).Quo(sdk.OneDec().Sub(takerFee))
+	amountInAfterAddTakerFee := math.LegacyNewDecFromInt(tokenIn.Amount).Quo(math.LegacyOneDec().Sub(takerFee))
 	tokenInAfterAddTakerFee := sdk.NewCoin(tokenIn.Denom, amountInAfterAddTakerFee.Ceil().TruncateInt())
 	takerFeeCoin := sdk.NewCoin(tokenIn.Denom, tokenInAfterAddTakerFee.Amount.Sub(tokenIn.Amount))
 	return tokenInAfterAddTakerFee, takerFeeCoin

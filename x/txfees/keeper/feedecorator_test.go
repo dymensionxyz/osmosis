@@ -27,8 +27,8 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 	baseDenom := sdk.DefaultBondDenom
 	baseGas := uint64(10000)
 	point1BaseDenomMinGasPrices := sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom,
-		sdk.MustNewDecFromStr("0.1")))
-	point2BaseDenomFeeMarketPrice := sdk.MustNewDecFromStr("0.2")
+		math.LegacyMustNewDecFromStr("0.1")))
+	point2BaseDenomFeeMarketPrice := math.LegacyMustNewDecFromStr("0.2")
 
 	// uion is setup with a relative price of 1:1
 	uion := "uion"
@@ -142,7 +142,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 				name:              fmt.Sprintf("works with chain min gas price higher than feemarket - %s", txType[isCheckTx]),
 				txFee:             sdk.NewCoins(math.NewInt64Coin(baseDenom, 2000)),                                 // 0.2 * 10000
 				minGasPrices:      sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom, point2BaseDenomFeeMarketPrice)), // 0.2
-				feeMarketMinPrice: sdk.MustNewDecFromStr("0.1"),                                                     // 0.1
+				feeMarketMinPrice: math.LegacyMustNewDecFromStr("0.1"),                                              // 0.1
 				isCheckTx:         isCheckTx == 1,
 				expectPass:        true,
 			},

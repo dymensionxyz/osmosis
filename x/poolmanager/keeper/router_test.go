@@ -22,7 +22,7 @@ const (
 var (
 	defaultInitPoolAmount     = math.NewInt(1000000000000)
 	DefaultExponentAtPriceOne = math.NewInt(-4)
-	defaultPoolSwapFee        = sdk.NewDecWithPrec(1, 2) // 1% pool swap fee default
+	defaultPoolSwapFee        = math.LegacyNewDecWithPrec(1, 2) // 1% pool swap fee default
 	defaultSwapAmount         = math.NewInt(1000000)
 	gammKeeperType            = reflect.TypeOf(&gamm.Keeper{})
 )
@@ -324,7 +324,7 @@ func (suite *KeeperTestSuite) TestRouteExactAmountOut() {
 		// 		sdk.NewCoins(sdk.NewCoin(foo, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 1.
 		// 		sdk.NewCoins(sdk.NewCoin(baz, defaultInitPoolAmount), sdk.NewCoin(uosmo, defaultInitPoolAmount)), // pool 2.
 		// 	},
-		// 	poolFee: []math.LegacyDec{defaultPoolSwapFee, sdk.NewDecWithPrec(1, 1)},
+		// 	poolFee: []math.LegacyDec{defaultPoolSwapFee, math.LegacyNewDecWithPrec(1, 1)},
 		// 	routes: []types.SwapAmountOutRoute{
 		// 		{
 		// 			PoolId:       1,
@@ -772,7 +772,7 @@ func (suite *KeeperTestSuite) calcInAmountAsSeparateSwaps(osmoFeeReduced bool, r
 			suite.Require().NoError(err)
 			swapFee := hopPool.GetSwapFee(cacheCtx)
 			// we then do individual swaps until we reach the end of the swap route
-			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountIn(cacheCtx, suite.TestAccs[0], hopPool, nextTokenIn, hop.TokenOutDenom, sdk.OneInt(), swapFee)
+			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountIn(cacheCtx, suite.TestAccs[0], hopPool, nextTokenIn, hop.TokenOutDenom, math.OneInt(), swapFee)
 			suite.Require().NoError(err)
 			nextTokenIn = sdk.NewCoin(hop.TokenOutDenom, tokenOut)
 		}
@@ -783,7 +783,7 @@ func (suite *KeeperTestSuite) calcInAmountAsSeparateSwaps(osmoFeeReduced bool, r
 			hopPool, err := suite.App.GAMMKeeper.GetPoolAndPoke(cacheCtx, hop.PoolId)
 			suite.Require().NoError(err)
 			updatedPoolSwapFee := hopPool.GetSwapFee(cacheCtx)
-			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountIn(cacheCtx, suite.TestAccs[0], hopPool, nextTokenIn, hop.TokenOutDenom, sdk.OneInt(), updatedPoolSwapFee)
+			tokenOut, err := suite.App.GAMMKeeper.SwapExactAmountIn(cacheCtx, suite.TestAccs[0], hopPool, nextTokenIn, hop.TokenOutDenom, math.OneInt(), updatedPoolSwapFee)
 			suite.Require().NoError(err)
 			nextTokenIn = sdk.NewCoin(hop.TokenOutDenom, tokenOut)
 		}

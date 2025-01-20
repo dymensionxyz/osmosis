@@ -203,7 +203,7 @@ func getMaximalNoSwapLPAmount(ctx sdk.Context, pool types.CFMMPoolI, shareOutAmo
 	totalSharesAmount := pool.GetTotalShares()
 	// shareRatio is the desired number of shares, divided by the total number of
 	// shares currently in the pool. It is intended to be used in scenarios where you want
-	shareRatio := sdk.NewDecFromInt(shareOutAmount).QuoInt(totalSharesAmount)
+	shareRatio := math.LegacyNewDecFromInt(shareOutAmount).QuoInt(totalSharesAmount)
 	if shareRatio.LTE(math.LegacyZeroDec()) {
 		return sdk.Coins{}, sdkerrors.Wrapf(types.ErrInvalidMathApprox, "Too few shares out wanted. "+
 			"(debug: getMaximalNoSwapLPAmount share ratio is zero or negative)")
@@ -214,7 +214,7 @@ func getMaximalNoSwapLPAmount(ctx sdk.Context, pool types.CFMMPoolI, shareOutAmo
 
 	for _, coin := range poolLiquidity {
 		// (coin.Amt * shareRatio).Ceil()
-		neededAmt := sdk.NewDecFromInt(coin.Amount).Mul(shareRatio).Ceil().RoundInt()
+		neededAmt := math.LegacyNewDecFromInt(coin.Amount).Mul(shareRatio).Ceil().RoundInt()
 		if neededAmt.LTE(math.ZeroInt()) {
 			return sdk.Coins{}, sdkerrors.Wrapf(types.ErrInvalidMathApprox, "Too few shares out wanted")
 		}

@@ -33,10 +33,10 @@ func NewParams(poolCreationFee sdk.Coins) Params {
 // default gamm module parameters.
 func DefaultParams() Params {
 	return Params{
-		PoolCreationFee:      sdk.Coins{math.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
+		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
 		EnableGlobalPoolFees: false,
-		GlobalFees:           GlobalFees{sdk.MustNewDecFromStr("0.02"), math.LegacyZeroDec()},
-		TakerFee:             sdk.MustNewDecFromStr("0.01"),
+		GlobalFees:           GlobalFees{math.LegacyMustNewDecFromStr("0.02"), math.LegacyZeroDec()},
+		TakerFee:             math.LegacyMustNewDecFromStr("0.01"),
 	}
 }
 
@@ -87,7 +87,7 @@ func validateGlobalFees(i interface{}) error {
 		return ErrNegativeExitFee
 	}
 
-	if v.ExitFee.GTE(sdk.OneDec()) {
+	if v.ExitFee.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchExitFee
 	}
 
@@ -95,7 +95,7 @@ func validateGlobalFees(i interface{}) error {
 		return ErrNegativeSwapFee
 	}
 
-	if v.SwapFee.GTE(sdk.OneDec()) {
+	if v.SwapFee.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchSwapFee
 	}
 
@@ -114,7 +114,7 @@ func validateTakerFees(i interface{}) error {
 		return ErrNegativeExitFee
 	}
 
-	if v.GTE(sdk.OneDec()) {
+	if v.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchExitFee
 	}
 

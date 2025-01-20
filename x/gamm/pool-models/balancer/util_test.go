@@ -34,13 +34,13 @@ func createTestContext(t *testing.T) sdk.Context {
 	db := dbm.NewMemDB()
 	logger := log.NewNopLogger()
 
-	ms := rootmulti.NewStore(db, logger)
+	ms := rootmulti.NewStore(db, logger, nil)
 
 	return sdk.NewContext(ms, tmtypes.Header{}, false, logger)
 }
 
 func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares math.Int) {
-	allowedErrRatioDec, err := sdk.NewDecFromStr(allowedErrRatio)
+	allowedErrRatioDec, err := math.LegacyNewDecFromStr(allowedErrRatio)
 	require.NoError(t, err)
 
 	errTolerance := osmomath.ErrTolerance{

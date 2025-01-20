@@ -80,7 +80,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100000000000000000000*%28%281+%2B+%2850000%2F1000000000000%29%29%5E0.5+-+1%29
 		// 	Simplified:  P_issued = 2,499,999,968,750
 		name:         "single tokensIn - equal weights with zero swap fee",
-		swapFee:      sdk.MustNewDecFromStr("0"),
+		swapFee:      math.LegacyMustNewDecFromStr("0"),
 		poolAssets:   oneTrillionEvenPoolAssets,
 		tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
 		expectShares: math.NewInt(2_499_999_968_750),
@@ -101,7 +101,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-0.5%29+*+0.01%29%2F1000000000000%29%29%5E0.5+-+1%29
 		// 	Simplified:  P_issued = 2_487_500_000_000
 		name:         "single tokensIn - equal weights with 0.01 swap fee",
-		swapFee:      sdk.MustNewDecFromStr("0.01"),
+		swapFee:      math.LegacyMustNewDecFromStr("0.01"),
 		poolAssets:   oneTrillionEvenPoolAssets,
 		tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
 		expectShares: math.NewInt(2_487_500_000_000),
@@ -122,7 +122,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=%28100+*+10%5E18+%29*+%28%28+1+%2B+%2850%2C000+*+%281+-+%281+-+0.5%29+*+0.99%29+%2F+1000000000000%29%29%5E0.5+-+1%29
 		// 	Simplified:  P_issued = 1_262_500_000_000
 		name:         "single tokensIn - equal weights with 0.99 swap fee",
-		swapFee:      sdk.MustNewDecFromStr("0.99"),
+		swapFee:      math.LegacyMustNewDecFromStr("0.99"),
 		poolAssets:   oneTrillionEvenPoolAssets,
 		tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
 		expectShares: math.NewInt(1_262_500_000_000),
@@ -143,7 +143,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=%28100+*+10%5E18+%29*+%28%28+1+%2B+%2850%2C000+*+%281+-+%281+-+0.25%29+*+0.99%29+%2F+1000000000000%29%29%5E0.25+-+1%29
 		// 	Simplified:  P_issued = 321_875_000_000
 		name:    "single tokensIn - unequal weights with 0.99 swap fee",
-		swapFee: sdk.MustNewDecFromStr("0.99"),
+		swapFee: math.LegacyMustNewDecFromStr("0.99"),
 		poolAssets: []balancer.PoolAsset{
 			defaultOsmoPoolAsset,
 			{
@@ -195,7 +195,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-%28500+%2F+%28100+%2B+500%29%29%29+*+0.01%29%2F1000000000000%29%29%5E%28500+%2F+%28100+%2B+500%29%29+-+1%29
 		// 	Simplified:  P_issued = 4_159_722_200_000
 		name:    "single asset - token in weight is greater than the other token, with non-zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0.01"),
+		swapFee: math.LegacyMustNewDecFromStr("0.01"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1e12),
@@ -221,7 +221,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-%28200+%2F+%28200+%2B+1000%29%29%29+*+0%29%2F1000000000000%29%29%5E%28200+%2F+%28200+%2B+1000%29%29+-+1%29
 		// 	Simplified:  P_issued = 833_333_315_972
 		name:    "single asset - token in weight is smaller than the other token, with zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1e12),
@@ -250,7 +250,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-%28200+%2F+%28200+%2B+1000%29%29%29+*+0.02%29%2F1000000000000%29%29%5E%28200+%2F+%28200+%2B+1000%29%29+-+1%29
 		// 	Simplified:  P_issued = 819_444_430_000
 		name:    "single asset - token in weight is smaller than the other token, with non-zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0.02"),
+		swapFee: math.LegacyMustNewDecFromStr("0.02"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1e12),
@@ -279,7 +279,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%28117552*%281+-+%281-%28200+%2F+%28200+%2B+1000%29%29%29+*+0%29%2F156736%29%29%5E%28200+%2F+%28200+%2B+1000%29%29+-+1%29
 		// 	Simplified:  P_issued = 9_775_731_930_496_140_648
 		name:    "single asset - tokenIn is large relative to liquidity, token in weight is smaller than the other token, with zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 156_736),
@@ -309,7 +309,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%2850000*%281+-+%281-%28200+%2F+%28200+%2B+1000%29%29%29+*+0.02%29%2F1000000000000%29%29%5E%28200+%2F+%28200+%2B+1000%29%29+-+1%29
 		// 	Simplified:  P_issued = 9_644_655_900_000_000_000
 		name:    "single asset - tokenIn is large relative to liquidity, token in weight is smaller than the other token, with non-zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0.02"),
+		swapFee: math.LegacyMustNewDecFromStr("0.02"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 156_736),
@@ -339,7 +339,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// 	Full solution: https://www.wolframalpha.com/input?i=100+*10%5E18*%28%281+%2B+%28499999*%281+-+%281-%28100+%2F+%28100+%2B+1000%29%29%29+*+0%29%2F500000%29%29%5E%28100+%2F+%28100+%2B+1000%29%29+-+1%29
 		// 	Simplified:  P_issued = 6_504_099_261_800_144_638
 		name:    "single asset - (almost 1 == tokenIn / liquidity ratio), token in weight is smaller than the other token, with zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 500_000),
@@ -362,7 +362,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// This has been deemed as acceptable since it causes code complexity to fix
 		// & only affects UX in an edge case (user has to split up single asset joins)
 		name:    "single asset - (exactly 1 == tokenIn / liquidity ratio - failure), token in weight is smaller than the other token, with zero swap fee",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 500_000),
@@ -379,7 +379,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 	},
 	{
 		name:         "tokenIn asset does not exist in pool",
-		swapFee:      sdk.MustNewDecFromStr("0"),
+		swapFee:      math.LegacyMustNewDecFromStr("0"),
 		poolAssets:   oneTrillionEvenPoolAssets,
 		tokensIn:     sdk.NewCoins(math.NewInt64Coin(doesNotExistDenom, 50_000)),
 		expectShares: math.ZeroInt(),
@@ -389,7 +389,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// Pool liquidity is changed by 1e-12 / 2
 		// P_issued = 1e20 * 1e-12 / 2 = 1e8 / 2 = 50_000_000
 		name:    "minimum input single asset equal liquidity",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1_000_000_000_000),
@@ -409,7 +409,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		// P_issued should be 1/10th that of the previous test
 		// p_issued = 50_000_000 / 10 = 5_000_000
 		name:    "minimum input single asset imbalanced liquidity",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 10_000_000_000_000),
@@ -430,7 +430,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 var multiAssetExactInputTestCases = []calcJoinSharesTestCase{
 	{
 		name:       "swap equal weights with zero swap fee",
-		swapFee:    sdk.MustNewDecFromStr("0"),
+		swapFee:    math.LegacyMustNewDecFromStr("0"),
 		poolAssets: oneTrillionEvenPoolAssets,
 		tokensIn: sdk.NewCoins(
 			math.NewInt64Coin("adym", 25_000),
@@ -447,7 +447,7 @@ var multiAssetExactInputTestCases = []calcJoinSharesTestCase{
 	},
 	{
 		name:       "swap equal weights with 0.001 swap fee",
-		swapFee:    sdk.MustNewDecFromStr("0.001"),
+		swapFee:    math.LegacyMustNewDecFromStr("0.001"),
 		poolAssets: oneTrillionEvenPoolAssets,
 		tokensIn: sdk.NewCoins(
 			math.NewInt64Coin("adym", 25_000),
@@ -464,7 +464,7 @@ var multiAssetExactInputTestCases = []calcJoinSharesTestCase{
 		// This is set to 1e20 (or 100 * 10^18) for Osmosis, so we should expect:
 		// P_issued = 1e20
 		name:    "minimum input with two assets and minimum liquidity",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1),
@@ -489,7 +489,7 @@ var multiAssetExactInputTestCases = []calcJoinSharesTestCase{
 		// Pool liquidity is changed by 1e-12
 		// P_issued = 1e20 * 1e-12 = 1e8
 		name:    "minimum input two assets equal liquidity",
-		swapFee: sdk.MustNewDecFromStr("0"),
+		swapFee: math.LegacyMustNewDecFromStr("0"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 1_000_000_000_000),
@@ -560,7 +560,7 @@ var multiAssetUnevenInputTestCases = []calcJoinSharesTestCase{
 		// 	Simplified:  P_issued = 2_500_000_000_000 + 1_243_750_000_000
 
 		name:       "Multi-tokens In: unequal amounts, equal weights with 0.01 swap fee",
-		swapFee:    sdk.MustNewDecFromStr("0.01"),
+		swapFee:    math.LegacyMustNewDecFromStr("0.01"),
 		poolAssets: oneTrillionEvenPoolAssets,
 		tokensIn: sdk.NewCoins(
 			math.NewInt64Coin("adym", 25_000),
@@ -588,7 +588,7 @@ var multiAssetUnevenInputTestCases = []calcJoinSharesTestCase{
 		// 	Full solution with fees: https://www.wolframalpha.com/input?i=%28100+*10%5E18+%2B+1250000000000%29*%28%281%2B++++%2837500*%281+-+%281-1%2F6%29+*+0.03%29%2F1000000012500%29%29%5E%281%2F6%29+-+1%29
 		// 	Simplified:  P_issued = 1,250,000,000,000 + 609,374,990,000
 		name:    "Multi-tokens In: unequal amounts, with unequal weights with 0.03 swap fee",
-		swapFee: sdk.MustNewDecFromStr("0.03"),
+		swapFee: math.LegacyMustNewDecFromStr("0.03"),
 		poolAssets: []balancer.PoolAsset{
 			{
 				Token:  math.NewInt64Coin("adym", 2_000_000_000_000),
@@ -641,42 +641,42 @@ func (suite *KeeperTestSuite) TestBalancerSpotPrice() {
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
 			quoteDenomPoolInput: math.NewInt64Coin(quoteDenom, 100),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("1"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("1"),
 		},
 		{
 			name:                "1:2 ratio",
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
 			quoteDenomPoolInput: math.NewInt64Coin(quoteDenom, 200),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("0.500000000000000000"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("0.500000000000000000"),
 		},
 		{
 			name:                "2:1 ratio",
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 200),
 			quoteDenomPoolInput: math.NewInt64Coin(quoteDenom, 100),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("2.000000000000000000"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("2.000000000000000000"),
 		},
 		{
 			name:                "rounding after sigfig ratio",
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 220),
 			quoteDenomPoolInput: math.NewInt64Coin(quoteDenom, 115),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("1.913043480000000000"), // ans is 1.913043478260869565, rounded is 1.91304348
+			expectedOutput:      math.LegacyMustNewDecFromStr("1.913043480000000000"), // ans is 1.913043478260869565, rounded is 1.91304348
 		},
 		{
 			name:                "check number of sig figs",
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 100),
 			quoteDenomPoolInput: math.NewInt64Coin(quoteDenom, 300),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("0.333333330000000000"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("0.333333330000000000"),
 		},
 		{
 			name:                "check number of sig figs high sizes",
 			baseDenomPoolInput:  math.NewInt64Coin(baseDenom, 343569192534),
-			quoteDenomPoolInput: sdk.NewCoin(quoteDenom, sdk.MustNewDecFromStr("186633424395479094888742").TruncateInt()),
+			quoteDenomPoolInput: sdk.NewCoin(quoteDenom, math.LegacyMustNewDecFromStr("186633424395479094888742").TruncateInt()),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("0.000000000001840877"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("0.000000000001840877"),
 		},
 	}
 
@@ -727,27 +727,27 @@ func (suite *KeeperTestSuite) TestBalancerSpotPriceBounds() {
 		{
 			name: "spot price check at max bitlen supply",
 			// 2^196, as >= 2^197 trips max bitlen of 256
-			quoteDenomPoolInput: sdk.NewCoin(baseDenom, sdk.MustNewDecFromStr("100433627766186892221372630771322662657637687111424552206336").TruncateInt()),
+			quoteDenomPoolInput: sdk.NewCoin(baseDenom, math.LegacyMustNewDecFromStr("100433627766186892221372630771322662657637687111424552206336").TruncateInt()),
 			quoteDenomWeight:    math.NewInt(100),
-			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, sdk.MustNewDecFromStr("100433627766186892221372630771322662657637687111424552206337").TruncateInt()),
+			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.LegacyMustNewDecFromStr("100433627766186892221372630771322662657637687111424552206337").TruncateInt()),
 			baseDenomWeight:     math.NewInt(100),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("1.000000000000000000"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("1.000000000000000000"),
 		},
 		{
 			name:                "spot price check at min supply",
-			quoteDenomPoolInput: sdk.NewCoin(baseDenom, sdk.OneInt()),
+			quoteDenomPoolInput: sdk.NewCoin(baseDenom, math.OneInt()),
 			quoteDenomWeight:    math.NewInt(100),
-			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, sdk.OneInt()),
+			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.OneInt()),
 			baseDenomWeight:     math.NewInt(100),
 			expectError:         false,
-			expectedOutput:      sdk.MustNewDecFromStr("1.000000000000000000"),
+			expectedOutput:      math.LegacyMustNewDecFromStr("1.000000000000000000"),
 		},
 		{
 			name:                "max spot price with equal weights",
 			quoteDenomPoolInput: sdk.NewCoin(baseDenom, types.MaxSpotPrice.TruncateInt()),
 			quoteDenomWeight:    math.NewInt(100),
-			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, sdk.OneInt()),
+			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.OneInt()),
 			baseDenomWeight:     math.NewInt(100),
 			expectError:         false,
 			expectedOutput:      types.MaxSpotPrice,
@@ -756,23 +756,23 @@ func (suite *KeeperTestSuite) TestBalancerSpotPriceBounds() {
 			// test int overflows
 			name:                "max spot price with extreme weights",
 			quoteDenomPoolInput: sdk.NewCoin(baseDenom, types.MaxSpotPrice.TruncateInt()),
-			quoteDenomWeight:    sdk.OneInt(),
-			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, sdk.OneInt()),
+			quoteDenomWeight:    math.OneInt(),
+			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.OneInt()),
 			baseDenomWeight:     math.NewInt(1 << 19),
 			expectError:         true,
 		},
 		{
 			name: "greater than max spot price with equal weights",
 			// Max spot price capped at 2^160
-			quoteDenomPoolInput: sdk.NewCoin(baseDenom, types.MaxSpotPrice.TruncateInt().Add(sdk.OneInt())),
+			quoteDenomPoolInput: sdk.NewCoin(baseDenom, types.MaxSpotPrice.TruncateInt().Add(math.OneInt())),
 			quoteDenomWeight:    math.NewInt(100),
-			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, sdk.OneInt()),
+			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.OneInt()),
 			baseDenomWeight:     math.NewInt(100),
 			expectError:         true,
 		},
 		{
 			name:                "internal error due to spot price precision being too small, resulting in 0 spot price",
-			quoteDenomPoolInput: sdk.NewCoin(baseDenom, sdk.OneInt()),
+			quoteDenomPoolInput: sdk.NewCoin(baseDenom, math.OneInt()),
 			quoteDenomWeight:    math.NewInt(100),
 			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.LegacyNewDec(10).PowerMut(19).TruncateInt().Sub(math.NewInt(2))),
 			baseDenomWeight:     math.NewInt(100),
@@ -780,11 +780,11 @@ func (suite *KeeperTestSuite) TestBalancerSpotPriceBounds() {
 		},
 		{
 			name:                "at min spot price",
-			quoteDenomPoolInput: sdk.NewCoin(baseDenom, sdk.OneInt()),
+			quoteDenomPoolInput: sdk.NewCoin(baseDenom, math.OneInt()),
 			quoteDenomWeight:    math.NewInt(100),
 			baseDenomPoolInput:  sdk.NewCoin(quoteDenom, math.LegacyNewDec(10).PowerMut(18).TruncateInt()),
 			baseDenomWeight:     math.NewInt(100),
-			expectedOutput:      sdk.OneDec().Quo(math.LegacyNewDec(10).PowerMut(18)),
+			expectedOutput:      math.LegacyOneDec().Quo(math.LegacyNewDec(10).PowerMut(18)),
 		},
 	}
 
@@ -926,7 +926,7 @@ func (suite *KeeperTestSuite) TestJoinPoolNoSwap() {
 		{
 			// only the exact ratio portion is successfully joined
 			name:       "Multi-tokens In: unequal amounts, equal weights with 0.01 swap fee",
-			swapFee:    sdk.MustNewDecFromStr("0.01"),
+			swapFee:    math.LegacyMustNewDecFromStr("0.01"),
 			poolAssets: oneTrillionEvenPoolAssets,
 			tokensIn: sdk.NewCoins(
 				math.NewInt64Coin("adym", 25_000),
@@ -944,7 +944,7 @@ func (suite *KeeperTestSuite) TestJoinPoolNoSwap() {
 			// We expect a 2:1 ratio in the joined liquidity because there's a 2:1 ration in existing liquidity
 			// Since only the exact ratio portion is successfully joined, we expect 25k adym and 12.5k uatom
 			name:    "Multi-tokens In: unequal amounts, with unequal weights with 0.03 swap fee",
-			swapFee: sdk.MustNewDecFromStr("0.03"),
+			swapFee: math.LegacyMustNewDecFromStr("0.03"),
 			poolAssets: []balancer.PoolAsset{
 				{
 					Token:  math.NewInt64Coin("adym", 2_000_000_000_000),

@@ -1,8 +1,9 @@
 package balancer
 
 import (
-	sdkerrors "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -37,7 +38,7 @@ func (msg MsgCreateBalancerPool) Type() string  { return TypeMsgCreateBalancerPo
 func (msg MsgCreateBalancerPool) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid sender address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid sender address (%s)", err)
 	}
 
 	err = validateUserSpecifiedPoolAssets(msg.PoolAssets)
@@ -56,10 +57,6 @@ func (msg MsgCreateBalancerPool) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func (msg MsgCreateBalancerPool) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func (msg MsgCreateBalancerPool) GetSigners() []sdk.AccAddress {

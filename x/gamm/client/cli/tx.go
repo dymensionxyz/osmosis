@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	math "cosmossdk.io/math"
+
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 
@@ -191,12 +193,12 @@ func NewBuildCreateBalancerPoolMsg(clientCtx client.Context, fs *flag.FlagSet) (
 		return nil, errors.New("deposit tokens and token weights should have same length")
 	}
 
-	swapFee, err := sdk.NewDecFromStr(pool.SwapFee)
+	swapFee, err := math.LegacyNewDecFromStr(pool.SwapFee)
 	if err != nil {
 		return nil, err
 	}
 
-	exitFee, err := sdk.NewDecFromStr(pool.ExitFee)
+	exitFee, err := math.LegacyNewDecFromStr(pool.ExitFee)
 	if err != nil {
 		return nil, err
 	}
@@ -410,7 +412,7 @@ func NewBuildSwapExactAmountOutMsg(clientCtx client.Context, args []string, fs *
 // Returns error if parsing fails.
 func ParseCoinsNoSort(coinsStr string) (sdk.Coins, error) {
 	coinStrs := strings.Split(coinsStr, ",")
-	decCoins := make(math.LegacyDecCoins, len(coinStrs))
+	decCoins := make(sdk.DecCoins, len(coinStrs))
 	for i, coinStr := range coinStrs {
 		coin, err := sdk.ParseDecCoin(coinStr)
 		if err != nil {

@@ -33,8 +33,8 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		}
 
 		poolParams := &balancer.PoolParams{
-			SwapFee: sdk.NewDecWithPrec(1, 2),
-			ExitFee: sdk.NewDecWithPrec(1, 2),
+			SwapFee: math.LegacyNewDecWithPrec(1, 2),
+			ExitFee: math.LegacyNewDecWithPrec(1, 2),
 		}
 
 		msg := &balancer.MsgCreateBalancerPool{
@@ -152,8 +152,8 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 			name: "negative swap fee with zero exit fee",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
 				msg.PoolParams = &balancer.PoolParams{
-					SwapFee: sdk.NewDecWithPrec(-1, 2),
-					ExitFee: sdk.NewDecWithPrec(0, 0),
+					SwapFee: math.LegacyNewDecWithPrec(-1, 2),
+					ExitFee: math.LegacyNewDecWithPrec(0, 0),
 				}
 				return msg
 			}),
@@ -195,8 +195,8 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 			name: "zero swap fee, zero exit fee",
 			msg: createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
 				msg.PoolParams = &balancer.PoolParams{
-					ExitFee: sdk.NewDecWithPrec(0, 0),
-					SwapFee: sdk.NewDecWithPrec(0, 0),
+					ExitFee: math.LegacyNewDecWithPrec(0, 0),
+					SwapFee: math.LegacyNewDecWithPrec(0, 0),
 				}
 				return msg
 			}),
@@ -252,7 +252,7 @@ func (suite *KeeperTestSuite) TestMsgCreateBalancerPool() {
 		"basic success test": {
 			msg: balancer.MsgCreateBalancerPool{
 				Sender:             suite.TestAccs[0].String(),
-				PoolParams:         &balancer.PoolParams{SwapFee: sdk.NewDecWithPrec(1, 2), ExitFee: sdk.NewDecWithPrec(1, 3)},
+				PoolParams:         &balancer.PoolParams{SwapFee: math.LegacyNewDecWithPrec(1, 2), ExitFee: math.LegacyNewDecWithPrec(1, 3)},
 				PoolAssets:         apptesting.DefaultPoolAssets,
 				FuturePoolGovernor: "",
 			},
@@ -261,7 +261,7 @@ func (suite *KeeperTestSuite) TestMsgCreateBalancerPool() {
 		"error due to negative swap fee": {
 			msg: balancer.MsgCreateBalancerPool{
 				Sender:             suite.TestAccs[0].String(),
-				PoolParams:         &balancer.PoolParams{SwapFee: sdk.NewDecWithPrec(1, 2).Neg(), ExitFee: sdk.NewDecWithPrec(1, 3)},
+				PoolParams:         &balancer.PoolParams{SwapFee: math.LegacyNewDecWithPrec(1, 2).Neg(), ExitFee: math.LegacyNewDecWithPrec(1, 3)},
 				PoolAssets:         apptesting.DefaultPoolAssets,
 				FuturePoolGovernor: "",
 			},

@@ -32,7 +32,7 @@ func (p Pool) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	decTotalWeight := sdk.NewDecFromInt(p.TotalWeight)
+	decTotalWeight := math.LegacyNewDecFromInt(p.TotalWeight)
 
 	return json.Marshal(balancerPoolPretty{
 		Address:            accAddr,
