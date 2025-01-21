@@ -19,7 +19,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/testutils"
+	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
 func TestGammInitGenesis(t *testing.T) {
