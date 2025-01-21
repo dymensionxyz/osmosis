@@ -14,7 +14,7 @@ import "cosmos_proto/cosmos.proto";
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 
 service Query {
-  // Params returns lockup params.
+  // Params returns gamm module params.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/params";
   }
@@ -145,7 +145,8 @@ message QueryCalcJoinPoolSharesRequest {
 }
 message QueryCalcJoinPoolSharesResponse {
   string share_out_amount = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar) = "cosmos.Int",
+(gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"share_out_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -159,7 +160,8 @@ message QueryCalcJoinPoolSharesResponse {
 message QueryCalcExitPoolCoinsFromSharesRequest {
   uint64 pool_id = 1;
   string share_in_amount = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar) = "cosmos.Int",
+(gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
 }
@@ -214,7 +216,8 @@ message QueryCalcJoinPoolNoSwapSharesResponse {
     (gogoproto.nullable) = false
   ];
   string shares_out = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar) = "cosmos.Int",
+(gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
 }
@@ -269,7 +272,8 @@ message QuerySwapExactAmountInRequest {
 
 message QuerySwapExactAmountInResponse {
   string token_out_amount = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar) = "cosmos.Int",
+(gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_out_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -288,7 +292,8 @@ message QuerySwapExactAmountOutRequest {
 
 message QuerySwapExactAmountOutResponse {
   string token_in_amount = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar) = "cosmos.Int",
+(gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_in_amount\"",
     (gogoproto.nullable) = false
   ];

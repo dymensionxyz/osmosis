@@ -85,7 +85,7 @@ func (m *GenesisState) GetFeetokens() []FeeToken {
 	return nil
 }
 
-// Params holds parameters for the incentives module
+// Params holds parameters for the txfees module
 type Params struct {
 	// epoch_identifier is what epoch type swap and burn will be triggered by
 	// (day, week, etc.)

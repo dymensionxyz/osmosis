@@ -43,7 +43,7 @@ func TestCalculateAmountOutAndIn_InverseRelationship(
 	swapFee math.LegacyDec,
 	errTolerance osmomath.ErrTolerance,
 ) {
-	initialOut := math.NewInt64Coin(assetOutDenom, initialCalcOut)
+	initialOut := sdk.NewInt64Coin(assetOutDenom, initialCalcOut)
 	initialOutCoins := sdk.NewCoins(initialOut)
 
 	actualTokenIn, err := pool.CalcInAmtGivenOut(ctx, initialOutCoins, assetInDenom, swapFee)
