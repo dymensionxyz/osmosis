@@ -18,13 +18,13 @@ type balancerPoolPretty struct {
 }
 
 // FIXME: make sure it's not used (as it's overriden by proto)
-func (p Pool) String() string {
-	out, err := p.MarshalJSON()
-	if err != nil {
-		panic(err)
-	}
-	return string(out)
-}
+// func (p Pool) String() string {
+// 	out, err := p.MarshalJSON()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return string(out)
+// }
 
 // MarshalJSON returns the JSON representation of a Pool.
 func (p Pool) MarshalJSON() ([]byte, error) {

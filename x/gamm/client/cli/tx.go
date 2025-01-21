@@ -412,7 +412,7 @@ func NewBuildSwapExactAmountOutMsg(clientCtx client.Context, args []string, fs *
 // Returns error if parsing fails.
 func ParseCoinsNoSort(coinsStr string) (sdk.Coins, error) {
 	coinStrs := strings.Split(coinsStr, ",")
-	decCoins := make(math.LegacyDecCoins, len(coinStrs))
+	decCoins := make(sdk.DecCoins, len(coinStrs))
 	for i, coinStr := range coinStrs {
 		coin, err := sdk.ParseDecCoin(coinStr)
 		if err != nil {

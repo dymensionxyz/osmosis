@@ -182,7 +182,7 @@ replace (
 	// Our cosmos-sdk branch is:  https://github.com/osmosis-labs/cosmos-sdk, current branch: v15.x. Direct commit link: https://github.com/osmosis-labs/cosmos-sdk/commit/931007612436a93dcee45314c12a637876ec29f5
 	// github.com/cosmos/cosmos-sdk => github.com/osmosis-labs/cosmos-sdk v0.45.1-0.20230627154005-cbb746abb7f1
 
-	github.com/osmosis-labs/osmosis/osmomath => github.com/dymensionxyz/osmosis/osmomath v0.0.6-dym-v0.0.1
+	// github.com/osmosis-labs/osmosis/osmomath => github.com/dymensionxyz/osmosis/osmomath v0.0.6-dym-v0.0.1
 
 	//  broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
@@ -191,5 +191,7 @@ replace (
 
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
 )
+
+replace github.com/osmosis-labs/osmosis/osmomath => /Users/mtsitrin/Applications/dymension/osmosis/osmomath
 
 replace github.com/dymensionxyz/sdk-utils => /Users/mtsitrin/Applications/dymension/sdk-utils
