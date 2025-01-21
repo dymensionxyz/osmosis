@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +19,7 @@ type testingStruct struct {
 	Pointer  *testingStruct
 	Slice    sdk.Coins
 	Struct   interface{}
-	Dec      sdk.Dec
+	Dec      math.LegacyDec
 }
 
 func TestParseFieldFromArg(t *testing.T) {
@@ -80,21 +81,21 @@ func TestParseFieldFromArg(t *testing.T) {
 		},
 		"Slice change": {
 			testingStruct: testingStruct{Slice: sdk.Coins{
-				sdk.NewCoin("foo", sdk.NewInt(100)),
-				sdk.NewCoin("bar", sdk.NewInt(100)),
+				sdk.NewCoin("foo", math.NewInt(100)),
+				sdk.NewCoin("bar", math.NewInt(100)),
 			}},
 			arg:        "10foo,10bar", // Should be of a format suitable for ParseCoinsNormalized
 			fieldIndex: 6,
 			expectedStruct: testingStruct{Slice: sdk.Coins{ // swapped places due to lexicographic order
-				sdk.NewCoin("bar", sdk.NewInt(10)),
-				sdk.NewCoin("foo", sdk.NewInt(10)),
+				sdk.NewCoin("bar", math.NewInt(10)),
+				sdk.NewCoin("foo", math.NewInt(10)),
 			}},
 		},
 		"Struct (sdk.Coin) change": {
-			testingStruct:  testingStruct{Struct: sdk.NewCoin("bar", sdk.NewInt(10))}, // only supports sdk.Int, sdk.Coin or time.Time, other structs are not recognized
+			testingStruct:  testingStruct{Struct: sdk.NewCoin("bar", math.NewInt(10))}, // only supports sdk.Int, sdk.Coin or time.Time, other structs are not recognized
 			arg:            "100bar",
 			fieldIndex:     7,
-			expectedStruct: testingStruct{Struct: sdk.NewCoin("bar", sdk.NewInt(10))},
+			expectedStruct: testingStruct{Struct: sdk.NewCoin("bar", math.NewInt(10))},
 		},
 		"Unrecognizable struct": {
 			testingStruct: testingStruct{Struct: testingStruct{}}, // only supports sdk.Int, sdk.Coin or time.Time, other structs are not recognized
@@ -117,10 +118,10 @@ func TestParseFieldFromArg(t *testing.T) {
 				Duration: time.Second,
 				Pointer:  &testingStruct{},
 				Slice: sdk.Coins{
-					sdk.NewCoin("foo", sdk.NewInt(100)),
-					sdk.NewCoin("bar", sdk.NewInt(100)),
+					sdk.NewCoin("foo", math.NewInt(100)),
+					sdk.NewCoin("bar", math.NewInt(100)),
 				},
-				Struct: sdk.NewCoin("bar", sdk.NewInt(10)),
+				Struct: sdk.NewCoin("bar", math.NewInt(10)),
 			},
 			arg:        "1foo,15bar",
 			fieldIndex: 6,
@@ -132,17 +133,17 @@ func TestParseFieldFromArg(t *testing.T) {
 				Duration: time.Second,
 				Pointer:  &testingStruct{},
 				Slice: sdk.Coins{
-					sdk.NewCoin("bar", sdk.NewInt(15)),
-					sdk.NewCoin("foo", sdk.NewInt(1)),
+					sdk.NewCoin("bar", math.NewInt(15)),
+					sdk.NewCoin("foo", math.NewInt(1)),
 				},
-				Struct: sdk.NewCoin("bar", sdk.NewInt(10)),
+				Struct: sdk.NewCoin("bar", math.NewInt(10)),
 			},
 		},
 		"Dec struct": {
-			testingStruct:  testingStruct{Dec: sdk.MustNewDecFromStr("100")},
+			testingStruct:  testingStruct{Dec: math.LegacyMustNewDecFromStr("100")},
 			arg:            "10",
 			fieldIndex:     8,
-			expectedStruct: testingStruct{Dec: sdk.MustNewDecFromStr("100")},
+			expectedStruct: testingStruct{Dec: math.LegacyMustNewDecFromStr("100")},
 		},
 	}
 

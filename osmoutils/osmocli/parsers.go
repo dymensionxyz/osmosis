@@ -336,18 +336,18 @@ func ParseCoins(arg string, fieldName string) (sdk.Coins, error) {
 }
 
 // TODO: This really shouldn't be getting used in the CLI, its misdesign on the CLI ux
-func ParseSdkInt(arg string, fieldName string) (sdk.Int, error) {
-	i, ok := sdk.NewIntFromString(arg)
+func ParseSdkInt(arg string, fieldName string) (math.Int, error) {
+	i, ok := math.NewIntFromString(arg)
 	if !ok {
-		return sdk.Int{}, fmt.Errorf("could not parse %s as sdk.Int for field %s", arg, fieldName)
+		return math.Int{}, fmt.Errorf("could not parse %s as math.Int for field %s", arg, fieldName)
 	}
 	return i, nil
 }
 
-func ParseSdkDec(arg, fieldName string) (sdk.Dec, error) {
-	i, err := sdk.NewDecFromStr(arg)
+func ParseSdkDec(arg, fieldName string) (math.LegacyDec, error) {
+	i, err := math.LegacyNewDecFromStr(arg)
 	if err != nil {
-		return math.LegacyDec{}, fmt.Errorf("could not parse %s as sdk.Dec for field %s: %w", arg, fieldName, err)
+		return math.LegacyDec{}, fmt.Errorf("could not parse %s as math.LegacyDec for field %s: %w", arg, fieldName, err)
 	}
 	return i, nil
 }

@@ -154,15 +154,15 @@ func MustGet(store store.KVStore, key []byte, result proto.Message) {
 }
 
 // MustSetDec sets dec value to store at key. Panics on any error.
-func MustSetDec(store store.KVStore, key []byte, value sdk.Dec) {
-	MustSet(store, key, &sdk.DecProto{
+func MustSetDec(store store.KVStore, key []byte, value math.LegacyDec) {
+	MustSet(store, key, &math.LegacyDecProto{
 		Dec: value,
 	})
 }
 
 // MustGetDec gets dec value from store at key. Panics on any error.
-func MustGetDec(store store.KVStore, key []byte) sdk.Dec {
-	result := &sdk.DecProto{}
+func MustGetDec(store store.KVStore, key []byte) math.LegacyDec {
+	result := &math.LegacyDecProto{}
 	MustGet(store, key, result)
 	return result.Dec
 }

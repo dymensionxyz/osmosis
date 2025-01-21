@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -16,11 +17,11 @@ const (
 	RoundBankers       RoundingDirection = 3
 )
 
-func DivIntByU64ToBigDec(i sdk.Int, u uint64, round RoundingDirection) (BigDec, error) {
+func DivIntByU64ToBigDec(i math.Int, u uint64, round RoundingDirection) (BigDec, error) {
 	if u == 0 {
 		return BigDec{}, errors.New("div by zero")
 	}
-	d := BigDecFromSDKDec(sdk.NewDecFromInt(i))
+	d := BigDecFromSDKDec(math.LegacyNewDecFromInt(i))
 	if round == RoundUp {
 		return d.QuoRoundUp(NewBigDec(int64(u))), nil
 	} else if round == RoundDown {

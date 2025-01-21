@@ -3,54 +3,54 @@ package osmomath
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 )
 
 func BenchmarkPow(b *testing.B) {
 	tests := []struct {
-		base sdk.Dec
-		exp  sdk.Dec
+		base math.LegacyDec
+		exp  math.LegacyDec
 	}{
 		// TODO: Choose selection here more robustly
 		{
-			base: sdk.MustNewDecFromStr("1.2"),
-			exp:  sdk.MustNewDecFromStr("1.2"),
+			base: math.LegacyMustNewDecFromStr("1.2"),
+			exp:  math.LegacyMustNewDecFromStr("1.2"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.5"),
-			exp:  sdk.MustNewDecFromStr("11.122"),
+			base: math.LegacyMustNewDecFromStr("0.5"),
+			exp:  math.LegacyMustNewDecFromStr("11.122"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.1"),
-			exp:  sdk.MustNewDecFromStr("0.00000492"),
+			base: math.LegacyMustNewDecFromStr("0.1"),
+			exp:  math.LegacyMustNewDecFromStr("0.00000492"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.0002423"),
-			exp:  sdk.MustNewDecFromStr("0.1234"),
+			base: math.LegacyMustNewDecFromStr("0.0002423"),
+			exp:  math.LegacyMustNewDecFromStr("0.1234"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.493"),
-			exp:  sdk.MustNewDecFromStr("0.00000121"),
+			base: math.LegacyMustNewDecFromStr("0.493"),
+			exp:  math.LegacyMustNewDecFromStr("0.00000121"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.000249"),
-			exp:  sdk.MustNewDecFromStr("2.304"),
+			base: math.LegacyMustNewDecFromStr("0.000249"),
+			exp:  math.LegacyMustNewDecFromStr("2.304"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.2342"),
-			exp:  sdk.MustNewDecFromStr("32.2"),
+			base: math.LegacyMustNewDecFromStr("0.2342"),
+			exp:  math.LegacyMustNewDecFromStr("32.2"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.000999"),
-			exp:  sdk.MustNewDecFromStr("142.4"),
+			base: math.LegacyMustNewDecFromStr("0.000999"),
+			exp:  math.LegacyMustNewDecFromStr("142.4"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("1.234"),
-			exp:  sdk.MustNewDecFromStr("120.3"),
+			base: math.LegacyMustNewDecFromStr("1.234"),
+			exp:  math.LegacyMustNewDecFromStr("120.3"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("0.00122"),
-			exp:  sdk.MustNewDecFromStr("123.2"),
+			base: math.LegacyMustNewDecFromStr("0.00122"),
+			exp:  math.LegacyMustNewDecFromStr("123.2"),
 		},
 	}
 
@@ -63,20 +63,20 @@ func BenchmarkPow(b *testing.B) {
 
 func BenchmarkSqrtPow(b *testing.B) {
 	tests := []struct {
-		base sdk.Dec
+		base math.LegacyDec
 	}{
 		// TODO: Choose selection here more robustly
 		{
-			base: sdk.MustNewDecFromStr("1.29847"),
+			base: math.LegacyMustNewDecFromStr("1.29847"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("1.313135"),
+			base: math.LegacyMustNewDecFromStr("1.313135"),
 		},
 		{
-			base: sdk.MustNewDecFromStr("1.65976735939"),
+			base: math.LegacyMustNewDecFromStr("1.65976735939"),
 		},
 	}
-	one_half := sdk.MustNewDecFromStr("0.5")
+	one_half := math.LegacyMustNewDecFromStr("0.5")
 
 	for i := 0; i < b.N; i++ {
 		for _, test := range tests {

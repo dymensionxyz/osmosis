@@ -33,7 +33,7 @@ func NewParams(poolCreationFee sdk.Coins) Params {
 // default gamm module parameters.
 func DefaultParams() Params {
 	return Params{
-		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
+		PoolCreationFee:      sdk.Coins{math.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
 		EnableGlobalPoolFees: false,
 		GlobalFees:           GlobalFees{math.LegacyMustNewDecFromStr("0.02"), math.LegacyZeroDec()},
 		TakerFee:             math.LegacyMustNewDecFromStr("0.01"),

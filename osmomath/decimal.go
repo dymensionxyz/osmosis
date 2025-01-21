@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -37,7 +39,7 @@ const (
 
 var (
 	precisionReuse       = new(big.Int).Exp(big.NewInt(10), big.NewInt(Precision), nil)
-	precisionReuseSDK    = new(big.Int).Exp(big.NewInt(10), big.NewInt(sdk.Precision), nil)
+	precisionReuseSDK    = new(big.Int).Exp(big.NewInt(10), big.NewInt(math.LegacyPrecision), nil)
 	fivePrecision        = new(big.Int).Quo(precisionReuse, big.NewInt(2))
 	precisionMultipliers []*big.Int
 	zeroInt              = big.NewInt(0)
@@ -549,10 +551,10 @@ func (d BigDec) MustFloat64() float64 {
 	}
 }
 
-// SdkDec returns the Sdk.Dec representation of a BigDec.
+// SdkDec returns the math.LegacyDec representation of a BigDec.
 // Values in any additional decimal places are truncated.
-func (d BigDec) SDKDec() sdk.Dec {
-	precisionDiff := Precision - sdk.Precision
+func (d BigDec) SDKDec() math.LegacyDec {
+	precisionDiff := Precision - math.LegacyPrecision
 	precisionFactor := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(precisionDiff)), nil)
 
 	if precisionDiff < 0 {
@@ -564,30 +566,30 @@ func (d BigDec) SDKDec() sdk.Dec {
 	intRepresentation := new(big.Int).Quo(d.BigInt(), precisionFactor)
 
 	// convert int representation back to SDK Dec precision
-	truncatedDec := sdk.NewDecFromBigIntWithPrec(intRepresentation, sdk.Precision)
+	truncatedDec := math.LegacyNewDecFromBigIntWithPrec(intRepresentation, math.LegacyPrecision)
 
 	return truncatedDec
 }
 
-// SDKDecRoundUp returns the Sdk.Dec representation of a BigDec.
+// SDKDecRoundUp returns the math.LegacyDec representation of a BigDec.
 // Round up at precision end.
 // Values in any additional decimal places are truncated.
-func (d BigDec) SDKDecRoundUp() sdk.Dec {
-	return sdk.NewDecFromBigIntWithPrec(chopPrecisionAndRoundUpSDKDec(d.i), sdk.Precision)
+func (d BigDec) SDKDecRoundUp() math.LegacyDec {
+	return math.LegacyNewDecFromBigIntWithPrec(chopPrecisionAndRoundUpSDKDec(d.i), math.LegacyPrecision)
 }
 
 // BigDecFromSdkDec returns the BigDec representation of an SDKDec.
 // Values in any additional decimal places are truncated.
-func BigDecFromSDKDec(d sdk.Dec) BigDec {
-	return NewDecFromBigIntWithPrec(d.BigInt(), sdk.Precision)
+func BigDecFromSDKDec(d math.LegacyDec) BigDec {
+	return NewDecFromBigIntWithPrec(d.BigInt(), math.LegacyPrecision)
 }
 
 // BigDecFromSdkDecSlice returns the []BigDec representation of an []SDKDec.
 // Values in any additional decimal places are truncated.
-func BigDecFromSDKDecSlice(ds []sdk.Dec) []BigDec {
+func BigDecFromSDKDecSlice(ds []math.LegacyDec) []BigDec {
 	result := make([]BigDec, len(ds))
 	for i, d := range ds {
-		result[i] = NewDecFromBigIntWithPrec(d.BigInt(), sdk.Precision)
+		result[i] = NewDecFromBigIntWithPrec(d.BigInt(), math.LegacyPrecision)
 	}
 	return result
 }
@@ -597,7 +599,7 @@ func BigDecFromSDKDecSlice(ds []sdk.Dec) []BigDec {
 func BigDecFromSDKDecCoinSlice(ds []sdk.DecCoin) []BigDec {
 	result := make([]BigDec, len(ds))
 	for i, d := range ds {
-		result[i] = NewDecFromBigIntWithPrec(d.Amount.BigInt(), sdk.Precision)
+		result[i] = NewDecFromBigIntWithPrec(d.Amount.BigInt(), math.LegacyPrecision)
 	}
 	return result
 }
@@ -652,7 +654,7 @@ func chopPrecisionAndRoundUpBigDec(d *big.Int) *big.Int {
 	return chopPrecisionAndRoundUp(d, precisionReuse)
 }
 
-// chopPrecisionAndRoundUpSDKDec removes  sdk.Precision amount of rightmost digits and rounds up.
+// chopPrecisionAndRoundUpSDKDec removes  math.LegacyPrecision amount of rightmost digits and rounds up.
 func chopPrecisionAndRoundUpSDKDec(d *big.Int) *big.Int {
 	return chopPrecisionAndRoundUp(d, precisionReuseSDK)
 }

@@ -57,10 +57,10 @@ func RunTxTestCase[M sdk.Msg](t *testing.T, desc *TxCliDesc, tc TxCliTestCase[M]
 		return
 	}
 	require.NoError(t, err, "error in desc.ParseAndBuildMsg")
-	if tc.OnlyCheckValidateBasic {
-		require.NoError(t, msg.ValidateBasic())
-		return
-	}
+	// if tc.OnlyCheckValidateBasic {
+	// 	require.NoError(t, msg.ValidateBasic())
+	// 	return
+	// }
 
 	require.Equal(t, tc.ExpectedMsg, msg)
 }

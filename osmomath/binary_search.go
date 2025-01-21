@@ -3,6 +3,7 @@ package osmomath
 import (
 	"errors"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -16,13 +17,13 @@ import (
 // * |a - b| / min(a, b) <= MultiplicativeTolerance
 //
 // Each check is respectively ignored if the entry is nil.
-// So AdditiveTolerance = sdk.Int{} or sdk.ZeroInt()
+// So AdditiveTolerance = math.Int{} or math.ZeroInt()
 // MultiplicativeTolerance = math.LegacyDec{}
 // RoundingDir = RoundUnconstrained.
 // Note that if AdditiveTolerance == 0, then this is equivalent to a standard compare.
 type ErrTolerance struct {
-	AdditiveTolerance       sdk.Dec
-	MultiplicativeTolerance sdk.Dec
+	AdditiveTolerance       math.LegacyDec
+	MultiplicativeTolerance math.LegacyDec
 	RoundingDir             RoundingDirection
 }
 
@@ -30,9 +31,9 @@ type ErrTolerance struct {
 // returns 0 if it is
 // returns 1 if not, and expected > actual.
 // returns -1 if not, and expected < actual
-func (e ErrTolerance) Compare(expected sdk.Int, actual sdk.Int) int {
-	expectedDec := sdk.NewDecFromInt(expected)
-	actualDec := sdk.NewDecFromInt(actual)
+func (e ErrTolerance) Compare(expected math.Int, actual math.Int) int {
+	expectedDec := math.LegacyNewDecFromInt(expected)
+	actualDec := math.LegacyNewDecFromInt(actual)
 
 	diff := expectedDec.Sub(actualDec).Abs()
 
@@ -72,12 +73,12 @@ func (e ErrTolerance) Compare(expected sdk.Int, actual sdk.Int) int {
 	}
 	// Check multiplicative tolerance equations
 	if !e.MultiplicativeTolerance.IsNil() && !e.MultiplicativeTolerance.IsZero() {
-		minValue := sdk.MinInt(expected.Abs(), actual.Abs())
+		minValue := math.MinInt(expected.Abs(), actual.Abs())
 		if minValue.IsZero() {
 			return comparisonSign
 		}
 
-		errTerm := diff.Quo(sdk.NewDecFromInt(minValue))
+		errTerm := diff.Quo(math.LegacyNewDecFromInt(minValue))
 		if errTerm.GT(e.MultiplicativeTolerance) {
 			return comparisonSign
 		}
@@ -164,15 +165,15 @@ func (e ErrTolerance) EqualCoins(expectedCoins sdk.Coins, actualCoins sdk.Coins)
 // Binary search inputs between [lowerbound, upperbound] to a monotonic increasing function f.
 // We stop once f(found_input) meets the ErrTolerance constraints.
 // If we perform more than maxIterations (or equivalently lowerbound = upperbound), we return an error.
-func BinarySearch(f func(sdk.Int) (sdk.Int, error),
-	lowerbound sdk.Int,
-	upperbound sdk.Int,
-	targetOutput sdk.Int,
+func BinarySearch(f func(math.Int) (math.Int, error),
+	lowerbound math.Int,
+	upperbound math.Int,
+	targetOutput math.Int,
 	errTolerance ErrTolerance,
 	maxIterations int,
-) (sdk.Int, error) {
+) (math.Int, error) {
 	var (
-		curEstimate, curOutput sdk.Int
+		curEstimate, curOutput math.Int
 		err                    error
 	)
 
@@ -181,7 +182,7 @@ func BinarySearch(f func(sdk.Int) (sdk.Int, error),
 		curEstimate = lowerbound.Add(upperbound).QuoRaw(2)
 		curOutput, err = f(curEstimate)
 		if err != nil {
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		compRes := errTolerance.Compare(targetOutput, curOutput)
@@ -194,7 +195,7 @@ func BinarySearch(f func(sdk.Int) (sdk.Int, error),
 		}
 	}
 
-	return sdk.Int{}, errors.New("hit maximum iterations, did not converge fast enough")
+	return math.Int{}, errors.New("hit maximum iterations, did not converge fast enough")
 }
 
 // SdkDec

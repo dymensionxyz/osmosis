@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
@@ -11,13 +12,13 @@ import (
 
 func TestSigFigRound(t *testing.T) {
 	// sigfig = 8
-	tenToSigFig := sdk.NewDec(10).Power(8).TruncateInt()
+	tenToSigFig := math.LegacyNewDec(10).Power(8).TruncateInt()
 
 	testCases := []struct {
 		name           string
-		decimal        sdk.Dec
+		decimal        math.LegacyDec
 		tenToSigFig    sdk.Int
-		expectedResult sdk.Dec
+		expectedResult math.LegacyDec
 	}{
 		{
 			name:           "Zero decimal",
@@ -27,8 +28,8 @@ func TestSigFigRound(t *testing.T) {
 		},
 		{
 			name:           "Zero tenToSigFig",
-			decimal:        sdk.MustNewDecFromStr("2.123"),
-			tenToSigFig:    sdk.ZeroInt(),
+			decimal:        math.LegacyMustNewDecFromStr("2.123"),
+			tenToSigFig:    math.ZeroInt(),
 			expectedResult: sdk.ZeroDec(),
 		},
 		// With input, decimal >= 0.1. We have:
@@ -40,9 +41,9 @@ func TestSigFigRound(t *testing.T) {
 		//  - result = numerator / denominator = 63
 		{
 			name:           "Big decimal, default tenToSigFig",
-			decimal:        sdk.MustNewDecFromStr("63.045"),
+			decimal:        math.LegacyMustNewDecFromStr("63.045"),
 			tenToSigFig:    tenToSigFig,
-			expectedResult: sdk.MustNewDecFromStr("63.045"),
+			expectedResult: math.LegacyMustNewDecFromStr("63.045"),
 		},
 		// With input, decimal < 0.1. We have:
 		// 	- dTimesK = 0.86724
@@ -53,9 +54,9 @@ func TestSigFigRound(t *testing.T) {
 		//  - result = numerator / denominator = 0.086724
 		{
 			name:           "Small decimal, default tenToSigFig",
-			decimal:        sdk.MustNewDecFromStr("0.0867245957"),
+			decimal:        math.LegacyMustNewDecFromStr("0.0867245957"),
 			tenToSigFig:    tenToSigFig,
-			expectedResult: sdk.MustNewDecFromStr("0.086724596"),
+			expectedResult: math.LegacyMustNewDecFromStr("0.086724596"),
 		},
 		// With input, decimal < 0.1. We have:
 		// 	- dTimesK = 0.86724
@@ -66,14 +67,14 @@ func TestSigFigRound(t *testing.T) {
 		//  - result = numerator / denominator = 0.087
 		{
 			name:           "Small decimal, random tenToSigFig",
-			decimal:        sdk.MustNewDecFromStr("0.086724"),
-			tenToSigFig:    sdk.NewInt(100),
-			expectedResult: sdk.MustNewDecFromStr("0.087"),
+			decimal:        math.LegacyMustNewDecFromStr("0.086724"),
+			tenToSigFig:    math.NewInt(100),
+			expectedResult: math.LegacyMustNewDecFromStr("0.087"),
 		},
 		{
 			name:           "minimum decimal is still kept",
 			decimal:        sdk.NewDecWithPrec(1, 18),
-			tenToSigFig:    sdk.NewInt(10),
+			tenToSigFig:    math.NewInt(10),
 			expectedResult: sdk.NewDecWithPrec(1, 18),
 		},
 	}
@@ -81,8 +82,8 @@ func TestSigFigRound(t *testing.T) {
 	for i, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			var actualResult sdk.Dec
-			ConditionalPanic(t, tc.tenToSigFig.Equal(sdk.ZeroInt()), func() {
+			var actualResult math.LegacyDec
+			ConditionalPanic(t, tc.tenToSigFig.Equal(math.ZeroInt()), func() {
 				actualResult = SigFigRound(tc.decimal, tc.tenToSigFig)
 				require.Equal(
 					t,

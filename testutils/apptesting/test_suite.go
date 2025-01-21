@@ -20,7 +20,7 @@ type KeeperTestHelper struct {
 /*
 var (
 	SecondaryDenom  = "uion"
-	SecondaryAmount = sdk.NewInt(100000000)
+	SecondaryAmount = math.NewInt(100000000)
 )
 
 // Setup sets up basic environment for suite (App, Ctx, and test accounts)
@@ -106,13 +106,13 @@ func (s *KeeperTestHelper) SetupValidator(bondStatus stakingtypes.BondStatus) sd
 	valPub := secp256k1.GenPrivKey().PubKey()
 	valAddr := sdk.ValAddress(valPub.Address())
 	bondDenom := s.App.StakingKeeper.GetParams(s.Ctx).BondDenom
-	selfBond := sdk.NewCoins(sdk.Coin{Amount: sdk.NewInt(100), Denom: bondDenom})
+	selfBond := sdk.NewCoins(sdk.Coin{Amount: math.NewInt(100), Denom: bondDenom})
 
 	s.FundAcc(sdk.AccAddress(valAddr), selfBond)
 
 	stakingCoin := sdk.NewCoin(sdk.DefaultBondDenom, selfBond[0].Amount)
 	ZeroCommission := stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
-	msg, err := stakingtypes.NewMsgCreateValidator(valAddr, valPub, stakingCoin, stakingtypes.Description{}, ZeroCommission, sdk.OneInt())
+	msg, err := stakingtypes.NewMsgCreateValidator(valAddr, valPub, stakingCoin, stakingtypes.Description{}, ZeroCommission, math.OneInt())
 	s.Require().NoError(err)
 
 	msgServer := stakingkeeper.NewMsgServerImpl(&s.App.StakingKeeper)
@@ -228,12 +228,12 @@ func (s *KeeperTestHelper) AllocateRewardsToValidator(valAddr sdk.ValAddress, re
 
 	// allocate rewards to validator
 	s.Ctx = s.Ctx.WithBlockHeight(s.Ctx.BlockHeight() + 1)
-	decTokens := sdk.DecCoins{{Denom: sdk.DefaultBondDenom, Amount: sdk.NewDec(20000)}}
+	decTokens := math.LegacyDecCoins{{Denom: sdk.DefaultBondDenom, Amount: math.LegacyNewDec(20000)}}
 	s.App.DistrKeeper.AllocateTokensToValidator(s.Ctx, validator, decTokens)
 }
 
 // SetupGammPoolsWithBondDenomMultiplier uses given multipliers to set initial pool supply of bond denom.
-func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []sdk.Dec) []gammtypes.CFMMPoolI {
+func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []math.LegacyDec) []gammtypes.CFMMPoolI {
 	bondDenom := s.App.StakingKeeper.BondDenom(s.Ctx)
 	// TODO: use sdk crypto instead of tendermint to generate address
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
@@ -246,8 +246,8 @@ func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []s
 		uosmoAmount := sdk.NewDecFromBigInt(gammtypes.InitPoolSharesSupply.BigInt()).Mul(multiplier).RoundInt()
 
 		s.FundAcc(acc1, sdk.NewCoins(
-			sdk.NewCoin(bondDenom, uosmoAmount.Mul(sdk.NewInt(10))),
-			sdk.NewInt64Coin(token, 100000),
+			sdk.NewCoin(bondDenom, uosmoAmount.Mul(math.NewInt(10))),
+			math.NewInt64Coin(token, 100000),
 		).Add(params.PoolCreationFee...))
 
 		var (
@@ -255,12 +255,12 @@ func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []s
 
 			// pool assets
 			defaultFooAsset = balancer.PoolAsset{
-				Weight: sdk.NewInt(100),
+				Weight: math.NewInt(100),
 				Token:  sdk.NewCoin(bondDenom, uosmoAmount),
 			}
 			defaultBarAsset = balancer.PoolAsset{
-				Weight: sdk.NewInt(100),
-				Token:  sdk.NewCoin(token, sdk.NewInt(10000)),
+				Weight: math.NewInt(100),
+				Token:  sdk.NewCoin(token, math.NewInt(10000)),
 			}
 
 			poolAssets = []balancer.PoolAsset{defaultFooAsset, defaultBarAsset}
@@ -286,12 +286,12 @@ func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []s
 
 // SwapAndSetSpotPrice runs a swap to set Spot price of a pool using arbitrary values
 // returns spot price after the arbitrary swap.
-func (s *KeeperTestHelper) SwapAndSetSpotPrice(poolId uint64, fromAsset sdk.Coin, toAsset sdk.Coin) sdk.Dec {
+func (s *KeeperTestHelper) SwapAndSetSpotPrice(poolId uint64, fromAsset sdk.Coin, toAsset sdk.Coin) math.LegacyDec {
 	// create a dummy account
 	acc1 := sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address().Bytes())
 
 	// fund dummy account with tokens to swap
-	coins := sdk.Coins{sdk.NewInt64Coin(fromAsset.Denom, 100000000000000)}
+	coins := sdk.Coins{math.NewInt64Coin(fromAsset.Denom, 100000000000000)}
 	s.FundAcc(acc1, coins)
 
 	route := []poolmanagertypes.SwapAmountOutRoute{
@@ -306,7 +306,7 @@ func (s *KeeperTestHelper) SwapAndSetSpotPrice(poolId uint64, fromAsset sdk.Coin
 		route,
 		fromAsset.Amount,
 		sdk.NewCoin(toAsset.Denom,
-			toAsset.Amount.Quo(sdk.NewInt(4))))
+			toAsset.Amount.Quo(math.NewInt(4))))
 	s.Require().NoError(err)
 
 	spotPrice, err := s.App.GAMMKeeper.CalculateSpotPrice(s.Ctx, poolId, fromAsset.Denom, toAsset.Denom)

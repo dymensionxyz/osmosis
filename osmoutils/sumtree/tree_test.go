@@ -10,10 +10,12 @@ import (
 
 	"github.com/cosmos/iavl"
 
-	dbm "github.com/cometbft/cometbft-db"
+	// dbm "github.com/cometbft/cometbft-db"
+	dbm "github.com/cosmos/cosmos-db"
 
+	"cosmossdk.io/math"
 	iavlstore "cosmossdk.io/store/iavl"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/store/wrapper"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils/sumtree"
 )
@@ -25,10 +27,10 @@ type TreeTestSuite struct {
 }
 
 func (suite *TreeTestSuite) SetupTest() {
-	db := dbm.NewMemDB()
-	tree, err := iavl.NewMutableTree(db, 100, false)
-	suite.Require().NoError(err)
-	_, _, err = tree.SaveVersion()
+	db := wrapper.NewDBWrapper(dbm.NewMemDB())
+
+	tree := iavl.NewMutableTree(db, 100, false, nil)
+	_, _, err := tree.SaveVersion()
 	suite.Require().Nil(err)
 	kvstore := iavlstore.UnsafeNewStore(tree)
 	suite.tree = sumtree.NewTree(kvstore, 10)
@@ -72,7 +74,7 @@ func (suite *TreeTestSuite) TestTreeInvariants() {
 	suite.SetupTest()
 
 	pairs := pairs{pair{[]byte("hello"), 100}}
-	suite.tree.Set([]byte("hello"), sdk.NewIntFromUint64(100))
+	suite.tree.Set([]byte("hello"), math.NewIntFromUint64(100))
 
 	// tested up to 2000
 	for i := 0; i < 500; i++ {
@@ -92,7 +94,7 @@ func (suite *TreeTestSuite) TestTreeInvariants() {
 			pairs = append(pairs, pair{key, value})
 		}
 
-		suite.tree.Set(key, sdk.NewIntFromUint64(value))
+		suite.tree.Set(key, math.NewIntFromUint64(value))
 
 		// check all is right
 		for _, pair := range pairs {
