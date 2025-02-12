@@ -17,15 +17,6 @@ type balancerPoolPretty struct {
 	PoolAssets         []PoolAsset    `json:"pool_assets" yaml:"pool_assets"`
 }
 
-// FIXME: make sure it's not used (as it's overriden by proto)
-// func (p Pool) String() string {
-// 	out, err := p.MarshalJSON()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return string(out)
-// }
-
 // MarshalJSON returns the JSON representation of a Pool.
 func (p Pool) MarshalJSON() ([]byte, error) {
 	accAddr, err := sdk.AccAddressFromBech32(p.Address)

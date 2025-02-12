@@ -88,14 +88,6 @@ func (msg MsgSwapExactAmountIn) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgSwapExactAmountIn) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
-}
-
 var _ sdk.Msg = &MsgSwapExactAmountOut{}
 
 func (msg MsgSwapExactAmountOut) Route() string { return RouterKey }
@@ -122,14 +114,6 @@ func (msg MsgSwapExactAmountOut) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgSwapExactAmountOut) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
-}
-
 var _ sdk.Msg = &MsgJoinPool{}
 
 func (msg MsgJoinPool) Route() string { return RouterKey }
@@ -150,14 +134,6 @@ func (msg MsgJoinPool) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func (msg MsgJoinPool) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
 }
 
 var _ sdk.Msg = &MsgExitPool{}
@@ -182,14 +158,6 @@ func (msg MsgExitPool) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgExitPool) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
-}
-
 var _ sdk.Msg = &MsgJoinSwapExternAmountIn{}
 
 func (msg MsgJoinSwapExternAmountIn) Route() string { return RouterKey }
@@ -209,14 +177,6 @@ func (msg MsgJoinSwapExternAmountIn) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func (msg MsgJoinSwapExternAmountIn) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
 }
 
 var _ sdk.Msg = &MsgJoinSwapShareAmountOut{}
@@ -245,14 +205,6 @@ func (msg MsgJoinSwapShareAmountOut) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgJoinSwapShareAmountOut) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
-}
-
 var _ sdk.Msg = &MsgExitSwapExternAmountOut{}
 
 func (msg MsgExitSwapExternAmountOut) Route() string { return RouterKey }
@@ -272,14 +224,6 @@ func (msg MsgExitSwapExternAmountOut) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func (msg MsgExitSwapExternAmountOut) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
 }
 
 var _ sdk.Msg = &MsgExitSwapShareAmountIn{}
@@ -306,12 +250,4 @@ func (msg MsgExitSwapShareAmountIn) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-func (msg MsgExitSwapShareAmountIn) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
 }

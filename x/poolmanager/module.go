@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
 
 	keeper "github.com/osmosis-labs/osmosis/v15/x/poolmanager/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -49,14 +48,6 @@ func (b AppModuleBasic) RegisterRESTRoutes(ctx client.Context, r *mux.Router) {
 }
 
 func (b AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-}
-
-func (b AppModuleBasic) GetTxCmd() *cobra.Command {
-	return nil
-}
-
-func (b AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return nil
 }
 
 // RegisterInterfaces registers interfaces and implementations of the gamm module.
