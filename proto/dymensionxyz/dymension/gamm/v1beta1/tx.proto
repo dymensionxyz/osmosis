@@ -3,30 +3,24 @@ package dymensionxyz.dymension.gamm.v1beta1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
 import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
 import "dymensionxyz/dymension/gamm/v1beta1/tx_swap.proto";
 import "dymensionxyz/dymension/gamm/v1beta1/tx_liquidity.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 
-
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+
   rpc JoinPool(MsgJoinPool) returns (MsgJoinPoolResponse);
-  rpc JoinSwapExternAmountIn(MsgJoinSwapExternAmountIn)
-  returns (MsgJoinSwapExternAmountInResponse);
-  rpc JoinSwapShareAmountOut(MsgJoinSwapShareAmountOut)
-  returns (MsgJoinSwapShareAmountOutResponse);
+  rpc JoinSwapExternAmountIn(MsgJoinSwapExternAmountIn) returns (MsgJoinSwapExternAmountInResponse);
+  rpc JoinSwapShareAmountOut(MsgJoinSwapShareAmountOut) returns (MsgJoinSwapShareAmountOutResponse);
 
   rpc ExitPool(MsgExitPool) returns (MsgExitPoolResponse);
-  rpc ExitSwapExternAmountOut(MsgExitSwapExternAmountOut)
-    returns (MsgExitSwapExternAmountOutResponse);
-  rpc ExitSwapShareAmountIn(MsgExitSwapShareAmountIn)
-    returns (MsgExitSwapShareAmountInResponse);
+  rpc ExitSwapExternAmountOut(MsgExitSwapExternAmountOut) returns (MsgExitSwapExternAmountOutResponse);
+  rpc ExitSwapShareAmountIn(MsgExitSwapShareAmountIn) returns (MsgExitSwapShareAmountInResponse);
 
-
-  rpc SwapExactAmountIn(MsgSwapExactAmountIn)
-      returns (MsgSwapExactAmountInResponse);
-  rpc SwapExactAmountOut(MsgSwapExactAmountOut)
-      returns (MsgSwapExactAmountOutResponse);
+  rpc SwapExactAmountIn(MsgSwapExactAmountIn) returns (MsgSwapExactAmountInResponse);
+  rpc SwapExactAmountOut(MsgSwapExactAmountOut) returns (MsgSwapExactAmountOutResponse);
 }
-
