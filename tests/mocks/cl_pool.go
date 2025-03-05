@@ -7,8 +7,10 @@ package mocks
 import (
 	reflect "reflect"
 
+	"cosmossdk.io/math"
 	types "github.com/cosmos/cosmos-sdk/types"
 	gomock "github.com/golang/mock/gomock"
+
 	types0 "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
@@ -36,7 +38,7 @@ func (m *MockConcentratedPoolExtension) EXPECT() *MockConcentratedPoolExtensionM
 }
 
 // ApplySwap mocks base method.
-func (m *MockConcentratedPoolExtension) ApplySwap(newLiquidity types.Dec, newCurrentTick types.Int, newCurrentSqrtPrice types.Dec) error {
+func (m *MockConcentratedPoolExtension) ApplySwap(newLiquidity math.LegacyDec, newCurrentTick math.Int, newCurrentSqrtPrice math.LegacyDec) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ApplySwap", newLiquidity, newCurrentTick, newCurrentSqrtPrice)
 	ret0, _ := ret[0].(error)
@@ -50,11 +52,11 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) ApplySwap(newLiquidity, new
 }
 
 // CalcActualAmounts mocks base method.
-func (m *MockConcentratedPoolExtension) CalcActualAmounts(ctx types.Context, lowerTick, upperTick int64, sqrtRatioLowerTick, sqrtRatioUpperTick, liquidityDelta types.Dec) (types.Dec, types.Dec) {
+func (m *MockConcentratedPoolExtension) CalcActualAmounts(ctx types.Context, lowerTick, upperTick int64, sqrtRatioLowerTick, sqrtRatioUpperTick, liquidityDelta math.LegacyDec) (math.LegacyDec, math.LegacyDec) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcActualAmounts", ctx, lowerTick, upperTick, sqrtRatioLowerTick, sqrtRatioUpperTick, liquidityDelta)
-	ret0, _ := ret[0].(types.Dec)
-	ret1, _ := ret[1].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
+	ret1, _ := ret[1].(math.LegacyDec)
 	return ret0, ret1
 }
 
@@ -79,10 +81,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetAddress() *gomock.Call {
 }
 
 // GetCurrentSqrtPrice mocks base method.
-func (m *MockConcentratedPoolExtension) GetCurrentSqrtPrice() types.Dec {
+func (m *MockConcentratedPoolExtension) GetCurrentSqrtPrice() math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCurrentSqrtPrice")
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -93,10 +95,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetCurrentSqrtPrice() *gomo
 }
 
 // GetCurrentTick mocks base method.
-func (m *MockConcentratedPoolExtension) GetCurrentTick() types.Int {
+func (m *MockConcentratedPoolExtension) GetCurrentTick() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCurrentTick")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -107,10 +109,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetCurrentTick() *gomock.Ca
 }
 
 // GetExitFee mocks base method.
-func (m *MockConcentratedPoolExtension) GetExitFee(ctx types.Context) types.Dec {
+func (m *MockConcentratedPoolExtension) GetExitFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExitFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -135,10 +137,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetId() *gomock.Call {
 }
 
 // GetLiquidity mocks base method.
-func (m *MockConcentratedPoolExtension) GetLiquidity() types.Dec {
+func (m *MockConcentratedPoolExtension) GetLiquidity() math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLiquidity")
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -149,10 +151,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetLiquidity() *gomock.Call
 }
 
 // GetPrecisionFactorAtPriceOne mocks base method.
-func (m *MockConcentratedPoolExtension) GetPrecisionFactorAtPriceOne() types.Int {
+func (m *MockConcentratedPoolExtension) GetPrecisionFactorAtPriceOne() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPrecisionFactorAtPriceOne")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -163,10 +165,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetPrecisionFactorAtPriceOn
 }
 
 // GetSwapFee mocks base method.
-func (m *MockConcentratedPoolExtension) GetSwapFee(ctx types.Context) types.Dec {
+func (m *MockConcentratedPoolExtension) GetSwapFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSwapFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -233,10 +235,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) GetTotalPoolLiquidity(ctx i
 }
 
 // GetTotalShares mocks base method.
-func (m *MockConcentratedPoolExtension) GetTotalShares() types.Int {
+func (m *MockConcentratedPoolExtension) GetTotalShares() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTotalShares")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -299,7 +301,7 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) Reset() *gomock.Call {
 }
 
 // SetCurrentSqrtPrice mocks base method.
-func (m *MockConcentratedPoolExtension) SetCurrentSqrtPrice(newSqrtPrice types.Dec) {
+func (m *MockConcentratedPoolExtension) SetCurrentSqrtPrice(newSqrtPrice math.LegacyDec) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetCurrentSqrtPrice", newSqrtPrice)
 }
@@ -311,7 +313,7 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) SetCurrentSqrtPrice(newSqrt
 }
 
 // SetCurrentTick mocks base method.
-func (m *MockConcentratedPoolExtension) SetCurrentTick(newTick types.Int) {
+func (m *MockConcentratedPoolExtension) SetCurrentTick(newTick math.Int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetCurrentTick", newTick)
 }
@@ -323,10 +325,10 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) SetCurrentTick(newTick inte
 }
 
 // SpotPrice mocks base method.
-func (m *MockConcentratedPoolExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (types.Dec, error) {
+func (m *MockConcentratedPoolExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (math.LegacyDec, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SpotPrice", ctx, quoteAssetDenom, baseAssetDenom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -352,7 +354,7 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) String() *gomock.Call {
 }
 
 // UpdateLiquidity mocks base method.
-func (m *MockConcentratedPoolExtension) UpdateLiquidity(newLiquidity types.Dec) {
+func (m *MockConcentratedPoolExtension) UpdateLiquidity(newLiquidity math.LegacyDec) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "UpdateLiquidity", newLiquidity)
 }
@@ -364,7 +366,7 @@ func (mr *MockConcentratedPoolExtensionMockRecorder) UpdateLiquidity(newLiquidit
 }
 
 // UpdateLiquidityIfActivePosition mocks base method.
-func (m *MockConcentratedPoolExtension) UpdateLiquidityIfActivePosition(ctx types.Context, lowerTick, upperTick int64, liquidityDelta types.Dec) bool {
+func (m *MockConcentratedPoolExtension) UpdateLiquidityIfActivePosition(ctx types.Context, lowerTick, upperTick int64, liquidityDelta math.LegacyDec) bool {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateLiquidityIfActivePosition", ctx, lowerTick, upperTick, liquidityDelta)
 	ret0, _ := ret[0].(bool)

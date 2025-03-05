@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
 )
@@ -42,16 +41,16 @@ func TestPowApprox(t *testing.T) {
 		{
 			// zero exp
 			base:           math.LegacyMustNewDecFromStr("0.8"),
-			exp:            sdk.ZeroDec(),
+			exp:            math.LegacyZeroDec(),
 			powPrecision:   math.LegacyMustNewDecFromStr("0.00001"),
 			expectedResult: math.LegacyOneDec(),
 		},
 		{
 			// zero base, this should panic
-			base:           sdk.ZeroDec(),
+			base:           math.LegacyZeroDec(),
 			exp:            math.LegacyOneDec(),
 			powPrecision:   math.LegacyMustNewDecFromStr("0.00001"),
-			expectedResult: sdk.ZeroDec(),
+			expectedResult: math.LegacyZeroDec(),
 			expectPanic:    true,
 		},
 		{
@@ -141,14 +140,14 @@ func TestPow(t *testing.T) {
 		{
 			// zero exp
 			base:           math.LegacyMustNewDecFromStr("0.8"),
-			exp:            sdk.ZeroDec(),
+			exp:            math.LegacyZeroDec(),
 			expectedResult: math.LegacyOneDec(),
 		},
 		{
 			// zero base, this should panic
-			base:           sdk.ZeroDec(),
+			base:           math.LegacyZeroDec(),
 			exp:            math.LegacyOneDec(),
-			expectedResult: sdk.ZeroDec(),
+			expectedResult: math.LegacyZeroDec(),
 		},
 		{
 			// large base, small exp
@@ -160,7 +159,7 @@ func TestPow(t *testing.T) {
 			// small base, large exp
 			base:           math.LegacyMustNewDecFromStr("0.0000123"),
 			exp:            math.LegacyMustNewDecFromStr("123"),
-			expectedResult: sdk.ZeroDec(),
+			expectedResult: math.LegacyZeroDec(),
 		},
 		{
 			// large base, large exp

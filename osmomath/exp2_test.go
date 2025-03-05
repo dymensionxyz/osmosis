@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
 	osmomath "github.com/osmosis-labs/osmosis/osmomath"
@@ -49,8 +48,8 @@ func TestExp2ChebyshevRationalApprox(t *testing.T) {
 			expectedResult: osmomath.OneDec(),
 
 			errTolerance: osmomath.ErrTolerance{
-				AdditiveTolerance:       sdk.ZeroDec(),
-				MultiplicativeTolerance: sdk.ZeroDec(),
+				AdditiveTolerance:       math.LegacyZeroDec(),
+				MultiplicativeTolerance: math.LegacyZeroDec(),
 				RoundingDir:             osmomath.RoundDown,
 			},
 		},
@@ -59,8 +58,8 @@ func TestExp2ChebyshevRationalApprox(t *testing.T) {
 			expectedResult: osmomath.MustNewDecFromStr("2"),
 
 			errTolerance: osmomath.ErrTolerance{
-				AdditiveTolerance:       sdk.ZeroDec(),
-				MultiplicativeTolerance: sdk.ZeroDec(),
+				AdditiveTolerance:       math.LegacyZeroDec(),
+				MultiplicativeTolerance: math.LegacyZeroDec(),
 				RoundingDir:             osmomath.RoundDown,
 			},
 		},

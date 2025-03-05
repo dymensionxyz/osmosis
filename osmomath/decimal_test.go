@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
@@ -22,7 +21,7 @@ type decimalTestSuite struct {
 
 var (
 	zeroAdditiveErrTolerance = osmomath.ErrTolerance{
-		AdditiveTolerance: sdk.ZeroDec(),
+		AdditiveTolerance: math.LegacyZeroDec(),
 	}
 )
 

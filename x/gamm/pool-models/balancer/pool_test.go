@@ -670,23 +670,23 @@ func TestCalcSingleAssetInAndOut_InverseRelationship(t *testing.T) {
 				initialCalcTokenOut := math.NewInt(tc.tokenOut)
 
 				actualSharesOut := balancer.CalcPoolSharesOutGivenSingleAssetIn(
-					sdk.NewDecFromBigInt(initialPoolBalanceOut.BigInt()),
-					sdk.NewDecFromBigInt(initialWeightOut.BigInt()).Quo(sdk.NewDecFromBigInt(initialWeightOut.Add(initialWeightIn).BigInt())),
+					math.LegacyNewDecFromBigInt(initialPoolBalanceOut.BigInt()),
+					math.LegacyNewDecFromBigInt(initialWeightOut.BigInt()).Quo(math.LegacyNewDecFromBigInt(initialWeightOut.Add(initialWeightIn).BigInt())),
 					initialTotalShares,
-					sdk.NewDecFromBigInt(initialCalcTokenOut.BigInt()),
+					math.LegacyNewDecFromBigInt(initialCalcTokenOut.BigInt()),
 					swapFeeDec,
 				)
 
 				inverseCalcTokenOut := balancer.CalcSingleAssetInGivenPoolSharesOut(
-					sdk.NewDecFromBigInt(initialPoolBalanceOut.Add(initialCalcTokenOut).BigInt()),
-					sdk.NewDecFromBigInt(initialWeightOut.BigInt()).Quo(sdk.NewDecFromBigInt(initialWeightOut.Add(initialWeightIn).BigInt())),
+					math.LegacyNewDecFromBigInt(initialPoolBalanceOut.Add(initialCalcTokenOut).BigInt()),
+					math.LegacyNewDecFromBigInt(initialWeightOut.BigInt()).Quo(math.LegacyNewDecFromBigInt(initialWeightOut.Add(initialWeightIn).BigInt())),
 					initialTotalShares.Add(actualSharesOut),
 					actualSharesOut,
 					swapFeeDec,
 				)
 
 				tol := math.LegacyNewDec(1)
-				osmoassert.DecApproxEq(t, sdk.NewDecFromBigInt(initialCalcTokenOut.BigInt()), inverseCalcTokenOut, tol)
+				osmoassert.DecApproxEq(t, math.LegacyNewDecFromBigInt(initialCalcTokenOut.BigInt()), inverseCalcTokenOut, tol)
 			})
 		}
 	}

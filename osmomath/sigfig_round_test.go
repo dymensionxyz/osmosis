@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
 )
@@ -17,20 +16,20 @@ func TestSigFigRound(t *testing.T) {
 	testCases := []struct {
 		name           string
 		decimal        math.LegacyDec
-		tenToSigFig    sdk.Int
+		tenToSigFig    math.Int
 		expectedResult math.LegacyDec
 	}{
 		{
 			name:           "Zero decimal",
-			decimal:        sdk.ZeroDec(),
+			decimal:        math.LegacyZeroDec(),
 			tenToSigFig:    tenToSigFig,
-			expectedResult: sdk.ZeroDec(),
+			expectedResult: math.LegacyZeroDec(),
 		},
 		{
 			name:           "Zero tenToSigFig",
 			decimal:        math.LegacyMustNewDecFromStr("2.123"),
 			tenToSigFig:    math.ZeroInt(),
-			expectedResult: sdk.ZeroDec(),
+			expectedResult: math.LegacyZeroDec(),
 		},
 		// With input, decimal >= 0.1. We have:
 		// 	- dTimesK = 63.045
@@ -73,9 +72,9 @@ func TestSigFigRound(t *testing.T) {
 		},
 		{
 			name:           "minimum decimal is still kept",
-			decimal:        sdk.NewDecWithPrec(1, 18),
+			decimal:        math.LegacyNewDecWithPrec(1, 18),
 			tenToSigFig:    math.NewInt(10),
-			expectedResult: sdk.NewDecWithPrec(1, 18),
+			expectedResult: math.LegacyNewDecWithPrec(1, 18),
 		},
 	}
 

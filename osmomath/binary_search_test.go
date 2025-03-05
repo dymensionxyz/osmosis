@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,28 +18,28 @@ var (
 func TestBinarySearch(t *testing.T) {
 	// straight line function that returns input. Simplest to binary search on,
 	// binary search directly reveals one bit of the answer in each iteration with this function.
-	lineF := func(a sdk.Int) (sdk.Int, error) {
+	lineF := func(a math.Int) (math.Int, error) {
 		return a, nil
 	}
-	cubicF := func(a sdk.Int) (sdk.Int, error) {
-		calculation := math.LegacyNewDecFromIntWithPrec(a, sdk.Precision)
+	cubicF := func(a math.Int) (math.Int, error) {
+		calculation := math.LegacyNewDecFromIntWithPrec(a, math.LegacyPrecision)
 		result := calculation.Power(3)
 		output := math.NewIntFromBigInt(result.BigInt())
 		return output, nil
 	}
-	noErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec()}
+	noErrTolerance := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec()}
 	testErrToleranceAdditive := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 20)}
-	testErrToleranceMultiplicative := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: math.LegacyNewDec(10)}
+	testErrToleranceMultiplicative := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec(), MultiplicativeTolerance: math.LegacyNewDec(10)}
 	testErrToleranceBoth := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 20), MultiplicativeTolerance: math.LegacyNewDec(1 << 3)}
 	tests := map[string]struct {
-		f             func(sdk.Int) (sdk.Int, error)
-		lowerbound    sdk.Int
-		upperbound    sdk.Int
-		targetOutput  sdk.Int
+		f             func(math.Int) (math.Int, error)
+		lowerbound    math.Int
+		upperbound    math.Int
+		targetOutput  math.Int
 		errTolerance  ErrTolerance
 		maxIterations int
 
-		expectedSolvedInput sdk.Int
+		expectedSolvedInput math.Int
 		expectErr           bool
 		// This binary searches inputs to a monotonic increasing function F
 		// We stop when the answer is within error bounds stated by errTolerance
@@ -69,7 +68,7 @@ func TestBinarySearch(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.True(sdk.IntEq(t, tc.expectedSolvedInput, actualSolvedInput))
+				require.True(math.IntEq(t, tc.expectedSolvedInput, actualSolvedInput))
 			}
 		})
 	}
@@ -156,7 +155,7 @@ var fnMap = map[string]searchFn{"line": lineF, "cubic": cubicF, "neg_cubic": neg
 // This function tests that any value in a given range can be reached within expected num iterations.
 func TestIterationDepthRandValue(t *testing.T) {
 	tests := map[string]binarySearchTestCase{}
-	exactEqual := ErrTolerance{AdditiveTolerance: sdk.ZeroDec()}
+	exactEqual := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec()}
 	withinOne := ErrTolerance{AdditiveTolerance: math.LegacyOneDec()}
 	within32 := ErrTolerance{AdditiveTolerance: math.LegacyOneDec().Mul(math.LegacyNewDec(32))}
 
@@ -321,7 +320,7 @@ func TestBinarySearchRoundingBehavior(t *testing.T) {
 }
 
 func TestErrTolerance_Compare(t *testing.T) {
-	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: math.LegacyDec{}}
+	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec(), MultiplicativeTolerance: math.LegacyDec{}}
 	NonZeroErrAdditive := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(10), MultiplicativeTolerance: math.LegacyDec{}}
 	NonZeroErrMultiplicative := ErrTolerance{AdditiveTolerance: math.LegacyDec{}, MultiplicativeTolerance: math.LegacyNewDec(10)}
 	NonZeroErrBoth := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1), MultiplicativeTolerance: math.LegacyNewDec(10)}

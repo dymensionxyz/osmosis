@@ -8,8 +8,10 @@ import (
 	reflect "reflect"
 	time "time"
 
+	"cosmossdk.io/math"
 	types "github.com/cosmos/cosmos-sdk/types"
 	gomock "github.com/golang/mock/gomock"
+
 	types0 "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
@@ -37,7 +39,7 @@ func (m *MockCFMMPoolI) EXPECT() *MockCFMMPoolIMockRecorder {
 }
 
 // CalcExitPoolCoinsFromShares mocks base method.
-func (m *MockCFMMPoolI) CalcExitPoolCoinsFromShares(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockCFMMPoolI) CalcExitPoolCoinsFromShares(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcExitPoolCoinsFromShares", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -52,7 +54,7 @@ func (mr *MockCFMMPoolIMockRecorder) CalcExitPoolCoinsFromShares(ctx, numShares,
 }
 
 // CalcInAmtGivenOut mocks base method.
-func (m *MockCFMMPoolI) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockCFMMPoolI) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -67,10 +69,10 @@ func (mr *MockCFMMPoolIMockRecorder) CalcInAmtGivenOut(ctx, tokenOut, tokenInDen
 }
 
 // CalcJoinPoolNoSwapShares mocks base method.
-func (m *MockCFMMPoolI) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockCFMMPoolI) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolNoSwapShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -83,10 +85,10 @@ func (mr *MockCFMMPoolIMockRecorder) CalcJoinPoolNoSwapShares(ctx, tokensIn, swa
 }
 
 // CalcJoinPoolShares mocks base method.
-func (m *MockCFMMPoolI) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockCFMMPoolI) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -99,7 +101,7 @@ func (mr *MockCFMMPoolIMockRecorder) CalcJoinPoolShares(ctx, tokensIn, swapFee i
 }
 
 // CalcOutAmtGivenIn mocks base method.
-func (m *MockCFMMPoolI) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockCFMMPoolI) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -114,7 +116,7 @@ func (mr *MockCFMMPoolIMockRecorder) CalcOutAmtGivenIn(ctx, tokenIn, tokenOutDen
 }
 
 // ExitPool mocks base method.
-func (m *MockCFMMPoolI) ExitPool(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockCFMMPoolI) ExitPool(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExitPool", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -143,10 +145,10 @@ func (mr *MockCFMMPoolIMockRecorder) GetAddress() *gomock.Call {
 }
 
 // GetExitFee mocks base method.
-func (m *MockCFMMPoolI) GetExitFee(ctx types.Context) types.Dec {
+func (m *MockCFMMPoolI) GetExitFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExitFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -171,10 +173,10 @@ func (mr *MockCFMMPoolIMockRecorder) GetId() *gomock.Call {
 }
 
 // GetSwapFee mocks base method.
-func (m *MockCFMMPoolI) GetSwapFee(ctx types.Context) types.Dec {
+func (m *MockCFMMPoolI) GetSwapFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSwapFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -199,10 +201,10 @@ func (mr *MockCFMMPoolIMockRecorder) GetTotalPoolLiquidity(ctx interface{}) *gom
 }
 
 // GetTotalShares mocks base method.
-func (m *MockCFMMPoolI) GetTotalShares() types.Int {
+func (m *MockCFMMPoolI) GetTotalShares() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTotalShares")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -241,10 +243,10 @@ func (mr *MockCFMMPoolIMockRecorder) IsActive(ctx interface{}) *gomock.Call {
 }
 
 // JoinPool mocks base method.
-func (m *MockCFMMPoolI) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockCFMMPoolI) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPool", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -256,10 +258,10 @@ func (mr *MockCFMMPoolIMockRecorder) JoinPool(ctx, tokensIn, swapFee interface{}
 }
 
 // JoinPoolNoSwap mocks base method.
-func (m *MockCFMMPoolI) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockCFMMPoolI) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPoolNoSwap", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -295,10 +297,10 @@ func (mr *MockCFMMPoolIMockRecorder) Reset() *gomock.Call {
 }
 
 // SpotPrice mocks base method.
-func (m *MockCFMMPoolI) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (types.Dec, error) {
+func (m *MockCFMMPoolI) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (math.LegacyDec, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SpotPrice", ctx, quoteAssetDenom, baseAssetDenom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -324,7 +326,7 @@ func (mr *MockCFMMPoolIMockRecorder) String() *gomock.Call {
 }
 
 // SwapInAmtGivenOut mocks base method.
-func (m *MockCFMMPoolI) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockCFMMPoolI) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -339,7 +341,7 @@ func (mr *MockCFMMPoolIMockRecorder) SwapInAmtGivenOut(ctx, tokenOut, tokenInDen
 }
 
 // SwapOutAmtGivenIn mocks base method.
-func (m *MockCFMMPoolI) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockCFMMPoolI) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -377,7 +379,7 @@ func (m *MockPoolAmountOutExtension) EXPECT() *MockPoolAmountOutExtensionMockRec
 }
 
 // CalcExitPoolCoinsFromShares mocks base method.
-func (m *MockPoolAmountOutExtension) CalcExitPoolCoinsFromShares(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockPoolAmountOutExtension) CalcExitPoolCoinsFromShares(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcExitPoolCoinsFromShares", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -392,7 +394,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcExitPoolCoinsFromShares(ct
 }
 
 // CalcInAmtGivenOut mocks base method.
-func (m *MockPoolAmountOutExtension) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockPoolAmountOutExtension) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -407,10 +409,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcInAmtGivenOut(ctx, tokenOu
 }
 
 // CalcJoinPoolNoSwapShares mocks base method.
-func (m *MockPoolAmountOutExtension) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockPoolAmountOutExtension) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolNoSwapShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -423,10 +425,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcJoinPoolNoSwapShares(ctx, 
 }
 
 // CalcJoinPoolShares mocks base method.
-func (m *MockPoolAmountOutExtension) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockPoolAmountOutExtension) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -439,7 +441,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcJoinPoolShares(ctx, tokens
 }
 
 // CalcOutAmtGivenIn mocks base method.
-func (m *MockPoolAmountOutExtension) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockPoolAmountOutExtension) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -454,10 +456,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcOutAmtGivenIn(ctx, tokenIn
 }
 
 // CalcTokenInShareAmountOut mocks base method.
-func (m *MockPoolAmountOutExtension) CalcTokenInShareAmountOut(ctx types.Context, tokenInDenom string, shareOutAmount types.Int, swapFee types.Dec) (types.Int, error) {
+func (m *MockPoolAmountOutExtension) CalcTokenInShareAmountOut(ctx types.Context, tokenInDenom string, shareOutAmount math.Int, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcTokenInShareAmountOut", ctx, tokenInDenom, shareOutAmount, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -469,7 +471,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) CalcTokenInShareAmountOut(ctx,
 }
 
 // ExitPool mocks base method.
-func (m *MockPoolAmountOutExtension) ExitPool(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockPoolAmountOutExtension) ExitPool(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExitPool", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -484,10 +486,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) ExitPool(ctx, numShares, exitF
 }
 
 // ExitSwapExactAmountOut mocks base method.
-func (m *MockPoolAmountOutExtension) ExitSwapExactAmountOut(ctx types.Context, tokenOut types.Coin, shareInMaxAmount types.Int) (types.Int, error) {
+func (m *MockPoolAmountOutExtension) ExitSwapExactAmountOut(ctx types.Context, tokenOut types.Coin, shareInMaxAmount math.Int) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExitSwapExactAmountOut", ctx, tokenOut, shareInMaxAmount)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -513,10 +515,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) GetAddress() *gomock.Call {
 }
 
 // GetExitFee mocks base method.
-func (m *MockPoolAmountOutExtension) GetExitFee(ctx types.Context) types.Dec {
+func (m *MockPoolAmountOutExtension) GetExitFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExitFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -541,10 +543,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) GetId() *gomock.Call {
 }
 
 // GetSwapFee mocks base method.
-func (m *MockPoolAmountOutExtension) GetSwapFee(ctx types.Context) types.Dec {
+func (m *MockPoolAmountOutExtension) GetSwapFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSwapFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -569,10 +571,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) GetTotalPoolLiquidity(ctx inte
 }
 
 // GetTotalShares mocks base method.
-func (m *MockPoolAmountOutExtension) GetTotalShares() types.Int {
+func (m *MockPoolAmountOutExtension) GetTotalShares() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTotalShares")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -597,7 +599,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) GetType() *gomock.Call {
 }
 
 // IncreaseLiquidity mocks base method.
-func (m *MockPoolAmountOutExtension) IncreaseLiquidity(sharesOut types.Int, coinsIn types.Coins) {
+func (m *MockPoolAmountOutExtension) IncreaseLiquidity(sharesOut math.Int, coinsIn types.Coins) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "IncreaseLiquidity", sharesOut, coinsIn)
 }
@@ -623,10 +625,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) IsActive(ctx interface{}) *gom
 }
 
 // JoinPool mocks base method.
-func (m *MockPoolAmountOutExtension) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockPoolAmountOutExtension) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPool", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -638,10 +640,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) JoinPool(ctx, tokensIn, swapFe
 }
 
 // JoinPoolNoSwap mocks base method.
-func (m *MockPoolAmountOutExtension) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockPoolAmountOutExtension) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPoolNoSwap", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -653,10 +655,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) JoinPoolNoSwap(ctx, tokensIn, 
 }
 
 // JoinPoolTokenInMaxShareAmountOut mocks base method.
-func (m *MockPoolAmountOutExtension) JoinPoolTokenInMaxShareAmountOut(ctx types.Context, tokenInDenom string, shareOutAmount types.Int) (types.Int, error) {
+func (m *MockPoolAmountOutExtension) JoinPoolTokenInMaxShareAmountOut(ctx types.Context, tokenInDenom string, shareOutAmount math.Int) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPoolTokenInMaxShareAmountOut", ctx, tokenInDenom, shareOutAmount)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -692,10 +694,10 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) Reset() *gomock.Call {
 }
 
 // SpotPrice mocks base method.
-func (m *MockPoolAmountOutExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (types.Dec, error) {
+func (m *MockPoolAmountOutExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (math.LegacyDec, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SpotPrice", ctx, quoteAssetDenom, baseAssetDenom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -721,7 +723,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) String() *gomock.Call {
 }
 
 // SwapInAmtGivenOut mocks base method.
-func (m *MockPoolAmountOutExtension) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockPoolAmountOutExtension) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -736,7 +738,7 @@ func (mr *MockPoolAmountOutExtensionMockRecorder) SwapInAmtGivenOut(ctx, tokenOu
 }
 
 // SwapOutAmtGivenIn mocks base method.
-func (m *MockPoolAmountOutExtension) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockPoolAmountOutExtension) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -774,7 +776,7 @@ func (m *MockWeightedPoolExtension) EXPECT() *MockWeightedPoolExtensionMockRecor
 }
 
 // CalcExitPoolCoinsFromShares mocks base method.
-func (m *MockWeightedPoolExtension) CalcExitPoolCoinsFromShares(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockWeightedPoolExtension) CalcExitPoolCoinsFromShares(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcExitPoolCoinsFromShares", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -789,7 +791,7 @@ func (mr *MockWeightedPoolExtensionMockRecorder) CalcExitPoolCoinsFromShares(ctx
 }
 
 // CalcInAmtGivenOut mocks base method.
-func (m *MockWeightedPoolExtension) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockWeightedPoolExtension) CalcInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -804,10 +806,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) CalcInAmtGivenOut(ctx, tokenOut
 }
 
 // CalcJoinPoolNoSwapShares mocks base method.
-func (m *MockWeightedPoolExtension) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockWeightedPoolExtension) CalcJoinPoolNoSwapShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolNoSwapShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -820,10 +822,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) CalcJoinPoolNoSwapShares(ctx, t
 }
 
 // CalcJoinPoolShares mocks base method.
-func (m *MockWeightedPoolExtension) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, types.Coins, error) {
+func (m *MockWeightedPoolExtension) CalcJoinPoolShares(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcJoinPoolShares", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(types.Coins)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
@@ -836,7 +838,7 @@ func (mr *MockWeightedPoolExtensionMockRecorder) CalcJoinPoolShares(ctx, tokensI
 }
 
 // CalcOutAmtGivenIn mocks base method.
-func (m *MockWeightedPoolExtension) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockWeightedPoolExtension) CalcOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalcOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -851,7 +853,7 @@ func (mr *MockWeightedPoolExtensionMockRecorder) CalcOutAmtGivenIn(ctx, tokenIn,
 }
 
 // ExitPool mocks base method.
-func (m *MockWeightedPoolExtension) ExitPool(ctx types.Context, numShares types.Int, exitFee types.Dec) (types.Coins, error) {
+func (m *MockWeightedPoolExtension) ExitPool(ctx types.Context, numShares math.Int, exitFee math.LegacyDec) (types.Coins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExitPool", ctx, numShares, exitFee)
 	ret0, _ := ret[0].(types.Coins)
@@ -880,10 +882,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) GetAddress() *gomock.Call {
 }
 
 // GetExitFee mocks base method.
-func (m *MockWeightedPoolExtension) GetExitFee(ctx types.Context) types.Dec {
+func (m *MockWeightedPoolExtension) GetExitFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetExitFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -908,10 +910,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) GetId() *gomock.Call {
 }
 
 // GetSwapFee mocks base method.
-func (m *MockWeightedPoolExtension) GetSwapFee(ctx types.Context) types.Dec {
+func (m *MockWeightedPoolExtension) GetSwapFee(ctx types.Context) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSwapFee", ctx)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -922,10 +924,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) GetSwapFee(ctx interface{}) *go
 }
 
 // GetTokenWeight mocks base method.
-func (m *MockWeightedPoolExtension) GetTokenWeight(denom string) (types.Int, error) {
+func (m *MockWeightedPoolExtension) GetTokenWeight(denom string) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenWeight", denom)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -951,10 +953,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) GetTotalPoolLiquidity(ctx inter
 }
 
 // GetTotalShares mocks base method.
-func (m *MockWeightedPoolExtension) GetTotalShares() types.Int {
+func (m *MockWeightedPoolExtension) GetTotalShares() math.Int {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTotalShares")
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	return ret0
 }
 
@@ -993,10 +995,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) IsActive(ctx interface{}) *gomo
 }
 
 // JoinPool mocks base method.
-func (m *MockWeightedPoolExtension) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockWeightedPoolExtension) JoinPool(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPool", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1008,10 +1010,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) JoinPool(ctx, tokensIn, swapFee
 }
 
 // JoinPoolNoSwap mocks base method.
-func (m *MockWeightedPoolExtension) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee types.Dec) (types.Int, error) {
+func (m *MockWeightedPoolExtension) JoinPoolNoSwap(ctx types.Context, tokensIn types.Coins, swapFee math.LegacyDec) (math.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "JoinPoolNoSwap", ctx, tokensIn, swapFee)
-	ret0, _ := ret[0].(types.Int)
+	ret0, _ := ret[0].(math.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1059,10 +1061,10 @@ func (mr *MockWeightedPoolExtensionMockRecorder) Reset() *gomock.Call {
 }
 
 // SpotPrice mocks base method.
-func (m *MockWeightedPoolExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (types.Dec, error) {
+func (m *MockWeightedPoolExtension) SpotPrice(ctx types.Context, quoteAssetDenom, baseAssetDenom string) (math.LegacyDec, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SpotPrice", ctx, quoteAssetDenom, baseAssetDenom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1088,7 +1090,7 @@ func (mr *MockWeightedPoolExtensionMockRecorder) String() *gomock.Call {
 }
 
 // SwapInAmtGivenOut mocks base method.
-func (m *MockWeightedPoolExtension) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockWeightedPoolExtension) SwapInAmtGivenOut(ctx types.Context, tokenOut types.Coins, tokenInDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapInAmtGivenOut", ctx, tokenOut, tokenInDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)
@@ -1103,7 +1105,7 @@ func (mr *MockWeightedPoolExtensionMockRecorder) SwapInAmtGivenOut(ctx, tokenOut
 }
 
 // SwapOutAmtGivenIn mocks base method.
-func (m *MockWeightedPoolExtension) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee types.Dec) (types.Coin, error) {
+func (m *MockWeightedPoolExtension) SwapOutAmtGivenIn(ctx types.Context, tokenIn types.Coins, tokenOutDenom string, swapFee math.LegacyDec) (types.Coin, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SwapOutAmtGivenIn", ctx, tokenIn, tokenOutDenom, swapFee)
 	ret0, _ := ret[0].(types.Coin)

@@ -43,7 +43,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			beneficiary:       &accs[1],
 			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
 			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expCommunityRev:   math.LegacyNewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
 		},
 		"no beneficiary, base denom": {
 			payer:             accs[0],
@@ -67,7 +67,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			beneficiary:       nil,
 			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
 			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expCommunityRev:   math.LegacyNewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
 		},
 	}
 

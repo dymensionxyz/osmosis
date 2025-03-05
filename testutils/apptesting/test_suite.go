@@ -1,9 +1,11 @@
 package apptesting
 
 import (
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/dymensionxyz/dymension/v3/app/apptesting"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -11,13 +13,12 @@ import (
 type KeeperTestHelper struct {
 	suite.Suite
 
-	App         *runtime.AppI
+	App         runtime.AppI
 	Ctx         sdk.Context
 	QueryHelper *baseapp.QueryServiceTestHelper
 	TestAccs    []sdk.AccAddress
 }
 
-/*
 var (
 	SecondaryDenom  = "uion"
 	SecondaryAmount = math.NewInt(100000000)
@@ -25,20 +26,21 @@ var (
 
 // Setup sets up basic environment for suite (App, Ctx, and test accounts)
 func (s *KeeperTestHelper) Setup() {
-	chainID := "osmosis_100-1"
+	chainID := "dymension_100-1"
 	s.App = apptesting.Setup(false, chainID)
-	s.Ctx = s.App.BaseApp.NewContext(false, tmtypes.Header{Height: 1, ChainID: chainID, Time: time.Now().UTC()})
-	s.QueryHelper = &baseapp.QueryServiceTestHelper{
-		GRPCQueryRouter: s.App.GRPCQueryRouter(),
-		Ctx:             s.Ctx,
-	}
+	// s.Ctx = s.App.ewContext(false, tmtypes.Header{Height: 1, ChainID: chainID, Time: time.Now().UTC()})
+	// s.QueryHelper = &baseapp.QueryServiceTestHelper{
+	// 	GRPCQueryRouter: s.App.GRPCQueryRouter(),
+	// 	Ctx:             s.Ctx,
+	// }
 
-	s.SetEpochStartTime()
-	s.TestAccs = CreateRandomAccounts(3)
+	// s.SetEpochStartTime()
+	// s.TestAccs = CreateRandomAccounts(3)
 
-	gammtypes.MaxNumOfAssetsInPool = 8
+	// gammtypes.MaxNumOfAssetsInPool = 8
 }
 
+/*
 func (s *KeeperTestHelper) SetupTestForInitGenesis() {
 	// Setting to True, leads to init genesis not running
 	s.App = apptesting.Setup(true, "")
@@ -111,7 +113,7 @@ func (s *KeeperTestHelper) SetupValidator(bondStatus stakingtypes.BondStatus) sd
 	s.FundAcc(sdk.AccAddress(valAddr), selfBond)
 
 	stakingCoin := sdk.NewCoin(sdk.DefaultBondDenom, selfBond[0].Amount)
-	ZeroCommission := stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
+	ZeroCommission := stakingtypes.NewCommissionRates(math.LegacyZeroDec(), math.LegacyZeroDec(), math.LegacyZeroDec())
 	msg, err := stakingtypes.NewMsgCreateValidator(valAddr, valPub, stakingCoin, stakingtypes.Description{}, ZeroCommission, math.OneInt())
 	s.Require().NoError(err)
 
@@ -243,7 +245,7 @@ func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []m
 	pools := []gammtypes.CFMMPoolI{}
 	for index, multiplier := range multipliers {
 		token := fmt.Sprintf("token%d", index)
-		uosmoAmount := sdk.NewDecFromBigInt(gammtypes.InitPoolSharesSupply.BigInt()).Mul(multiplier).RoundInt()
+		uosmoAmount := math.LegacyNewDecFromBigInt(gammtypes.InitPoolSharesSupply.BigInt()).Mul(multiplier).RoundInt()
 
 		s.FundAcc(acc1, sdk.NewCoins(
 			sdk.NewCoin(bondDenom, uosmoAmount.Mul(math.NewInt(10))),
@@ -267,8 +269,8 @@ func (s *KeeperTestHelper) SetupGammPoolsWithBondDenomMultiplier(multipliers []m
 		)
 
 		poolParams := balancer.PoolParams{
-			SwapFee: sdk.NewDecWithPrec(1, 2),
-			ExitFee: sdk.NewDecWithPrec(1, 2),
+			SwapFee: math.LegacyNewDecWithPrec(1, 2),
+			ExitFee: math.LegacyNewDecWithPrec(1, 2),
 		}
 		msg := balancer.NewMsgCreateBalancerPool(acc1, poolParams, poolAssets, defaultFutureGovernor)
 

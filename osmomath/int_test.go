@@ -7,9 +7,8 @@ import (
 	"strconv"
 	"testing"
 
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/suite"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type intTestSuite struct {
@@ -307,35 +306,35 @@ func (s *intTestSuite) TestEncodingTableInt() {
 }
 
 func (s *intTestSuite) TestEncodingTableUint() {
-	var i sdk.Uint
+	var i math.Uint
 
 	cases := []struct {
-		i      sdk.Uint
+		i      math.Uint
 		jsonBz []byte
 		rawBz  []byte
 	}{
 		{
-			sdk.NewUint(0),
+			math.NewUint(0),
 			[]byte("\"0\""),
 			[]byte{0x30},
 		},
 		{
-			sdk.NewUint(100),
+			math.NewUint(100),
 			[]byte("\"100\""),
 			[]byte{0x31, 0x30, 0x30},
 		},
 		{
-			sdk.NewUint(51842),
+			math.NewUint(51842),
 			[]byte("\"51842\""),
 			[]byte{0x35, 0x31, 0x38, 0x34, 0x32},
 		},
 		{
-			sdk.NewUint(19513368),
+			math.NewUint(19513368),
 			[]byte("\"19513368\""),
 			[]byte{0x31, 0x39, 0x35, 0x31, 0x33, 0x33, 0x36, 0x38},
 		},
 		{
-			sdk.NewUint(999999999999),
+			math.NewUint(999999999999),
 			[]byte("\"999999999999\""),
 			[]byte{0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39, 0x39},
 		},
@@ -450,9 +449,9 @@ func (s *intTestSuite) TestEncodingRandom() {
 
 	for i := 0; i < 1000; i++ {
 		n := rand.Uint64()
-		ni := sdk.NewUint(n)
+		ni := math.NewUint(n)
 
-		var ri sdk.Uint
+		var ri math.Uint
 
 		str, err := ni.Marshal()
 		s.Require().Nil(err)

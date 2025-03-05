@@ -5,13 +5,12 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDivIntByU64ToBigDec(t *testing.T) {
 	type testcase struct {
-		i      sdk.Int
+		i      math.Int
 		u      uint64
 		round  RoundingDirection
 		want   BigDec
@@ -32,7 +31,7 @@ func TestDivIntByU64ToBigDec(t *testing.T) {
 		"7/3 round banker": {math.NewInt(7), 3, RoundBankers,
 			MustNewDecFromStr("2.333333333333333333333333333333333333"), false},
 	}
-	addTCForAllRoundingModes := func(prefix string, i sdk.Int, u uint64, want BigDec) {
+	addTCForAllRoundingModes := func(prefix string, i math.Int, u uint64, want BigDec) {
 		for round := 1; round < 4; round++ {
 			tests[fmt.Sprintf("%s rounding=%d", prefix, round)] =
 				testcase{i, u, RoundingDirection(round), want, false}
