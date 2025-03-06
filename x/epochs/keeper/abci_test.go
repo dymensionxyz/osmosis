@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/stretchr/testify/require"
 
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
@@ -13,12 +12,12 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 
-	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
+	"github.com/dymensionxyz/dymension/v3/app/apptesting"
 )
 
 // This test is responsible for testing how epochs increment based off
 // of their initial conditions, and subsequent block height / times.
-func (suite KeeperTestSuite) TestEpochInfoBeginBlockChanges() {
+func (suite *KeeperTestSuite) TestEpochInfoBeginBlockChanges() {
 	block1Time := time.Unix(1656907200, 0).UTC()
 	const defaultIdentifier = "hourly"
 	const defaultDuration = time.Hour
@@ -118,8 +117,8 @@ func initializeBlankEpochInfoFields(epoch types.EpochInfo, identifier string, du
 }
 
 func TestEpochStartingOneMonthAfterInitGenesis(t *testing.T) {
-	app := apptesting.Setup(false, "")
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+	app := apptesting.Setup(t)
+	ctx := app.BaseApp.NewContext(false)
 
 	// On init genesis, default epochs information is set
 	// To check init genesis again, should make it fresh status

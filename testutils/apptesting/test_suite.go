@@ -1,19 +1,32 @@
 package apptesting
 
 import (
+	"time"
+
+	coreheader "cosmossdk.io/core/header"
+	"cosmossdk.io/log"
 	"cosmossdk.io/math"
+	"cosmossdk.io/store/rootmulti"
+	storetypes "cosmossdk.io/store/types"
+	abci "github.com/cometbft/cometbft/abci/types"
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/runtime"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	dymapp "github.com/dymensionxyz/dymension/v3/app"
+
+	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 	"github.com/dymensionxyz/dymension/v3/app/apptesting"
 
 	"github.com/stretchr/testify/suite"
+
+	dbm "github.com/cosmos/cosmos-db"
 )
 
 type KeeperTestHelper struct {
 	suite.Suite
 
-	App         runtime.AppI
+	App         dymapp.App
 	Ctx         sdk.Context
 	QueryHelper *baseapp.QueryServiceTestHelper
 	TestAccs    []sdk.AccAddress
@@ -26,8 +39,7 @@ var (
 
 // Setup sets up basic environment for suite (App, Ctx, and test accounts)
 func (s *KeeperTestHelper) Setup() {
-	chainID := "dymension_100-1"
-	s.App = apptesting.Setup(false, chainID)
+	s.App = *apptesting.Setup(s.T())
 	// s.Ctx = s.App.ewContext(false, tmtypes.Header{Height: 1, ChainID: chainID, Time: time.Now().UTC()})
 	// s.QueryHelper = &baseapp.QueryServiceTestHelper{
 	// 	GRPCQueryRouter: s.App.GRPCQueryRouter(),
@@ -59,6 +71,7 @@ func (s *KeeperTestHelper) SetEpochStartTime() {
 		}
 	}
 }
+*/
 
 // CreateTestContext creates a test context.
 func (s *KeeperTestHelper) CreateTestContext() sdk.Context {
@@ -67,37 +80,51 @@ func (s *KeeperTestHelper) CreateTestContext() sdk.Context {
 }
 
 // CreateTestContextWithMultiStore creates a test context and returns it together with multi store.
-func (s *KeeperTestHelper) CreateTestContextWithMultiStore() (sdk.Context, sdk.CommitMultiStore) {
+func (s *KeeperTestHelper) CreateTestContextWithMultiStore() (sdk.Context, storetypes.CommitMultiStore) {
 	db := dbm.NewMemDB()
 	logger := log.NewNopLogger()
 
-	ms := rootmulti.NewStore(db, logger)
+	ms := rootmulti.NewStore(db, logger, nil)
 
-	return sdk.NewContext(ms, tmtypes.Header{}, false, logger), ms
+	return sdk.NewContext(ms, cmtproto.Header{}, false, logger), ms
 }
 
 // CreateTestContext creates a test context.
 func (s *KeeperTestHelper) Commit() {
-	oldHeight := s.Ctx.BlockHeight()
-	oldHeader := s.Ctx.BlockHeader()
-	s.App.Commit()
-	newHeader := tmtypes.Header{Height: oldHeight + 1, ChainID: oldHeader.ChainID, Time: oldHeader.Time.Add(time.Second)}
-	s.App.BeginBlock(abci.RequestBeginBlock{Header: newHeader})
-	s.Ctx = s.App.GetBaseApp().NewContext(false, newHeader)
+	_, err := s.App.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.Ctx.BlockHeight(), Time: s.Ctx.BlockTime()})
+	if err != nil {
+		panic(err)
+	}
+	_, err = s.App.Commit()
+	if err != nil {
+		panic(err)
+	}
+
+	newBlockTime := s.Ctx.BlockTime().Add(time.Second)
+
+	header := s.Ctx.BlockHeader()
+	header.Time = newBlockTime
+	header.Height++
+
+	s.Ctx = s.App.BaseApp.NewUncachedContext(false, header).WithHeaderInfo(coreheader.Info{
+		Height: header.Height,
+		Time:   header.Time,
+	})
 }
 
 // FundAcc funds target address with specified amount.
 func (s *KeeperTestHelper) FundAcc(acc sdk.AccAddress, amounts sdk.Coins) {
-	err := bankutil.FundAccount(s.App.BankKeeper, s.Ctx, acc, amounts)
+	err := bankutil.FundAccount(s.Ctx, s.App.BankKeeper, acc, amounts)
 	s.Require().NoError(err)
 }
 
 // FundModuleAcc funds target modules with specified amount.
 func (s *KeeperTestHelper) FundModuleAcc(moduleName string, amounts sdk.Coins) {
-	err := bankutil.FundModuleAccount(s.App.BankKeeper, s.Ctx, moduleName, amounts)
+	err := bankutil.FundModuleAccount(s.Ctx, s.App.BankKeeper, moduleName, amounts)
 	s.Require().NoError(err)
 }
 
+/*
 func (s *KeeperTestHelper) MintCoins(coins sdk.Coins) {
 	err := s.App.BankKeeper.MintCoins(s.Ctx, gammtypes.ModuleName, coins)
 	s.Require().NoError(err)
@@ -356,22 +383,15 @@ func (s *KeeperTestHelper) StateNotAltered() {
 	newState := s.App.ExportState(s.Ctx)
 	s.Require().Equal(oldState, newState)
 }
+*/
 
 // CreateRandomAccounts is a function return a list of randomly generated AccAddresses
 func CreateRandomAccounts(numAccts int) []sdk.AccAddress {
 	testAddrs := make([]sdk.AccAddress, numAccts)
 	for i := 0; i < numAccts; i++ {
-		pk := ed25519.GenPrivKey().PubKey()
+		pk := secp256k1.GenPrivKey().PubKey()
 		testAddrs[i] = sdk.AccAddress(pk.Address())
 	}
 
 	return testAddrs
 }
-
-func GenerateTestAddrs() (string, string) {
-	pk1 := ed25519.GenPrivKey().PubKey()
-	validAddr := sdk.AccAddress(pk1.Address()).String()
-	invalidAddr := sdk.AccAddress("invalid").String()
-	return validAddr, invalidAddr
-}
-*/

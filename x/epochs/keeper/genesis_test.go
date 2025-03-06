@@ -4,17 +4,15 @@ import (
 	"testing"
 	"time"
 
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/dymensionxyz/dymension/v3/app/apptesting"
 	"github.com/stretchr/testify/require"
 
 	"github.com/osmosis-labs/osmosis/v15/x/epochs/types"
-
-	apptesting "github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 )
 
 func TestEpochsExportGenesis(t *testing.T) {
-	app := apptesting.Setup(false, "")
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+	app := apptesting.Setup(t)
+	ctx := app.BaseApp.NewContext(false)
 
 	chainStartTime := ctx.BlockTime()
 	chainStartHeight := ctx.BlockHeight()
@@ -31,8 +29,8 @@ func TestEpochsExportGenesis(t *testing.T) {
 }
 
 func TestEpochsInitGenesis(t *testing.T) {
-	app := apptesting.Setup(false, "")
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
+	app := apptesting.Setup(t)
+	ctx := app.BaseApp.NewContext(false)
 
 	// On init genesis, default epochs information is set
 	// To check init genesis again, should make it fresh status
