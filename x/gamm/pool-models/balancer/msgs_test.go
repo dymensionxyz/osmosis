@@ -54,9 +54,6 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 
 	require.Equal(t, default_msg.Route(), types.RouterKey)
 	require.Equal(t, default_msg.Type(), "create_balancer_pool")
-	signers := default_msg.GetSigners()
-	require.Equal(t, len(signers), 1)
-	require.Equal(t, signers[0].String(), addr1)
 
 	tests := []struct {
 		name       string

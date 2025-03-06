@@ -54,20 +54,20 @@ func TestUpdateIntermediaryPoolAssetsLiquidity(t *testing.T) {
 		{
 			name: "regular case with multiple pool assets and a subset of newLiquidity to update",
 			newLiquidity: sdk.NewCoins(
-				math.NewInt64Coin("adym", 1_000),
-				math.NewInt64Coin("atom", 2_000),
-				math.NewInt64Coin("ion", 3_000)),
+				sdk.NewInt64Coin("adym", 1_000),
+				sdk.NewInt64Coin("atom", 2_000),
+				sdk.NewInt64Coin("ion", 3_000)),
 			poolAssets: map[string]balancer.PoolAsset{
 				"adym": {
-					Token:  math.NewInt64Coin("adym", adymValueOriginal),
+					Token:  sdk.NewInt64Coin("adym", adymValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 				"atom": {
-					Token:  math.NewInt64Coin("atom", atomValueOriginal),
+					Token:  sdk.NewInt64Coin("atom", atomValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 				"ion": {
-					Token:  math.NewInt64Coin("ion", ionValueOriginal),
+					Token:  sdk.NewInt64Coin("ion", ionValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 			},
@@ -78,15 +78,15 @@ func TestUpdateIntermediaryPoolAssetsLiquidity(t *testing.T) {
 			newLiquidity: sdk.NewCoins(),
 			poolAssets: map[string]balancer.PoolAsset{
 				"adym": {
-					Token:  math.NewInt64Coin("adym", adymValueOriginal),
+					Token:  sdk.NewInt64Coin("adym", adymValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 				"atom": {
-					Token:  math.NewInt64Coin("atom", atomValueOriginal),
+					Token:  sdk.NewInt64Coin("atom", atomValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 				"ion": {
-					Token:  math.NewInt64Coin("ion", ionValueOriginal),
+					Token:  sdk.NewInt64Coin("ion", ionValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 			},
@@ -95,10 +95,10 @@ func TestUpdateIntermediaryPoolAssetsLiquidity(t *testing.T) {
 		{
 			name: "newLiquidity has a coin that poolAssets don't",
 			newLiquidity: sdk.NewCoins(
-				math.NewInt64Coin("juno", 1_000)),
+				sdk.NewInt64Coin("juno", 1_000)),
 			poolAssets: map[string]balancer.PoolAsset{
 				"adym": {
-					Token:  math.NewInt64Coin("adym", adymValueOriginal),
+					Token:  sdk.NewInt64Coin("adym", adymValueOriginal),
 					Weight: math.NewInt(weight),
 				},
 			},
@@ -202,7 +202,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			name:         "one token in - equal weights with zero swap fee",
 			swapFee:      math.LegacyMustNewDecFromStr("0"),
 			poolAssets:   oneTrillionEvenPoolAssets,
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000)),
 			expectShares: math.NewInt(2_499_999_968_750),
 		},
 		{
@@ -222,7 +222,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			name:         "two tokens in - equal weights with zero swap fee",
 			swapFee:      math.LegacyMustNewDecFromStr("0"),
 			poolAssets:   oneTrillionEvenPoolAssets,
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin("uatom", 50_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000), sdk.NewInt64Coin("uatom", 50_000)),
 			expectShares: math.NewInt(2_499_999_968_750 * 2),
 		},
 		{
@@ -244,7 +244,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			name:         "one token in - equal weights with swap fee of 0.01",
 			swapFee:      math.LegacyMustNewDecFromStr("0.01"),
 			poolAssets:   oneTrillionEvenPoolAssets,
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000)),
 			expectShares: math.NewInt(2_487_500_000_000),
 		},
 		{
@@ -266,7 +266,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			name:         "two tokens in - equal weights with swap fee of 0.01",
 			swapFee:      math.LegacyMustNewDecFromStr("0.01"),
 			poolAssets:   oneTrillionEvenPoolAssets,
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin("uatom", 50_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000), sdk.NewInt64Coin("uatom", 50_000)),
 			expectShares: math.NewInt(2_487_500_000_000 * 2),
 		},
 		{
@@ -310,15 +310,15 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			swapFee: math.LegacyMustNewDecFromStr("0.03"),
 			poolAssets: []balancer.PoolAsset{
 				{
-					Token:  math.NewInt64Coin("adym", 2_000_000_000),
+					Token:  sdk.NewInt64Coin("adym", 2_000_000_000),
 					Weight: math.NewInt(500),
 				},
 				{
-					Token:  math.NewInt64Coin("uatom", 1e12),
+					Token:  sdk.NewInt64Coin("uatom", 1e12),
 					Weight: math.NewInt(100),
 				},
 			},
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin("uatom", 100_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000), sdk.NewInt64Coin("uatom", 100_000)),
 			expectShares: math.NewInt(2_072_912_400_000_000 + 1_624_999_900_000),
 		},
 		{
@@ -333,7 +333,7 @@ func TestCalcJoinSingleAssetTokensIn(t *testing.T) {
 			swapFee:    math.LegacyZeroDec(),
 			poolAssets: oneTrillionEvenPoolAssets,
 			// Second tokenIn does not exist.
-			tokensIn:     sdk.NewCoins(math.NewInt64Coin("adym", 50_000), math.NewInt64Coin(doesNotExistDenom, 50_000)),
+			tokensIn:     sdk.NewCoins(sdk.NewInt64Coin("adym", 50_000), sdk.NewInt64Coin(doesNotExistDenom, 50_000)),
 			expectShares: math.ZeroInt(),
 			expErr:       fmt.Errorf(balancer.ErrMsgFormatNoPoolAssetFound, doesNotExistDenom),
 		},
@@ -401,13 +401,13 @@ func TestGetPoolAssetsByDenom(t *testing.T) {
 			name: "one pool asset",
 			poolAssets: []balancer.PoolAsset{
 				{
-					Token:  math.NewInt64Coin("adym", 1e12),
+					Token:  sdk.NewInt64Coin("adym", 1e12),
 					Weight: math.NewInt(100),
 				},
 			},
 			expectedPoolAssetsByDenom: map[string]balancer.PoolAsset{
 				"adym": {
-					Token:  math.NewInt64Coin("adym", 1e12),
+					Token:  sdk.NewInt64Coin("adym", 1e12),
 					Weight: math.NewInt(100),
 				},
 			},
@@ -416,21 +416,21 @@ func TestGetPoolAssetsByDenom(t *testing.T) {
 			name: "two pool assets",
 			poolAssets: []balancer.PoolAsset{
 				{
-					Token:  math.NewInt64Coin("adym", 1e12),
+					Token:  sdk.NewInt64Coin("adym", 1e12),
 					Weight: math.NewInt(100),
 				},
 				{
-					Token:  math.NewInt64Coin("atom", 123),
+					Token:  sdk.NewInt64Coin("atom", 123),
 					Weight: math.NewInt(400),
 				},
 			},
 			expectedPoolAssetsByDenom: map[string]balancer.PoolAsset{
 				"adym": {
-					Token:  math.NewInt64Coin("adym", 1e12),
+					Token:  sdk.NewInt64Coin("adym", 1e12),
 					Weight: math.NewInt(100),
 				},
 				"atom": {
-					Token:  math.NewInt64Coin("atom", 123),
+					Token:  sdk.NewInt64Coin("atom", 123),
 					Weight: math.NewInt(400),
 				},
 			},
@@ -439,11 +439,11 @@ func TestGetPoolAssetsByDenom(t *testing.T) {
 			name: "duplicate pool assets",
 			poolAssets: []balancer.PoolAsset{
 				{
-					Token:  math.NewInt64Coin("adym", 1e12),
+					Token:  sdk.NewInt64Coin("adym", 1e12),
 					Weight: math.NewInt(100),
 				},
 				{
-					Token:  math.NewInt64Coin("adym", 123),
+					Token:  sdk.NewInt64Coin("adym", 123),
 					Weight: math.NewInt(400),
 				},
 			},
@@ -551,12 +551,12 @@ func (suite *BalancerTestSuite) TestBalancerCalculateAmountOutAndIn_InverseRelat
 				ctx := suite.CreateTestContext()
 
 				poolAssetOut := balancer.PoolAsset{
-					Token:  math.NewInt64Coin(tc.denomOut, tc.initialPoolOut),
+					Token:  sdk.NewInt64Coin(tc.denomOut, tc.initialPoolOut),
 					Weight: math.NewInt(tc.initialWeightOut),
 				}
 
 				poolAssetIn := balancer.PoolAsset{
-					Token:  math.NewInt64Coin(tc.denomIn, tc.initialPoolIn),
+					Token:  sdk.NewInt64Coin(tc.denomIn, tc.initialPoolIn),
 					Weight: math.NewInt(tc.initialWeightIn),
 				}
 
@@ -1154,7 +1154,7 @@ func TestBalancerPoolPokeTokenWeights(t *testing.T) {
 		for i, asset := range paramsCopy.InitialPoolWeights {
 			assetCopy := balancer.PoolAsset{
 				Weight: asset.Weight,
-				Token:  math.NewInt64Coin(asset.Token.Denom, 10000),
+				Token:  sdk.NewInt64Coin(asset.Token.Denom, 10000),
 			}
 			initialPoolAssets[i] = assetCopy
 		}
@@ -1217,14 +1217,14 @@ func TestIsActive(t *testing.T) {
 
 func TestCalcJoinPoolNoSwapShares(t *testing.T) {
 	balancerPoolAssets := []balancer.PoolAsset{
-		{Token: math.NewInt64Coin("foo", 100), Weight: math.NewIntFromUint64(5)},
-		{Token: math.NewInt64Coin("bar", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: sdk.NewInt64Coin("foo", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: sdk.NewInt64Coin("bar", 100), Weight: math.NewIntFromUint64(5)},
 	}
 
 	balancerThreePoolAssets := []balancer.PoolAsset{
-		{Token: math.NewInt64Coin("foo", 100), Weight: math.NewIntFromUint64(5)},
-		{Token: math.NewInt64Coin("bar", 100), Weight: math.NewIntFromUint64(5)},
-		{Token: math.NewInt64Coin("baz", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: sdk.NewInt64Coin("foo", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: sdk.NewInt64Coin("bar", 100), Weight: math.NewIntFromUint64(5)},
+		{Token: sdk.NewInt64Coin("baz", 100), Weight: math.NewIntFromUint64(5)},
 	}
 
 	tests := map[string]struct {
@@ -1300,7 +1300,7 @@ func TestCalcJoinPoolNoSwapShares(t *testing.T) {
 			expectPass:      false,
 		},
 		"single asset pool, no-swap join attempt with one asset": {
-			tokensIn: sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(sdk.MaxSortableDec.TruncateInt64()))),
+			tokensIn: sdk.NewCoins(sdk.NewCoin("foo", math.NewInt(math.LegacyMaxSortableDec.TruncateInt64()))),
 			poolAssets: []balancer.PoolAsset{
 				{Token: sdk.NewCoin("foo", math.NewInt(1)), Weight: math.NewIntFromUint64(1)},
 			},

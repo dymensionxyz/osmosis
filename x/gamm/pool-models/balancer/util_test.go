@@ -5,11 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/log"
 	"cosmossdk.io/math"
-	"cosmossdk.io/store/rootmulti"
-	dbm "github.com/cometbft/cometbft-db"
-	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -28,15 +24,6 @@ func createTestPool(t *testing.T, swapFee, exitFee math.LegacyDec, poolAssets ..
 	require.NoError(t, err)
 
 	return &pool
-}
-
-func createTestContext(t *testing.T) sdk.Context {
-	db := dbm.NewMemDB()
-	logger := log.NewNopLogger()
-
-	ms := rootmulti.NewStore(db, logger, nil)
-
-	return sdk.NewContext(ms, tmtypes.Header{}, false, logger)
 }
 
 func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares math.Int) {

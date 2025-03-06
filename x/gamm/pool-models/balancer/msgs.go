@@ -11,7 +11,6 @@ import (
 
 const (
 	TypeMsgCreateBalancerPool = "create_balancer_pool"
-	TypeMsgMigrateShares      = "migrate_shares"
 )
 
 var (
