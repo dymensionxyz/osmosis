@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/math"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
@@ -13,6 +14,7 @@ import (
 
 type KeeperTestSuite struct {
 	apptesting.KeeperTestHelper
+	clientCtx client.Context
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -21,6 +23,11 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (suite *KeeperTestSuite) SetupTest() {
 	suite.Setup()
+
+	txconfig := suite.App.GetTxConfig()
+	suite.clientCtx = client.Context{}.
+		WithTxConfig(txconfig).
+		WithCodec(suite.App.AppCodec())
 
 	// Mint some assets to the accounts.
 	for _, acc := range suite.TestAccs {

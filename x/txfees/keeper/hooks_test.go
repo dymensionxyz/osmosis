@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"time"
 
+	math "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
@@ -22,22 +22,22 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 	}{
 		{
 			name:        "DYM is burned",
-			coins:       sdk.Coins{math.NewInt64Coin(baseDenom, 100000)},
+			coins:       sdk.Coins{sdk.NewInt64Coin(baseDenom, 100000)},
 			burnedDenom: baseDenom,
 		},
 		{
 			name:        "One non-dym fee token (uion)",
-			coins:       sdk.Coins{math.NewInt64Coin(uion, 1000)},
+			coins:       sdk.Coins{sdk.NewInt64Coin(uion, 1000)},
 			burnedDenom: baseDenom,
 		},
 		{
 			name:        "Multiple non-dym fee token",
-			coins:       sdk.Coins{math.NewInt64Coin(baseDenom, 2000), math.NewInt64Coin(uion, 30000)},
+			coins:       sdk.Coins{sdk.NewInt64Coin(baseDenom, 2000), sdk.NewInt64Coin(uion, 30000)},
 			burnedDenom: baseDenom,
 		},
 		{
 			name:        "unknown fee token is burned as well",
-			coins:       sdk.Coins{math.NewInt64Coin(atom, 2000)},
+			coins:       sdk.Coins{sdk.NewInt64Coin(atom, 2000)},
 			burnedDenom: atom,
 		},
 	}
@@ -49,8 +49,7 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 		suite.PrepareBalancerPoolWithCoins(sdk.NewCoin(baseDenom, math.NewInt(1000000000000)), sdk.NewCoin(uion, math.NewInt(5000)))
 
 		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(types.ModuleName)
-		err := bankutil.FundModuleAccount(suite.App.BankKeeper, suite.Ctx, types.ModuleName, tc.coins)
-		suite.Require().NoError(err)
+		suite.FundModuleAcc(types.ModuleName, tc.coins)
 		balances := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 		suite.Assert().Equal(balances, tc.coins, tc.name)
 

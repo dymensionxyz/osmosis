@@ -10,7 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/ante"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
@@ -185,13 +184,17 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 		gasLimit := tc.gasRequested
 
 		sigV2, err := clienttx.SignWithPrivKey(
-			txconfig.SignModeHandler().DefaultMode(), signerData,
-			txBuilder, priv0, txconfig, 0)
+			suite.Ctx,
+			1,
+			signerData,
+			txBuilder,
+			priv0,
+			txconfig, 0)
 		suite.Require().NoError(err, "test: %s", tc.name)
 		err = txBuilder.SetSignatures(sigV2)
 		suite.Require().NoError(err, "test: %s", tc.name)
 
-		bankutil.FundAccount(suite.App.BankKeeper, suite.Ctx, addr0, tc.txFee)
+		suite.FundAcc(addr0, tc.txFee)
 		tx := suite.BuildTx(txBuilder, msgs, sigV2, "", tc.txFee, gasLimit)
 
 		var feeMarketKeeper types.FeeMarketKeeper

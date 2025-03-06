@@ -132,9 +132,9 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 	testAccount := suite.TestAccs[0]
 
 	// get raw pool creation fee(s) as DecCoins
-	poolCreationFeeDecCoins := math.LegacyDecCoins{}
+	poolCreationFeeDecCoins := sdk.DecCoins{}
 	for _, coin := range params.PoolCreationFee {
-		poolCreationFeeDecCoins = poolCreationFeeDecCoins.Add(math.LegacyNewDecCoin(coin.Denom, coin.Amount))
+		poolCreationFeeDecCoins = poolCreationFeeDecCoins.Add(sdk.NewDecCoin(coin.Denom, coin.Amount))
 	}
 
 	// TODO: should be moved to balancer package
@@ -283,7 +283,8 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 		}
 
 		// note starting balances for community fee pool and pool creator account
-		feePoolBalBeforeNewPool := distributionKeeper.GetFeePoolCommunityCoins(suite.Ctx)
+		feePoolBalBeforeNewPool, err := distributionKeeper.FeePool.Get(suite.Ctx)
+		suite.Require().NoError(err)
 		senderBalBeforeNewPool := bankKeeper.GetAllBalances(suite.Ctx, sender)
 
 		// attempt to create a pool with the given NewMsgCreateBalancerPool message
@@ -301,8 +302,9 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 			)
 
 			// make sure pool creation fee is correctly sent to community pool
-			feePool := distributionKeeper.GetFeePoolCommunityCoins(suite.Ctx)
-			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.Add(poolCreationFeeDecCoins...))
+			feePool, err := distributionKeeper.FeePool.Get(suite.Ctx)
+			suite.Require().NoError(err)
+			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.CommunityPool.Add(poolCreationFeeDecCoins...))
 
 			// get expected tokens in new pool and corresponding pool shares
 			expectedPoolTokens := sdk.Coins{}
@@ -1038,7 +1040,8 @@ func (suite *KeeperTestSuite) TestPoolCreationFee() {
 		suite.FundAcc(sender, apptesting.DefaultAcctFunds)
 
 		// note starting balances for community fee pool and pool creator account
-		feePoolBalBeforeNewPool := distributionKeeper.GetFeePoolCommunityCoins(suite.Ctx)
+		feePoolBalBeforeNewPool, err := distributionKeeper.FeePool.Get(suite.Ctx)
+		suite.Require().NoError(err)
 		senderBalBeforeNewPool := bankKeeper.GetAllBalances(suite.Ctx, sender)
 
 		// attempt to create a pool with the given NewMsgCreateBalancerPool message
@@ -1055,8 +1058,9 @@ func (suite *KeeperTestSuite) TestPoolCreationFee() {
 			)
 
 			// make sure pool creation fee is correctly sent to community pool
-			feePool := distributionKeeper.GetFeePoolCommunityCoins(suite.Ctx)
-			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.Add(math.LegacyNewDecCoinsFromCoins(test.poolCreationFee...)...))
+			feePool, err := distributionKeeper.FeePool.Get(suite.Ctx)
+			suite.Require().NoError(err)
+			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.CommunityPool.Add(sdk.NewDecCoinsFromCoins(test.poolCreationFee...)...))
 			// get expected tokens in new pool and corresponding pool shares
 			expectedPoolTokens := sdk.Coins{}
 			for _, asset := range test.msg.GetPoolAssets() {

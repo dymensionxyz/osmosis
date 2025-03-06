@@ -710,11 +710,11 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 func (suite *KeeperTestSuite) TestV2QueryBalancerPoolSpotPrice() {
 	v2queryClient := v2types.NewQueryClient(suite.QueryHelper)
 	coins := sdk.NewCoins(
-		math.NewInt64Coin("tokenA", 1000),
-		math.NewInt64Coin("tokenB", 2000),
-		math.NewInt64Coin("tokenC", 3000),
-		math.NewInt64Coin("tokenD", 4000),
-		math.NewInt64Coin("tokenE", 4000), // 4000 intentional
+		sdk.NewInt64Coin("tokenA", 1000),
+		sdk.NewInt64Coin("tokenB", 2000),
+		sdk.NewInt64Coin("tokenC", 3000),
+		sdk.NewInt64Coin("tokenD", 4000),
+		sdk.NewInt64Coin("tokenE", 4000), // 4000 intentional
 	)
 	poolID := suite.PrepareBalancerPoolWithCoins(coins...)
 

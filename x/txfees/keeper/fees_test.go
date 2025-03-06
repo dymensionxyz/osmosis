@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/gogoproto/proto"
 
+	"cosmossdk.io/math"
+
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/keeper"
@@ -19,7 +21,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 		beneficiary       *sdk.AccAddress
 		expTakerFee       sdk.Coins
 		expBeneficiaryRev sdk.Coins
-		expCommunityRev   math.LegacyDecCoins
+		expCommunityRev   sdk.DecCoins
 	}{
 		"beneficiary, base denom": {
 			payer:             accs[0],
@@ -43,7 +45,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			beneficiary:       &accs[1],
 			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
 			expBeneficiaryRev: nil,
-			expCommunityRev:   math.LegacyNewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
 		},
 		"no beneficiary, base denom": {
 			payer:             accs[0],
@@ -67,7 +69,7 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			beneficiary:       nil,
 			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
 			expBeneficiaryRev: nil,
-			expCommunityRev:   math.LegacyNewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
 		},
 	}
 
@@ -143,11 +145,12 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			if tc.beneficiary != nil {
 				actualBeneficiaryBalance = s.App.BankKeeper.GetAllBalances(s.Ctx, *tc.beneficiary)
 			}
-			s.Require().True(tc.expBeneficiaryRev.IsEqual(actualBeneficiaryBalance))
+			s.Require().True(tc.expBeneficiaryRev.Equal(actualBeneficiaryBalance))
 
 			// Check community pool balance
-			actualCommunityPoolBalance := s.App.DistrKeeper.GetFeePoolCommunityCoins(s.Ctx)
-			s.Require().Equal(tc.expCommunityRev, actualCommunityPoolBalance)
+			actualCommunityPoolBalance, err := s.App.DistrKeeper.FeePool.Get(s.Ctx)
+			s.Require().NoError(err)
+			s.Require().Equal(tc.expCommunityRev, actualCommunityPoolBalance.CommunityPool)
 		})
 	}
 }
