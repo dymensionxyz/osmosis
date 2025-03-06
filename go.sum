@@ -426,6 +426,8 @@ github.com/dvsekhvalnov/jose2go v1.6.0 h1:Y9gnSnP4qEI0+/uQkHvFXeD2PLPJeXEL+ySMEA
 github.com/dvsekhvalnov/jose2go v1.6.0/go.mod h1:QsHjhyTlD/lAVqn/NSbVZmSCGeDehTB/mPZadG+mhXU=
 github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250304142645-9247a76c5c16 h1:co6P4tcHJbxtbwfPwEqh/2wPdNiZGHVH3/tY5VGc6gc=
 github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250304142645-9247a76c5c16/go.mod h1:5kiJMNqeEyv1o0y2A4Db9uu7E+XYZyso2Vad5wrXcLk=
+github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250306180031-86acf62aee54 h1:wEDzmDrV5TZ8lIzuPacA6l35SxV5TRmpWqZaE3AZSXM=
+github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250306180031-86acf62aee54/go.mod h1:5kiJMNqeEyv1o0y2A4Db9uu7E+XYZyso2Vad5wrXcLk=
 github.com/dymensionxyz/ethermint v0.22.0-dymension-v1.1.0-rc01.0.20250217105006-7a008c02116a h1:w7gKQi5DvTXhsCWSA7TDAPPaCitWj+goiMl2bUvYErc=
 github.com/dymensionxyz/ethermint v0.22.0-dymension-v1.1.0-rc01.0.20250217105006-7a008c02116a/go.mod h1:7Olvfv96cvfqhwMm/4fIWgQDQaUqbfcUtrp5fgRQU1U=
 github.com/dymensionxyz/gerr-cosmos v1.1.0 h1:IW/P7HCB/iP9kgk3VXaWUoMoyx3vD76YO6p1fnubHVc=

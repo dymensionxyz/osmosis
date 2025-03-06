@@ -15,7 +15,7 @@ require (
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/cosmos/iavl v1.2.2
-	github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250304142645-9247a76c5c16
+	github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250306180031-86acf62aee54
 	github.com/dymensionxyz/gerr-cosmos v1.1.0
 	github.com/dymensionxyz/sdk-utils v0.2.13-0.20250114202609-b3e820f5b629
 	github.com/golang/mock v1.6.0
@@ -249,6 +249,5 @@ replace (
 	//  broken goleveldb
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 
-	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.29
 	golang.org/x/exp => golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 )
