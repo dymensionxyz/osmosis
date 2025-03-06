@@ -19,15 +19,19 @@ type QueryTestSuite struct {
 
 func (s *QueryTestSuite) SetupSuite() {
 	s.Setup()
+	s.Ctx = s.Ctx.WithBlockHeight(1)
 	s.queryClient = types.NewQueryClient(s.QueryHelper)
 
 	// set up pool
+	basedenom, err := s.App.TxFeesKeeper.GetBaseDenom(s.Ctx)
+	s.Require().NoError(err)
+
 	poolAssets := []sdk.Coin{
 		sdk.NewInt64Coin("uosmo", 1000000),
-		sdk.NewInt64Coin("adym", 120000000),
+		sdk.NewInt64Coin(basedenom, 120000000),
 	}
 	s.PrepareBalancerPoolWithCoins(poolAssets...)
-	err := s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})
+	err = s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})
 	s.Require().NoError(err)
 
 	s.Commit()

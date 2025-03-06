@@ -27,22 +27,25 @@ type QueryCliTestCase[Q proto.Message] struct {
 }
 
 func RunTxTestCases[M sdk.Msg](t *testing.T, desc *TxCliDesc, testcases map[string]TxCliTestCase[M]) {
+	t.Helper()
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			RunTxTestCase(t, desc, tc)
+			RunTxTestCase(t, desc, &tc)
 		})
 	}
 }
 
 func RunQueryTestCases[Q proto.Message](t *testing.T, desc *QueryDescriptor, testcases map[string]QueryCliTestCase[Q]) {
+	t.Helper()
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			RunQueryTestCase(t, desc, tc)
+			RunQueryTestCase(t, desc, &tc)
 		})
 	}
 }
 
-func RunTxTestCase[M sdk.Msg](t *testing.T, desc *TxCliDesc, tc TxCliTestCase[M]) {
+func RunTxTestCase[M sdk.Msg](t *testing.T, desc *TxCliDesc, tc *TxCliTestCase[M]) {
+	t.Helper()
 	cmd := BuildTxCli[M](desc)
 	err := resetCommandFlagValues(cmd)
 	require.NoError(t, err, "error in resetCommandFlagValues")
@@ -57,15 +60,18 @@ func RunTxTestCase[M sdk.Msg](t *testing.T, desc *TxCliDesc, tc TxCliTestCase[M]
 		return
 	}
 	require.NoError(t, err, "error in desc.ParseAndBuildMsg")
-	// if tc.OnlyCheckValidateBasic {
-	// 	require.NoError(t, msg.ValidateBasic())
-	// 	return
-	// }
+	if tc.OnlyCheckValidateBasic {
+		msgWithValBasic, ok := msg.(sdk.HasValidateBasic)
+		require.True(t, ok)
+		require.NoError(t, msgWithValBasic.ValidateBasic())
+		return
+	}
 
 	require.Equal(t, tc.ExpectedMsg, msg)
 }
 
-func RunQueryTestCase[Q proto.Message](t *testing.T, desc *QueryDescriptor, tc QueryCliTestCase[Q]) {
+func RunQueryTestCase[Q proto.Message](t *testing.T, desc *QueryDescriptor, tc *QueryCliTestCase[Q]) {
+	t.Helper()
 	cmd := BuildQueryCli[Q, int](desc, nil)
 	err := resetCommandFlagValues(cmd)
 	require.NoError(t, err, "error in resetCommandFlagValues")
@@ -85,12 +91,10 @@ func RunQueryTestCase[Q proto.Message](t *testing.T, desc *QueryDescriptor, tc Q
 // This logic is copied from the SDK, it should've just been publicly exposed.
 // But instead its buried within a mega-method.
 func newClientContextWithFrom(t *testing.T, fs *pflag.FlagSet) client.Context {
-	clientCtx := client.Context{GenerateOnly: true}
+	t.Helper()
+	clientCtx := client.Context{}
 	from, _ := fs.GetString(flags.FlagFrom)
-	fromAddr, fromName, _, err := client.GetFromFields(clientCtx, nil, from)
-	require.NoError(t, err)
-
-	clientCtx = clientCtx.WithFrom(from).WithFromAddress(fromAddr).WithFromName(fromName)
+	clientCtx = clientCtx.WithFrom(from).WithFromAddress(sdk.MustAccAddressFromBech32(from)).WithFromName(from)
 	return clientCtx
 }
 

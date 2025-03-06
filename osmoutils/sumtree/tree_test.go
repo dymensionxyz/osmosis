@@ -6,16 +6,16 @@ import (
 	"sort"
 	"testing"
 
+	"cosmossdk.io/log"
 	"github.com/stretchr/testify/suite"
 
+	"cosmossdk.io/store/wrapper"
 	"github.com/cosmos/iavl"
 
-	// dbm "github.com/cometbft/cometbft-db"
 	dbm "github.com/cosmos/cosmos-db"
 
 	"cosmossdk.io/math"
 	iavlstore "cosmossdk.io/store/iavl"
-	"cosmossdk.io/store/wrapper"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils/sumtree"
 )
@@ -28,8 +28,7 @@ type TreeTestSuite struct {
 
 func (suite *TreeTestSuite) SetupTest() {
 	db := wrapper.NewDBWrapper(dbm.NewMemDB())
-
-	tree := iavl.NewMutableTree(db, 100, false, nil)
+	tree := iavl.NewMutableTree(db, 100, false, log.NewNopLogger())
 	_, _, err := tree.SaveVersion()
 	suite.Require().Nil(err)
 	kvstore := iavlstore.UnsafeNewStore(tree)

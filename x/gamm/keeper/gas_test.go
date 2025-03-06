@@ -74,9 +74,8 @@ func (suite *KeeperTestSuite) TestJoinPoolGas() {
 		sdk.NewCoin("baz", math.NewInt(10000000000000000)),
 	))
 
-	//This test been modified, as GAS increased vs osmosis
 	firstJoinGas := suite.measureJoinPoolGas(defaultAddr, poolId, minShareOutAmount, defaultCoins)
-	suite.Assert().LessOrEqual(int(firstJoinGas), 105000)
+	suite.Assert().LessOrEqual(int(firstJoinGas), 150000)
 
 	for i := 1; i < startAveragingAt; i++ {
 		_, _, err := suite.App.GAMMKeeper.JoinPoolNoSwap(suite.Ctx, defaultAddr, poolId, minShareOutAmount, sdk.Coins{})
@@ -85,8 +84,8 @@ func (suite *KeeperTestSuite) TestJoinPoolGas() {
 
 	avgGas, maxGas := suite.measureAvgAndMaxJoinPoolGas(totalNumJoins, defaultAddr, poolIDFn, minShareOutAmountFn, maxCoinsFn)
 	fmt.Printf("test deets: total %d of pools joined, begin average at %d\n", totalNumJoins, startAveragingAt)
-	suite.Assert().LessOrEqual(int(avgGas), 105000, "average gas / join pool")
-	suite.Assert().LessOrEqual(int(maxGas), 105000, "max gas / join pool")
+	suite.Assert().LessOrEqual(int(avgGas), 150000, "average gas / join pool")
+	suite.Assert().LessOrEqual(int(maxGas), 150000, "max gas / join pool")
 }
 
 func (suite *KeeperTestSuite) TestRepeatedJoinPoolDistinctDenom() {

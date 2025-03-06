@@ -31,7 +31,7 @@ var (
 	// pool assets
 	defaultDymAsset = balancertypes.PoolAsset{
 		Weight: math.NewInt(100),
-		Token:  sdk.NewCoin(sdk.DefaultBondDenom, math.NewInt(10000)),
+		Token:  sdk.NewCoin("adym", math.NewInt(10000)),
 	}
 	defaultBarAsset = balancertypes.PoolAsset{
 		Weight: math.NewInt(100),
@@ -252,7 +252,7 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 			emptySender: false,
 			expectPass:  false,
 		},
-		//test case for pool with no whitelesited denoms
+		//test case for pool with no whitelisted denoms
 		{
 			name: "create the pool with no whitelisted denoms",
 			msg: balancer.NewMsgCreateBalancerPool(testAccount, defaultPoolParams, []balancertypes.PoolAsset{{
@@ -304,7 +304,7 @@ func (suite *KeeperTestSuite) TestCreateBalancerPool() {
 			// make sure pool creation fee is correctly sent to community pool
 			feePool, err := distributionKeeper.FeePool.Get(suite.Ctx)
 			suite.Require().NoError(err)
-			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.CommunityPool.Add(poolCreationFeeDecCoins...))
+			suite.Require().Equal(feePool.CommunityPool, feePoolBalBeforeNewPool.CommunityPool.Add(poolCreationFeeDecCoins...))
 
 			// get expected tokens in new pool and corresponding pool shares
 			expectedPoolTokens := sdk.Coins{}
@@ -1060,7 +1060,7 @@ func (suite *KeeperTestSuite) TestPoolCreationFee() {
 			// make sure pool creation fee is correctly sent to community pool
 			feePool, err := distributionKeeper.FeePool.Get(suite.Ctx)
 			suite.Require().NoError(err)
-			suite.Require().Equal(feePool, feePoolBalBeforeNewPool.CommunityPool.Add(sdk.NewDecCoinsFromCoins(test.poolCreationFee...)...))
+			suite.Require().Equal(feePool.CommunityPool, feePoolBalBeforeNewPool.CommunityPool.Add(sdk.NewDecCoinsFromCoins(test.poolCreationFee...)...))
 			// get expected tokens in new pool and corresponding pool shares
 			expectedPoolTokens := sdk.Coins{}
 			for _, asset := range test.msg.GetPoolAssets() {
