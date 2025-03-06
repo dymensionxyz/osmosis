@@ -11,6 +11,8 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
+// FIXME: move to dymension main test suite
+
 var DefaultAcctFunds sdk.Coins = sdk.NewCoins(
 	sdk.NewCoin("adym", math.NewInt(100000000000000000)),
 	sdk.NewCoin("foo", math.NewInt(10000000000)),

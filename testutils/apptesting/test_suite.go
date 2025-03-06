@@ -7,7 +7,6 @@ import (
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
@@ -35,7 +34,7 @@ func (s *KeeperTestHelper) Setup() {
 		Ctx:             s.Ctx,
 	}
 
-	s.TestAccs = CreateRandomAccounts(3)
+	s.TestAccs = apptesting.CreateRandomAccounts(3)
 
 	s.SetEpochStartTime()
 	gammtypes.MaxNumOfAssetsInPool = 8
@@ -89,25 +88,4 @@ func (s *KeeperTestHelper) BuildTx(
 	txBuilder.SetGasLimit(gasLimit)
 
 	return txBuilder.GetTx()
-}
-
-/*
-// StateNotAltered validates that app state is not altered. Fails if it is.
-func (s *KeeperTestHelper) StateNotAltered() {
-	oldState := s.App.ExportState(s.Ctx)
-	s.App.Commit()
-	newState := s.App.ExportState(s.Ctx)
-	s.Require().Equal(oldState, newState)
-}
-*/
-
-// CreateRandomAccounts is a function return a list of randomly generated AccAddresses
-func CreateRandomAccounts(numAccts int) []sdk.AccAddress {
-	testAddrs := make([]sdk.AccAddress, numAccts)
-	for i := 0; i < numAccts; i++ {
-		pk := secp256k1.GenPrivKey().PubKey()
-		testAddrs[i] = sdk.AccAddress(pk.Address())
-	}
-
-	return testAddrs
 }

@@ -6,7 +6,8 @@ import (
 
 	"cosmossdk.io/math"
 
-	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
+	"github.com/dymensionxyz/dymension/v3/app/apptesting"
+
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"

@@ -118,7 +118,7 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 			s.SetupSuite()
 			err := s.QueryHelper.Invoke(gocontext.Background(), tc.query, tc.input, tc.output)
 			s.Require().NoError(err)
-			// s.StateNotAltered()
+			s.StateNotAltered()
 		})
 	}
 }

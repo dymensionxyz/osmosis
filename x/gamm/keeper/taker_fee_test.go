@@ -7,6 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/mock"
 
+	dymtesting "github.com/dymensionxyz/dymension/v3/app/apptesting"
+
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -111,7 +113,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			suite.SetupTest()
 
 			// set mock rollapp keeper with a random beneficiary for testing taker fees
-			beneficiary := apptesting.CreateRandomAccounts(1)[0]
+			beneficiary := dymtesting.CreateRandomAccounts(1)[0]
 			rollappKeeper := new(RollappKeeperMock)
 			suite.App.GAMMKeeper.SetRollapp(rollappKeeper)
 			// we consider adym as a rollapp token for convenience
@@ -280,7 +282,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			suite.SetupTest()
 
 			// set mock rollapp keeper with a random beneficiary for testing taker fees
-			beneficiary := apptesting.CreateRandomAccounts(1)[0]
+			beneficiary := dymtesting.CreateRandomAccounts(1)[0]
 			rollappKeeper := new(RollappKeeperMock)
 			suite.App.GAMMKeeper.SetRollapp(rollappKeeper)
 			// we consider adym as a rollapp token for convenience
