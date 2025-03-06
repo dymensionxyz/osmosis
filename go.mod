@@ -18,7 +18,6 @@ require (
 	github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250304142645-9247a76c5c16
 	github.com/dymensionxyz/gerr-cosmos v1.1.0
 	github.com/dymensionxyz/sdk-utils v0.2.13-0.20250114202609-b3e820f5b629
-	github.com/evmos/ethermint v0.22.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
@@ -115,6 +114,7 @@ require (
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/go-ethereum v1.10.26 // indirect
+	github.com/evmos/ethermint v0.22.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff // indirect
@@ -243,7 +243,6 @@ require (
 
 replace (
 	github.com/evmos/ethermint => github.com/dymensionxyz/ethermint v0.22.0-dymension-v1.1.0-rc01.0.20250217105006-7a008c02116a
-
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/osmosis/osmomath => ./osmomath
 
@@ -251,6 +250,5 @@ replace (
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 
 	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.29
-
-	golang.org/x/exp => golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb
+	golang.org/x/exp => golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 )

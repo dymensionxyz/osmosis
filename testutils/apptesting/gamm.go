@@ -137,7 +137,7 @@ func (s *KeeperTestHelper) PrepareCustomBalancerPoolFromCoins(coins sdk.Coins, p
 }
 
 // Modify spotprice of a pool to target spotprice
-func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice sdk.Dec, baseDenom string) {
+func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice math.LegacyDec, baseDenom string) {
 	var quoteDenom string
 	int64Max := int64(^uint64(0) >> 1)
 
@@ -160,7 +160,7 @@ func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice sdk.De
 			Sender:            s.TestAccs[0].String(),
 			Routes:            []poolmanagertypes.SwapAmountInRoute{{PoolId: poolID, TokenOutDenom: baseDenom}},
 			TokenIn:           swapIn[0],
-			TokenOutMinAmount: sdk.ZeroInt(),
+			TokenOutMinAmount: math.ZeroInt(),
 		}
 
 		gammMsgServer := gammkeeper.NewMsgServerImpl(s.App.GAMMKeeper)
@@ -196,7 +196,7 @@ func (s *KeeperTestHelper) RunBasicSwap(poolId uint64) {
 		Sender:            s.TestAccs[0].String(),
 		Routes:            []poolmanagertypes.SwapAmountInRoute{{PoolId: poolId, TokenOutDenom: denoms[1]}},
 		TokenIn:           swapIn[0],
-		TokenOutMinAmount: sdk.ZeroInt(),
+		TokenOutMinAmount: math.ZeroInt(),
 	}
 
 	gammMsgServer := gammkeeper.NewMsgServerImpl(s.App.GAMMKeeper)
@@ -245,15 +245,15 @@ func (s *KeeperTestHelper) RunBasicJoin(poolId uint64) {
 	s.Require().NoError(err)
 }
 
-func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, pool gammtypes.CFMMPoolI, targetSpotPrice sdk.Dec, baseDenom, quoteDenom string) (amountTrade sdk.Dec) {
+func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, pool gammtypes.CFMMPoolI, targetSpotPrice math.LegacyDec, baseDenom, quoteDenom string) (amountTrade math.LegacyDec) {
 	blPool, ok := pool.(*balancer.Pool)
 	s.Require().True(ok)
 	quoteAsset, _ := blPool.GetPoolAsset(quoteDenom)
 	baseAsset, err := blPool.GetPoolAsset(baseDenom)
 	s.Require().NoError(err)
 
-	s.Require().NotEqual(baseAsset.Weight, sdk.ZeroInt())
-	s.Require().NotEqual(quoteAsset.Weight, sdk.ZeroInt())
+	s.Require().NotEqual(baseAsset.Weight, math.ZeroInt())
+	s.Require().NotEqual(quoteAsset.Weight, math.ZeroInt())
 
 	spotPriceNow, err := blPool.SpotPrice(ctx, baseDenom, quoteDenom)
 	s.Require().NoError(err)
@@ -264,7 +264,7 @@ func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, poo
 	ratioPrice := targetSpotPrice.Quo(spotPriceNow)
 	ratioWeight := (math.LegacyNewDecFromInt(baseAsset.Weight)).Quo(math.LegacyNewDecFromInt(baseAsset.Weight).Add(math.LegacyNewDecFromInt(quoteAsset.Weight)))
 
-	amountTrade = math.LegacyNewDecFromInt(quoteAsset.Token.Amount).Mul(osmomath.Pow(ratioPrice, ratioWeight).Sub(sdk.OneDec()))
+	amountTrade = math.LegacyNewDecFromInt(quoteAsset.Token.Amount).Mul(osmomath.Pow(ratioPrice, ratioWeight).Sub(math.LegacyOneDec()))
 
 	return amountTrade
 }

@@ -40,15 +40,15 @@ var (
 // Setup sets up basic environment for suite (App, Ctx, and test accounts)
 func (s *KeeperTestHelper) Setup() {
 	s.App = *apptesting.Setup(s.T())
-	// s.Ctx = s.App.ewContext(false, tmtypes.Header{Height: 1, ChainID: chainID, Time: time.Now().UTC()})
-	// s.QueryHelper = &baseapp.QueryServiceTestHelper{
-	// 	GRPCQueryRouter: s.App.GRPCQueryRouter(),
-	// 	Ctx:             s.Ctx,
-	// }
+	s.Ctx = s.App.BaseApp.NewContext(false)
+	s.QueryHelper = &baseapp.QueryServiceTestHelper{
+		GRPCQueryRouter: s.App.GRPCQueryRouter(),
+		Ctx:             s.Ctx,
+	}
+
+	s.TestAccs = CreateRandomAccounts(3)
 
 	// s.SetEpochStartTime()
-	// s.TestAccs = CreateRandomAccounts(3)
-
 	// gammtypes.MaxNumOfAssetsInPool = 8
 }
 
