@@ -5,6 +5,8 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+// FIXME: move to dymension main test suite
+
 // AssertEventEmitted asserts that ctx's event manager has emitted the given number of events
 // of the given type.
 func (s *KeeperTestHelper) AssertEventEmitted(ctx sdk.Context, eventTypeExpected string, numEventsExpected int, msgAndArgs ...interface{}) {

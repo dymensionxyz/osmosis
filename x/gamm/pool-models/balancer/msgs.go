@@ -1,6 +1,7 @@
 package balancer
 
 import (
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -10,7 +11,6 @@ import (
 
 const (
 	TypeMsgCreateBalancerPool = "create_balancer_pool"
-	TypeMsgMigrateShares      = "migrate_shares"
 )
 
 var (
@@ -37,7 +37,7 @@ func (msg MsgCreateBalancerPool) Type() string  { return TypeMsgCreateBalancerPo
 func (msg MsgCreateBalancerPool) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid sender address (%s)", err)
+		return errorsmod.Wrapf(sdkerrors.ErrInvalidAddress, "Invalid sender address (%s)", err)
 	}
 
 	err = validateUserSpecifiedPoolAssets(msg.PoolAssets)
@@ -58,20 +58,7 @@ func (msg MsgCreateBalancerPool) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgCreateBalancerPool) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
-}
-
-func (msg MsgCreateBalancerPool) GetSigners() []sdk.AccAddress {
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		panic(err)
-	}
-	return []sdk.AccAddress{sender}
-}
-
-/// Implement the CreatePoolMsg interface
-
+// / Implement the CreatePoolMsg interface
 func (msg MsgCreateBalancerPool) PoolCreator() sdk.AccAddress {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {

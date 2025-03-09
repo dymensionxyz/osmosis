@@ -5,41 +5,41 @@ import (
 	"math/rand"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	withinOne     = ErrTolerance{AdditiveTolerance: sdk.OneDec()}
-	withinFactor8 = ErrTolerance{MultiplicativeTolerance: sdk.NewDec(8)}
+	withinOne     = ErrTolerance{AdditiveTolerance: math.LegacyOneDec()}
+	withinFactor8 = ErrTolerance{MultiplicativeTolerance: math.LegacyNewDec(8)}
 	zero          = ZeroDec()
 )
 
 func TestBinarySearch(t *testing.T) {
 	// straight line function that returns input. Simplest to binary search on,
 	// binary search directly reveals one bit of the answer in each iteration with this function.
-	lineF := func(a sdk.Int) (sdk.Int, error) {
+	lineF := func(a math.Int) (math.Int, error) {
 		return a, nil
 	}
-	cubicF := func(a sdk.Int) (sdk.Int, error) {
-		calculation := sdk.NewDecFromIntWithPrec(a, sdk.Precision)
+	cubicF := func(a math.Int) (math.Int, error) {
+		calculation := math.LegacyNewDecFromIntWithPrec(a, math.LegacyPrecision)
 		result := calculation.Power(3)
-		output := sdk.NewIntFromBigInt(result.BigInt())
+		output := math.NewIntFromBigInt(result.BigInt())
 		return output, nil
 	}
-	noErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec()}
-	testErrToleranceAdditive := ErrTolerance{AdditiveTolerance: sdk.NewDec(1 << 20)}
-	testErrToleranceMultiplicative := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: sdk.NewDec(10)}
-	testErrToleranceBoth := ErrTolerance{AdditiveTolerance: sdk.NewDec(1 << 20), MultiplicativeTolerance: sdk.NewDec(1 << 3)}
+	noErrTolerance := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec()}
+	testErrToleranceAdditive := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 20)}
+	testErrToleranceMultiplicative := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec(), MultiplicativeTolerance: math.LegacyNewDec(10)}
+	testErrToleranceBoth := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 20), MultiplicativeTolerance: math.LegacyNewDec(1 << 3)}
 	tests := map[string]struct {
-		f             func(sdk.Int) (sdk.Int, error)
-		lowerbound    sdk.Int
-		upperbound    sdk.Int
-		targetOutput  sdk.Int
+		f             func(math.Int) (math.Int, error)
+		lowerbound    math.Int
+		upperbound    math.Int
+		targetOutput  math.Int
 		errTolerance  ErrTolerance
 		maxIterations int
 
-		expectedSolvedInput sdk.Int
+		expectedSolvedInput math.Int
 		expectErr           bool
 		// This binary searches inputs to a monotonic increasing function F
 		// We stop when the answer is within error bounds stated by errTolerance
@@ -49,16 +49,16 @@ func TestBinarySearch(t *testing.T) {
 		// If it is, we return current output
 		// Additive error bounds are solid addition / subtraction bounds to error, while multiplicative bounds take effect after dividing by the minimum between the two compared numbers.
 	}{
-		"linear f, no err tolerance, converges":                          {lineF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), noErrTolerance, 51, sdk.NewInt(1 + (1 << 25)), false},
-		"linear f, no err tolerance, does not converge":                  {lineF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), noErrTolerance, 10, sdk.Int{}, true},
-		"cubic f, no err tolerance, converges":                           {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), noErrTolerance, 51, sdk.NewInt(322539792367616), false},
-		"cubic f, no err tolerance, does not converge":                   {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), noErrTolerance, 10, sdk.Int{}, true},
-		"cubic f, large additive err tolerance, converges":               {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt((1 << 15)), testErrToleranceAdditive, 51, sdk.NewInt(1 << 46), false},
-		"cubic f, large additive err tolerance, does not converge":       {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt((1 << 30)), testErrToleranceAdditive, 10, sdk.Int{}, true},
-		"cubic f, large multiplicative err tolerance, converges":         {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), testErrToleranceMultiplicative, 51, sdk.NewInt(322539792367616), false},
-		"cubic f, large multiplicative err tolerance, does not converge": {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt(1 + (1 << 25)), testErrToleranceMultiplicative, 10, sdk.Int{}, true},
-		"cubic f, both err tolerances, converges":                        {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt((1 << 15)), testErrToleranceBoth, 51, sdk.NewInt(1 << 45), false},
-		"cubic f, both err tolerances, does not converge":                {cubicF, sdk.ZeroInt(), sdk.NewInt(1 << 50), sdk.NewInt((1 << 30)), testErrToleranceBoth, 10, sdk.Int{}, true},
+		"linear f, no err tolerance, converges":                          {lineF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), noErrTolerance, 51, math.NewInt(1 + (1 << 25)), false},
+		"linear f, no err tolerance, does not converge":                  {lineF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), noErrTolerance, 10, math.Int{}, true},
+		"cubic f, no err tolerance, converges":                           {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), noErrTolerance, 51, math.NewInt(322539792367616), false},
+		"cubic f, no err tolerance, does not converge":                   {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), noErrTolerance, 10, math.Int{}, true},
+		"cubic f, large additive err tolerance, converges":               {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt((1 << 15)), testErrToleranceAdditive, 51, math.NewInt(1 << 46), false},
+		"cubic f, large additive err tolerance, does not converge":       {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt((1 << 30)), testErrToleranceAdditive, 10, math.Int{}, true},
+		"cubic f, large multiplicative err tolerance, converges":         {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), testErrToleranceMultiplicative, 51, math.NewInt(322539792367616), false},
+		"cubic f, large multiplicative err tolerance, does not converge": {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt(1 + (1 << 25)), testErrToleranceMultiplicative, 10, math.Int{}, true},
+		"cubic f, both err tolerances, converges":                        {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt((1 << 15)), testErrToleranceBoth, 51, math.NewInt(1 << 45), false},
+		"cubic f, both err tolerances, does not converge":                {cubicF, math.ZeroInt(), math.NewInt(1 << 50), math.NewInt((1 << 30)), testErrToleranceBoth, 10, math.Int{}, true},
 	}
 
 	for name, tc := range tests {
@@ -68,7 +68,7 @@ func TestBinarySearch(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				require.True(sdk.IntEq(t, tc.expectedSolvedInput, actualSolvedInput))
+				require.True(math.IntEq(t, tc.expectedSolvedInput, actualSolvedInput))
 			}
 		})
 	}
@@ -155,9 +155,9 @@ var fnMap = map[string]searchFn{"line": lineF, "cubic": cubicF, "neg_cubic": neg
 // This function tests that any value in a given range can be reached within expected num iterations.
 func TestIterationDepthRandValue(t *testing.T) {
 	tests := map[string]binarySearchTestCase{}
-	exactEqual := ErrTolerance{AdditiveTolerance: sdk.ZeroDec()}
-	withinOne := ErrTolerance{AdditiveTolerance: sdk.OneDec()}
-	within32 := ErrTolerance{AdditiveTolerance: sdk.OneDec().Mul(sdk.NewDec(32))}
+	exactEqual := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec()}
+	withinOne := ErrTolerance{AdditiveTolerance: math.LegacyOneDec()}
+	within32 := ErrTolerance{AdditiveTolerance: math.LegacyOneDec().Mul(math.LegacyNewDec(32))}
 
 	createRandInput := func(fnName string, lowerbound, upperbound int64,
 		errTolerance ErrTolerance, maxNumIters int, errToleranceName string) {
@@ -229,8 +229,8 @@ func runBinarySearchTestCases(t *testing.T, tests map[string]binarySearchTestCas
 }
 
 func TestBinarySearchBigDec(t *testing.T) {
-	testErrToleranceAdditive := ErrTolerance{AdditiveTolerance: sdk.NewDec(1 << 30)}
-	errToleranceBoth := ErrTolerance{AdditiveTolerance: sdk.NewDec(1 << 30), MultiplicativeTolerance: sdk.NewDec(1 << 3)}
+	testErrToleranceAdditive := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 30)}
+	errToleranceBoth := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 30), MultiplicativeTolerance: math.LegacyNewDec(1 << 3)}
 
 	twoTo50 := NewBigDec(1 << 50)
 	twoTo25PlusOne := NewBigDec(1 + (1 << 25))
@@ -281,7 +281,7 @@ func TestBinarySearchBigDec(t *testing.T) {
 }
 
 func TestBinarySearchRoundingBehavior(t *testing.T) {
-	withinTwoTo30 := ErrTolerance{AdditiveTolerance: sdk.NewDec(1 << 30)}
+	withinTwoTo30 := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1 << 30)}
 
 	twoTo50 := NewBigDec(1 << 50)
 	// twoTo25PlusOne := NewBigDec(1 + (1 << 25))
@@ -320,10 +320,10 @@ func TestBinarySearchRoundingBehavior(t *testing.T) {
 }
 
 func TestErrTolerance_Compare(t *testing.T) {
-	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: sdk.ZeroDec(), MultiplicativeTolerance: sdk.Dec{}}
-	NonZeroErrAdditive := ErrTolerance{AdditiveTolerance: sdk.NewDec(10), MultiplicativeTolerance: sdk.Dec{}}
-	NonZeroErrMultiplicative := ErrTolerance{AdditiveTolerance: sdk.Dec{}, MultiplicativeTolerance: sdk.NewDec(10)}
-	NonZeroErrBoth := ErrTolerance{AdditiveTolerance: sdk.NewDec(1), MultiplicativeTolerance: sdk.NewDec(10)}
+	ZeroErrTolerance := ErrTolerance{AdditiveTolerance: math.LegacyZeroDec(), MultiplicativeTolerance: math.LegacyDec{}}
+	NonZeroErrAdditive := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(10), MultiplicativeTolerance: math.LegacyDec{}}
+	NonZeroErrMultiplicative := ErrTolerance{AdditiveTolerance: math.LegacyDec{}, MultiplicativeTolerance: math.LegacyNewDec(10)}
+	NonZeroErrBoth := ErrTolerance{AdditiveTolerance: math.LegacyNewDec(1), MultiplicativeTolerance: math.LegacyNewDec(10)}
 	tests := []struct {
 		name         string
 		tol          ErrTolerance
@@ -352,11 +352,11 @@ func TestErrTolerance_Compare(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotInt := tt.tol.Compare(sdk.NewInt(tt.intInput), sdk.NewInt(tt.intReference))
+			gotInt := tt.tol.Compare(math.NewInt(tt.intInput), math.NewInt(tt.intReference))
 			if gotInt != tt.expectedCompareResult {
 				t.Errorf("ErrTolerance.Compare() = %v, want %v", gotInt, tt.expectedCompareResult)
 			}
-			gotIntRev := tt.tol.Compare(sdk.NewInt(tt.intReference), sdk.NewInt(tt.intInput))
+			gotIntRev := tt.tol.Compare(math.NewInt(tt.intReference), math.NewInt(tt.intInput))
 			if gotIntRev != -tt.expectedCompareResult {
 				t.Errorf("ErrTolerance.Compare() = %v, want %v", gotIntRev, -tt.expectedCompareResult)
 			}

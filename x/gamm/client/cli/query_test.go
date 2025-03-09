@@ -4,6 +4,7 @@ import (
 	gocontext "context"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -31,10 +32,10 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		adymDenom = apptesting.DefaultPoolAssets[3].Token.Denom
 
 		basicValidTokensIn = sdk.NewCoins(
-			sdk.NewCoin(fooDenom, sdk.OneInt()),
-			sdk.NewCoin(barDenom, sdk.OneInt()),
-			sdk.NewCoin(bazDenom, sdk.OneInt()),
-			sdk.NewCoin(adymDenom, sdk.OneInt()))
+			sdk.NewCoin(fooDenom, math.OneInt()),
+			sdk.NewCoin(barDenom, math.OneInt()),
+			sdk.NewCoin(bazDenom, math.OneInt()),
+			sdk.NewCoin(adymDenom, math.OneInt()))
 	)
 
 	testCases := []struct {
@@ -106,7 +107,7 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		{
 			"Query exit pool coins from shares",
 			"/dymensionxyz.dymension.gamm.v1beta1.Query/CalcExitPoolCoinsFromShares",
-			&types.QueryCalcExitPoolCoinsFromSharesRequest{PoolId: 1, ShareInAmount: sdk.OneInt()},
+			&types.QueryCalcExitPoolCoinsFromSharesRequest{PoolId: 1, ShareInAmount: math.OneInt()},
 			&types.QueryCalcExitPoolCoinsFromSharesResponse{},
 		},
 	}

@@ -5,13 +5,14 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func DefaultFeeString(cfg network.Config) string {
-	feeCoins := sdk.NewCoins(sdk.NewCoin(cfg.BondDenom, sdk.NewInt(10)))
+	feeCoins := sdk.NewCoins(sdk.NewCoin(cfg.BondDenom, math.NewInt(10)))
 	return fmt.Sprintf("--%s=%s", flags.FlagFees, feeCoins.String())
 }
 
@@ -34,8 +35,8 @@ func ParseUint64SliceFromString(s string, separator string) ([]uint64, error) {
 	return parsedInts, nil
 }
 
-func ParseSdkIntFromString(s string, separator string) ([]sdk.Int, error) {
-	var parsedInts []sdk.Int
+func ParseSdkIntFromString(s string, separator string) ([]math.Int, error) {
+	var parsedInts []math.Int
 	for _, weightStr := range strings.Split(s, separator) {
 		weightStr = strings.TrimSpace(weightStr)
 
@@ -43,7 +44,7 @@ func ParseSdkIntFromString(s string, separator string) ([]sdk.Int, error) {
 		if err != nil {
 			return parsedInts, err
 		}
-		parsedInts = append(parsedInts, sdk.NewIntFromUint64(parsed))
+		parsedInts = append(parsedInts, math.NewIntFromUint64(parsed))
 	}
 	return parsedInts, nil
 }

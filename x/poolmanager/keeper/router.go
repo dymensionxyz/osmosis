@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
@@ -17,35 +18,35 @@ func (k Keeper) RouteExactAmountIn(
 	sender sdk.AccAddress,
 	routes []types.SwapAmountInRoute,
 	tokenIn sdk.Coin,
-	tokenOutMinAmount sdk.Int,
-) (tokenOutAmount sdk.Int, err error) {
+	tokenOutMinAmount math.Int,
+) (tokenOutAmount math.Int, err error) {
 	route := types.SwapAmountInRoutes(routes)
 	if err := route.Validate(); err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 
 	for i, route := range routes {
 		// To prevent the multihop swap from being interrupted prematurely, we keep
 		// the minimum expected output at a very low number until the last pool
-		_outMinAmount := sdk.NewInt(1)
+		_outMinAmount := math.NewInt(1)
 		if len(routes)-1 == i {
 			_outMinAmount = tokenOutMinAmount
 		}
 
 		swapModule, err := k.GetPoolModule(ctx, route.PoolId)
 		if err != nil {
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		// Execute the expected swap on the current routed pool
 		pool, poolErr := swapModule.GetPool(ctx, route.PoolId)
 		if poolErr != nil {
-			return sdk.Int{}, poolErr
+			return math.Int{}, poolErr
 		}
 
 		// check if pool is active, if not error
 		if !pool.IsActive(ctx) {
-			return sdk.Int{}, fmt.Errorf("pool %d is not active", pool.GetId())
+			return math.Int{}, fmt.Errorf("pool %d is not active", pool.GetId())
 		}
 
 		swapFee := pool.GetSwapFee(ctx)
@@ -53,7 +54,7 @@ func (k Keeper) RouteExactAmountIn(
 		tokenOutAmount, err = swapModule.SwapExactAmountIn(ctx, sender, pool, tokenIn, route.TokenOutDenom, _outMinAmount, swapFee)
 		if err != nil {
 			ctx.Logger().Error(err.Error())
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		// Chain output of current pool as the input for the next routed pool
@@ -66,42 +67,42 @@ func (k Keeper) MultihopEstimateOutGivenExactAmountIn(
 	ctx sdk.Context,
 	routes []types.SwapAmountInRoute,
 	tokenIn sdk.Coin,
-) (tokenOutAmount sdk.Int, err error) {
+) (tokenOutAmount math.Int, err error) {
 	// recover from panic
 	defer func() {
 		if r := recover(); r != nil {
-			tokenOutAmount = sdk.Int{}
+			tokenOutAmount = math.Int{}
 			err = fmt.Errorf("function MultihopEstimateOutGivenExactAmountIn failed due to internal reason: %v", r)
 		}
 	}()
 
 	route := types.SwapAmountInRoutes(routes)
 	if err := route.Validate(); err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 
 	for _, route := range routes {
 		swapModule, err := k.GetPoolModule(ctx, route.PoolId)
 		if err != nil {
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		// Execute the expected swap on the current routed pool
 		poolI, poolErr := swapModule.GetPool(ctx, route.PoolId)
 		if poolErr != nil {
-			return sdk.Int{}, poolErr
+			return math.Int{}, poolErr
 		}
 
 		swapFee := poolI.GetSwapFee(ctx)
 
 		tokenOut, err := swapModule.CalcOutAmtGivenIn(ctx, poolI, tokenIn, route.TokenOutDenom, swapFee)
 		if err != nil {
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		tokenOutAmount = tokenOut.Amount
 		if !tokenOutAmount.IsPositive() {
-			return sdk.Int{}, errors.New("token amount must be positive")
+			return math.Int{}, errors.New("token amount must be positive")
 		}
 
 		// Chain output of current pool as the input for the next routed pool
@@ -117,29 +118,29 @@ func (k Keeper) MultihopEstimateOutGivenExactAmountIn(
 func (k Keeper) RouteExactAmountOut(ctx sdk.Context,
 	sender sdk.AccAddress,
 	routes []types.SwapAmountOutRoute,
-	tokenInMaxAmount sdk.Int,
+	tokenInMaxAmount math.Int,
 	tokenOut sdk.Coin,
-) (tokenInAmount sdk.Int, err error) {
+) (tokenInAmount math.Int, err error) {
 	route := types.SwapAmountOutRoutes(routes)
 	if err := route.Validate(); err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			tokenInAmount = sdk.Int{}
+			tokenInAmount = math.Int{}
 			err = fmt.Errorf("function RouteExactAmountOut failed due to internal reason: %v", r)
 		}
 	}()
 
 	// Determine what the estimated input would be for each pool along the multi-hop route
-	var insExpected []sdk.Int
+	var insExpected []math.Int
 	insExpected, err = k.createMultihopExpectedSwapOuts(ctx, routes, tokenOut)
 	if err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 	if len(insExpected) == 0 {
-		return sdk.Int{}, nil
+		return math.Int{}, nil
 	}
 
 	insExpected[0] = tokenInMaxAmount
@@ -150,7 +151,7 @@ func (k Keeper) RouteExactAmountOut(ctx sdk.Context,
 	for i, route := range routes {
 		swapModule, err := k.GetPoolModule(ctx, route.PoolId)
 		if err != nil {
-			return sdk.Int{}, err
+			return math.Int{}, err
 		}
 
 		_tokenOut := tokenOut
@@ -164,18 +165,18 @@ func (k Keeper) RouteExactAmountOut(ctx sdk.Context,
 		// Execute the expected swap on the current routed pool
 		pool, poolErr := swapModule.GetPool(ctx, route.PoolId)
 		if poolErr != nil {
-			return sdk.Int{}, poolErr
+			return math.Int{}, poolErr
 		}
 
 		// check if pool is active, if not error
 		if !pool.IsActive(ctx) {
-			return sdk.Int{}, fmt.Errorf("pool %d is not active", pool.GetId())
+			return math.Int{}, fmt.Errorf("pool %d is not active", pool.GetId())
 		}
 
 		swapFee := pool.GetSwapFee(ctx)
 		_tokenInAmount, swapErr := swapModule.SwapExactAmountOut(ctx, sender, pool, route.TokenInDenom, insExpected[i], _tokenOut, swapFee)
 		if swapErr != nil {
-			return sdk.Int{}, swapErr
+			return math.Int{}, swapErr
 		}
 
 		// Sets the final amount of tokens that need to be input into the first pool. Even though this is the final return value for the
@@ -193,30 +194,30 @@ func (k Keeper) MultihopEstimateInGivenExactAmountOut(
 	ctx sdk.Context,
 	routes []types.SwapAmountOutRoute,
 	tokenOut sdk.Coin,
-) (tokenInAmount sdk.Int, err error) {
-	var insExpected []sdk.Int
+) (tokenInAmount math.Int, err error) {
+	var insExpected []math.Int
 
 	// recover from panic
 	defer func() {
 		if r := recover(); r != nil {
-			insExpected = []sdk.Int{}
+			insExpected = []math.Int{}
 			err = fmt.Errorf("function MultihopEstimateInGivenExactAmountOut failed due to internal reason: %v", r)
 		}
 	}()
 
 	route := types.SwapAmountOutRoutes(routes)
 	if err := route.Validate(); err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 
 	// Determine what the estimated input would be for each pool along the multi-hop route
 	insExpected, err = k.createMultihopExpectedSwapOuts(ctx, routes, tokenOut)
 
 	if err != nil {
-		return sdk.Int{}, err
+		return math.Int{}, err
 	}
 	if len(insExpected) == 0 {
-		return sdk.Int{}, nil
+		return math.Int{}, nil
 	}
 
 	return insExpected[0], nil
@@ -232,8 +233,8 @@ func (k Keeper) createMultihopExpectedSwapOuts(
 	ctx sdk.Context,
 	routes []types.SwapAmountOutRoute,
 	tokenOut sdk.Coin,
-) ([]sdk.Int, error) {
-	insExpected := make([]sdk.Int, len(routes))
+) ([]math.Int, error) {
+	insExpected := make([]math.Int, len(routes))
 	for i := len(routes) - 1; i >= 0; i-- {
 		route := routes[i]
 

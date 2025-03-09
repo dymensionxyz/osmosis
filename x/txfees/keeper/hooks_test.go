@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"time"
 
+	math "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
@@ -46,11 +46,10 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 		suite.SetupTest()
 
 		// create pools for three separate fee tokens
-		suite.PrepareBalancerPoolWithCoins(sdk.NewCoin(baseDenom, sdk.NewInt(1000000000000)), sdk.NewCoin(uion, sdk.NewInt(5000)))
+		suite.PrepareBalancerPoolWithCoins(sdk.NewCoin(baseDenom, math.NewInt(1000000000000)), sdk.NewCoin(uion, math.NewInt(5000)))
 
 		moduleAddrFee := suite.App.AccountKeeper.GetModuleAddress(types.ModuleName)
-		err := bankutil.FundModuleAccount(suite.App.BankKeeper, suite.Ctx, types.ModuleName, tc.coins)
-		suite.Require().NoError(err)
+		suite.FundModuleAcc(types.ModuleName, tc.coins)
 		balances := suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 		suite.Assert().Equal(balances, tc.coins, tc.name)
 

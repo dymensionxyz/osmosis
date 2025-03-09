@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
@@ -71,7 +72,7 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 			},
 		}
 		wrappedRouteExactAmountInFn := func(ctx sdk.Context) error {
-			_, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, sdk.ZeroInt())
+			_, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, math.ZeroInt())
 			return err
 		}
 		err = osmoutils.ApplyFuncIfNoError(ctx, wrappedRouteExactAmountInFn)
@@ -155,11 +156,11 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 }
 
 // AfterJoinPool hook is a noop.
-func (h Hooks) AfterJoinPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, enterCoins sdk.Coins, shareOutAmount sdk.Int) {
+func (h Hooks) AfterJoinPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, enterCoins sdk.Coins, shareOutAmount math.Int) {
 }
 
 // AfterExitPool hook is a noop.
-func (h Hooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, shareInAmount sdk.Int, exitCoins sdk.Coins) {
+func (h Hooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, shareInAmount math.Int, exitCoins sdk.Coins) {
 }
 
 // AfterSwap hook is a noop.

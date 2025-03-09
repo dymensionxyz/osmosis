@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
@@ -35,23 +36,23 @@ func (suite *PoolManagerEventsTestSuite) TestEmitSwapEvent() {
 		poolId          uint64
 		tokensIn        sdk.Coins
 		tokensOut       sdk.Coins
-		closingPrice    sdk.Dec
+		closingPrice    math.LegacyDec
 	}{
 		"basic valid": {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          1,
-			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(1234))),
-			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomB, sdk.NewInt(5678))),
-			closingPrice:    sdk.NewDec(123),
+			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(1234))),
+			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomB, math.NewInt(5678))),
+			closingPrice:    math.LegacyNewDec(123),
 		},
 		"valid with multiple tokens in and out": {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          200,
-			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(12)), sdk.NewCoin(testDenomB, sdk.NewInt(99))),
-			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomC, sdk.NewInt(88)), sdk.NewCoin(testDenomD, sdk.NewInt(34))),
-			closingPrice:    sdk.NewDec(123),
+			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(12)), sdk.NewCoin(testDenomB, math.NewInt(99))),
+			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomC, math.NewInt(88)), sdk.NewCoin(testDenomD, math.NewInt(34))),
+			closingPrice:    math.LegacyNewDec(123),
 		},
 	}
 
@@ -101,13 +102,13 @@ func (suite *PoolManagerEventsTestSuite) TestEmitAddLiquidityEvent() {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          1,
-			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(1234))),
+			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(1234))),
 		},
 		"valid with multiple tokens in": {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          200,
-			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(12)), sdk.NewCoin(testDenomB, sdk.NewInt(99))),
+			tokensIn:        sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(12)), sdk.NewCoin(testDenomB, math.NewInt(99))),
 		},
 	}
 
@@ -152,13 +153,13 @@ func (suite *PoolManagerEventsTestSuite) TestEmitRemoveLiquidityEvent() {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          1,
-			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(1234))),
+			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(1234))),
 		},
 		"valid with multiple tokens out": {
 			ctx:             suite.CreateTestContext(),
 			testAccountAddr: sdk.AccAddress([]byte(addressString)),
 			poolId:          200,
-			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomA, sdk.NewInt(12)), sdk.NewCoin(testDenomB, sdk.NewInt(99))),
+			tokensOut:       sdk.NewCoins(sdk.NewCoin(testDenomA, math.NewInt(12)), sdk.NewCoin(testDenomB, math.NewInt(99))),
 		},
 	}
 

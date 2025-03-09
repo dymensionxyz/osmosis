@@ -3,12 +3,13 @@ package keeper_test
 import (
 	"fmt"
 
+	math "cosmossdk.io/math"
+
 	clienttx "github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
-	bankutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/ante"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
@@ -16,10 +17,10 @@ import (
 
 // mockFeeMarketKeeper implements the FeeMarketKeeper interface for testing
 type mockFeeMarketKeeper struct {
-	minGasPrice sdk.Dec
+	minGasPrice math.LegacyDec
 }
 
-func (m mockFeeMarketKeeper) GetMinGasPrice(ctx sdk.Context) sdk.Dec {
+func (m mockFeeMarketKeeper) GetMinGasPrice(ctx sdk.Context) math.LegacyDec {
 	return m.minGasPrice
 }
 
@@ -27,8 +28,8 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 	baseDenom := sdk.DefaultBondDenom
 	baseGas := uint64(10000)
 	point1BaseDenomMinGasPrices := sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom,
-		sdk.MustNewDecFromStr("0.1")))
-	point2BaseDenomFeeMarketPrice := sdk.MustNewDecFromStr("0.2")
+		math.LegacyMustNewDecFromStr("0.1")))
+	point2BaseDenomFeeMarketPrice := math.LegacyMustNewDecFromStr("0.2")
 
 	// uion is setup with a relative price of 1:1
 	uion := "uion"
@@ -36,9 +37,9 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 	type testcase struct {
 		name              string
 		txFee             sdk.Coins
-		minGasPrices      sdk.DecCoins // if blank, set to 0
-		feeMarketMinPrice sdk.Dec      // if blank, no feemarket keeper is used
-		gasRequested      uint64       // if blank, set to base gas
+		minGasPrices      sdk.DecCoins   // if blank, set to 0
+		feeMarketMinPrice math.LegacyDec // if blank, no feemarket keeper is used
+		gasRequested      uint64         // if blank, set to base gas
 		isCheckTx         bool
 		isSimulate        bool // if blank, is false
 		expectPass        bool
@@ -140,9 +141,9 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 			},
 			{
 				name:              fmt.Sprintf("works with chain min gas price higher than feemarket - %s", txType[isCheckTx]),
-				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)), // 0.2 * 10000
+				txFee:             sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 2000)),                                  // 0.2 * 10000
 				minGasPrices:      sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom, point2BaseDenomFeeMarketPrice)), // 0.2
-				feeMarketMinPrice: sdk.MustNewDecFromStr("0.1"),                                                     // 0.1
+				feeMarketMinPrice: math.LegacyMustNewDecFromStr("0.1"),                                              // 0.1
 				isCheckTx:         isCheckTx == 1,
 				expectPass:        true,
 			},
@@ -183,13 +184,17 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 		gasLimit := tc.gasRequested
 
 		sigV2, err := clienttx.SignWithPrivKey(
-			txconfig.SignModeHandler().DefaultMode(), signerData,
-			txBuilder, priv0, txconfig, 0)
+			suite.Ctx,
+			1,
+			signerData,
+			txBuilder,
+			priv0,
+			txconfig, 0)
 		suite.Require().NoError(err, "test: %s", tc.name)
 		err = txBuilder.SetSignatures(sigV2)
 		suite.Require().NoError(err, "test: %s", tc.name)
 
-		bankutil.FundAccount(suite.App.BankKeeper, suite.Ctx, addr0, tc.txFee)
+		suite.FundAcc(addr0, tc.txFee)
 		tx := suite.BuildTx(txBuilder, msgs, sigV2, "", tc.txFee, gasLimit)
 
 		var feeMarketKeeper types.FeeMarketKeeper

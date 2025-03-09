@@ -7,8 +7,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	errorsmod "cosmossdk.io/errors"
+	"cosmossdk.io/math"
+	"cosmossdk.io/store/prefix"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
@@ -236,8 +238,8 @@ func (q Querier) CalcExitPoolCoinsFromShares(ctx context.Context, req *types.Que
 	exitFee := pool.GetExitFee(sdkCtx)
 
 	totalSharesAmount := pool.GetTotalShares()
-	if req.ShareInAmount.GTE(totalSharesAmount) || req.ShareInAmount.LTE(sdk.ZeroInt()) {
-		return nil, sdkerrors.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative")
+	if req.ShareInAmount.GTE(totalSharesAmount) || req.ShareInAmount.LTE(math.ZeroInt()) {
+		return nil, errorsmod.Wrapf(types.ErrInvalidMathApprox, "share ratio is zero or negative")
 	}
 
 	exitCoins, err := pool.CalcExitPoolCoinsFromShares(sdkCtx, req.ShareInAmount, exitFee)
@@ -297,7 +299,7 @@ func (q Querier) PoolParams(ctx context.Context, req *types.QueryPoolParamsReque
 
 	default:
 		errMsg := fmt.Sprintf("unrecognized %s pool type: %T", types.ModuleName, pool)
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnpackAny, errMsg)
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnpackAny, errMsg)
 	}
 }
 

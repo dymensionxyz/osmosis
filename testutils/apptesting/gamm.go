@@ -1,6 +1,7 @@
 package apptesting
 
 import (
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/osmomath"
@@ -10,29 +11,31 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
+// FIXME: move to dymension main test suite
+
 var DefaultAcctFunds sdk.Coins = sdk.NewCoins(
-	sdk.NewCoin("adym", sdk.NewInt(100000000000000000)),
-	sdk.NewCoin("foo", sdk.NewInt(10000000000)),
-	sdk.NewCoin("bar", sdk.NewInt(10000000000)),
-	sdk.NewCoin("baz", sdk.NewInt(10000000000)),
+	sdk.NewCoin("adym", math.NewInt(100000000000000000)),
+	sdk.NewCoin("foo", math.NewInt(10000000000)),
+	sdk.NewCoin("bar", math.NewInt(10000000000)),
+	sdk.NewCoin("baz", math.NewInt(10000000000)),
 )
 
 var DefaultPoolAssets = []balancer.PoolAsset{
 	{
-		Weight: sdk.NewInt(100),
-		Token:  sdk.NewCoin("foo", sdk.NewInt(5000000)),
+		Weight: math.NewInt(100),
+		Token:  sdk.NewCoin("foo", math.NewInt(5000000)),
 	},
 	{
-		Weight: sdk.NewInt(200),
-		Token:  sdk.NewCoin("bar", sdk.NewInt(5000000)),
+		Weight: math.NewInt(200),
+		Token:  sdk.NewCoin("bar", math.NewInt(5000000)),
 	},
 	{
-		Weight: sdk.NewInt(300),
-		Token:  sdk.NewCoin("baz", sdk.NewInt(5000000)),
+		Weight: math.NewInt(300),
+		Token:  sdk.NewCoin("baz", math.NewInt(5000000)),
 	},
 	{
-		Weight: sdk.NewInt(400),
-		Token:  sdk.NewCoin("adym", sdk.NewInt(5000000)),
+		Weight: math.NewInt(400),
+		Token:  sdk.NewCoin("adym", math.NewInt(5000000)),
 	},
 }
 
@@ -53,35 +56,35 @@ func (s *KeeperTestHelper) PrepareBalancerPoolWithCoinsAndWeights(coins sdk.Coin
 	var poolAssets []balancer.PoolAsset
 	for i, coin := range coins {
 		poolAsset := balancer.PoolAsset{
-			Weight: sdk.NewInt(weights[i]),
+			Weight: math.NewInt(weights[i]),
 			Token:  coin,
 		}
 		poolAssets = append(poolAssets, poolAsset)
 	}
 
 	return s.PrepareCustomBalancerPool(poolAssets, balancer.PoolParams{
-		SwapFee: sdk.ZeroDec(),
-		ExitFee: sdk.ZeroDec(),
+		SwapFee: math.LegacyZeroDec(),
+		ExitFee: math.LegacyZeroDec(),
 	})
 }
 
 // PrepareBalancerPool returns a Balancer pool's pool-ID with pool params set in PrepareBalancerPoolWithPoolParams.
 func (s *KeeperTestHelper) PrepareBalancerPool() uint64 {
 	poolId := s.PrepareBalancerPoolWithPoolParams(balancer.PoolParams{
-		SwapFee: sdk.NewDec(0),
-		ExitFee: sdk.NewDec(0),
+		SwapFee: math.LegacyNewDec(0),
+		ExitFee: math.LegacyNewDec(0),
 	})
 
 	spotPrice, err := s.App.GAMMKeeper.CalculateSpotPrice(s.Ctx, poolId, "foo", "bar")
 	s.NoError(err)
-	s.Equal(sdk.NewDec(2).String(), spotPrice.String())
+	s.Equal(math.LegacyNewDec(2).String(), spotPrice.String())
 	spotPrice, err = s.App.GAMMKeeper.CalculateSpotPrice(s.Ctx, poolId, "bar", "baz")
 	s.NoError(err)
-	s.Equal(sdk.NewDecWithPrec(15, 1).String(), spotPrice.String())
+	s.Equal(math.LegacyNewDecWithPrec(15, 1).String(), spotPrice.String())
 	spotPrice, err = s.App.GAMMKeeper.CalculateSpotPrice(s.Ctx, poolId, "baz", "foo")
 	s.NoError(err)
-	oneThird := sdk.NewDec(1).Quo(sdk.NewDec(3))
-	sp := sdk.NewDecFromInt(oneThird.MulInt(gammtypes.SpotPriceSigFigs).RoundInt()).QuoInt(gammtypes.SpotPriceSigFigs)
+	oneThird := math.LegacyNewDec(1).Quo(math.LegacyNewDec(3))
+	sp := math.LegacyNewDecFromInt(oneThird.MulInt(gammtypes.SpotPriceSigFigs).RoundInt()).QuoInt(gammtypes.SpotPriceSigFigs)
 	s.Equal(sp.String(), spotPrice.String())
 
 	return poolId
@@ -108,7 +111,7 @@ func (s *KeeperTestHelper) PrepareBalancerPoolWithPoolParams(poolParams balancer
 // PrepareCustomBalancerPool sets up a Balancer pool with an array of assets and given parameters
 func (s *KeeperTestHelper) PrepareCustomBalancerPool(assets []balancer.PoolAsset, params balancer.PoolParams) uint64 {
 	// Add coins for pool creation fee + coins needed to mint balances
-	fundCoins := sdk.NewCoins(sdk.NewCoin("adym", sdk.NewInt(10000000000)))
+	fundCoins := sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(10000000000)))
 	for _, a := range assets {
 		fundCoins = fundCoins.Add(a.Token)
 	}
@@ -126,7 +129,7 @@ func (s *KeeperTestHelper) PrepareCustomBalancerPoolFromCoins(coins sdk.Coins, p
 	var poolAssets []balancer.PoolAsset
 	for _, coin := range coins {
 		poolAsset := balancer.PoolAsset{
-			Weight: sdk.NewInt(1),
+			Weight: math.NewInt(1),
 			Token:  coin,
 		}
 		poolAssets = append(poolAssets, poolAsset)
@@ -136,7 +139,7 @@ func (s *KeeperTestHelper) PrepareCustomBalancerPoolFromCoins(coins sdk.Coins, p
 }
 
 // Modify spotprice of a pool to target spotprice
-func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice sdk.Dec, baseDenom string) {
+func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice math.LegacyDec, baseDenom string) {
 	var quoteDenom string
 	int64Max := int64(^uint64(0) >> 1)
 
@@ -153,20 +156,20 @@ func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice sdk.De
 
 	amountTrade := s.CalcAmoutOfTokenToGetTargetPrice(s.Ctx, pool, targetSpotPrice, baseDenom, quoteDenom)
 	if amountTrade.IsPositive() {
-		swapIn := sdk.NewCoins(sdk.NewCoin(quoteDenom, sdk.NewInt(amountTrade.RoundInt64())))
+		swapIn := sdk.NewCoins(sdk.NewCoin(quoteDenom, math.NewInt(amountTrade.RoundInt64())))
 		s.FundAcc(s.TestAccs[0], swapIn)
 		msg := gammtypes.MsgSwapExactAmountIn{
 			Sender:            s.TestAccs[0].String(),
 			Routes:            []poolmanagertypes.SwapAmountInRoute{{PoolId: poolID, TokenOutDenom: baseDenom}},
 			TokenIn:           swapIn[0],
-			TokenOutMinAmount: sdk.ZeroInt(),
+			TokenOutMinAmount: math.ZeroInt(),
 		}
 
 		gammMsgServer := gammkeeper.NewMsgServerImpl(s.App.GAMMKeeper)
 		_, err = gammMsgServer.SwapExactAmountIn(sdk.WrapSDKContext(s.Ctx), &msg)
 		s.Require().NoError(err)
 	} else {
-		swapOut := sdk.NewCoins(sdk.NewCoin(quoteDenom, sdk.NewInt(amountTrade.RoundInt64()).Abs()))
+		swapOut := sdk.NewCoins(sdk.NewCoin(quoteDenom, math.NewInt(amountTrade.RoundInt64()).Abs()))
 		swapFee := pool.GetSwapFee(s.Ctx)
 		tokenIn, err := pool.CalcInAmtGivenOut(s.Ctx, swapOut, baseDenom, swapFee)
 		s.Require().NoError(err)
@@ -174,7 +177,7 @@ func (s *KeeperTestHelper) ModifySpotPrice(poolID uint64, targetSpotPrice sdk.De
 		msg := gammtypes.MsgSwapExactAmountOut{
 			Sender:           s.TestAccs[0].String(),
 			Routes:           []poolmanagertypes.SwapAmountOutRoute{{PoolId: poolID, TokenInDenom: baseDenom}},
-			TokenInMaxAmount: sdk.NewInt(int64Max),
+			TokenInMaxAmount: math.NewInt(int64Max),
 			TokenOut:         swapOut[0],
 		}
 
@@ -188,14 +191,14 @@ func (s *KeeperTestHelper) RunBasicSwap(poolId uint64) {
 	denoms, err := s.App.GAMMKeeper.GetPoolDenoms(s.Ctx, poolId)
 	s.Require().NoError(err)
 
-	swapIn := sdk.NewCoins(sdk.NewCoin(denoms[0], sdk.NewInt(1000)))
+	swapIn := sdk.NewCoins(sdk.NewCoin(denoms[0], math.NewInt(1000)))
 	s.FundAcc(s.TestAccs[0], swapIn)
 
 	msg := gammtypes.MsgSwapExactAmountIn{
 		Sender:            s.TestAccs[0].String(),
 		Routes:            []poolmanagertypes.SwapAmountInRoute{{PoolId: poolId, TokenOutDenom: denoms[1]}},
 		TokenIn:           swapIn[0],
-		TokenOutMinAmount: sdk.ZeroInt(),
+		TokenOutMinAmount: math.ZeroInt(),
 	}
 
 	gammMsgServer := gammkeeper.NewMsgServerImpl(s.App.GAMMKeeper)
@@ -204,7 +207,7 @@ func (s *KeeperTestHelper) RunBasicSwap(poolId uint64) {
 }
 
 func (s *KeeperTestHelper) RunBasicExit(poolId uint64) {
-	shareInAmount := sdk.NewInt(100)
+	shareInAmount := math.NewInt(100)
 	tokenOutMins := sdk.NewCoins()
 
 	msg := gammtypes.MsgExitPool{
@@ -226,7 +229,7 @@ func (s *KeeperTestHelper) RunBasicJoin(poolId uint64) {
 
 	tokenIn := sdk.NewCoins()
 	for _, denom := range denoms {
-		tokenIn = tokenIn.Add(sdk.NewCoin(denom, sdk.NewInt(10000000)))
+		tokenIn = tokenIn.Add(sdk.NewCoin(denom, math.NewInt(10000000)))
 	}
 
 	s.FundAcc(s.TestAccs[0], sdk.NewCoins(tokenIn...))
@@ -235,7 +238,7 @@ func (s *KeeperTestHelper) RunBasicJoin(poolId uint64) {
 	msg := gammtypes.MsgJoinPool{
 		Sender:         s.TestAccs[0].String(),
 		PoolId:         poolId,
-		ShareOutAmount: totalPoolShare.Quo(sdk.NewInt(100000)),
+		ShareOutAmount: totalPoolShare.Quo(math.NewInt(100000)),
 		TokenInMaxs:    tokenIn,
 	}
 
@@ -244,15 +247,15 @@ func (s *KeeperTestHelper) RunBasicJoin(poolId uint64) {
 	s.Require().NoError(err)
 }
 
-func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, pool gammtypes.CFMMPoolI, targetSpotPrice sdk.Dec, baseDenom, quoteDenom string) (amountTrade sdk.Dec) {
+func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, pool gammtypes.CFMMPoolI, targetSpotPrice math.LegacyDec, baseDenom, quoteDenom string) (amountTrade math.LegacyDec) {
 	blPool, ok := pool.(*balancer.Pool)
 	s.Require().True(ok)
 	quoteAsset, _ := blPool.GetPoolAsset(quoteDenom)
 	baseAsset, err := blPool.GetPoolAsset(baseDenom)
 	s.Require().NoError(err)
 
-	s.Require().NotEqual(baseAsset.Weight, sdk.ZeroInt())
-	s.Require().NotEqual(quoteAsset.Weight, sdk.ZeroInt())
+	s.Require().NotEqual(baseAsset.Weight, math.ZeroInt())
+	s.Require().NotEqual(quoteAsset.Weight, math.ZeroInt())
 
 	spotPriceNow, err := blPool.SpotPrice(ctx, baseDenom, quoteDenom)
 	s.Require().NoError(err)
@@ -261,9 +264,9 @@ func (s *KeeperTestHelper) CalcAmoutOfTokenToGetTargetPrice(ctx sdk.Context, poo
 	// AmoutQuoteTokenNeedToTrade = AmoutQuoTokenNow * ((targetSpotPrice/spotPriceNow)^((weight_base/(weight_base + weight_quote))) -1 )
 
 	ratioPrice := targetSpotPrice.Quo(spotPriceNow)
-	ratioWeight := (sdk.NewDecFromInt(baseAsset.Weight)).Quo(sdk.NewDecFromInt(baseAsset.Weight).Add(sdk.NewDecFromInt(quoteAsset.Weight)))
+	ratioWeight := (math.LegacyNewDecFromInt(baseAsset.Weight)).Quo(math.LegacyNewDecFromInt(baseAsset.Weight).Add(math.LegacyNewDecFromInt(quoteAsset.Weight)))
 
-	amountTrade = sdk.NewDecFromInt(quoteAsset.Token.Amount).Mul(osmomath.Pow(ratioPrice, ratioWeight).Sub(sdk.OneDec()))
+	amountTrade = math.LegacyNewDecFromInt(quoteAsset.Token.Amount).Mul(osmomath.Pow(ratioPrice, ratioWeight).Sub(math.LegacyOneDec()))
 
 	return amountTrade
 }

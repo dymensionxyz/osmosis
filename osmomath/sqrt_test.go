@@ -5,19 +5,19 @@ import (
 	"math/rand"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func generateRandomDecForEachBitlen(r *rand.Rand, numPerBitlen int) []sdk.Dec {
-	res := make([]sdk.Dec, (255+sdk.DecimalPrecisionBits)*numPerBitlen)
-	for i := 0; i < 255+sdk.DecimalPrecisionBits; i++ {
+func generateRandomDecForEachBitlen(r *rand.Rand, numPerBitlen int) []math.LegacyDec {
+	res := make([]math.LegacyDec, (255+math.LegacyDecimalPrecisionBits)*numPerBitlen)
+	for i := 0; i < 255+math.LegacyDecimalPrecisionBits; i++ {
 		upperbound := big.NewInt(1)
 		upperbound.Lsh(upperbound, uint(i))
 		for j := 0; j < numPerBitlen; j++ {
 			v := big.NewInt(0).Rand(r, upperbound)
-			res[i*numPerBitlen+j] = sdk.NewDecFromBigIntWithPrec(v, 18)
+			res[i*numPerBitlen+j] = math.LegacyNewDecFromBigIntWithPrec(v, 18)
 		}
 	}
 	return res
@@ -25,16 +25,16 @@ func generateRandomDecForEachBitlen(r *rand.Rand, numPerBitlen int) []sdk.Dec {
 
 func TestSdkApproxSqrtVectors(t *testing.T) {
 	testCases := []struct {
-		input    sdk.Dec
-		expected sdk.Dec
+		input    math.LegacyDec
+		expected math.LegacyDec
 	}{
-		{sdk.OneDec(), sdk.OneDec()},                                                    // 1.0 => 1.0
-		{sdk.NewDecWithPrec(25, 2), sdk.NewDecWithPrec(5, 1)},                           // 0.25 => 0.5
-		{sdk.NewDecWithPrec(4, 2), sdk.NewDecWithPrec(2, 1)},                            // 0.09 => 0.3
-		{sdk.NewDecFromInt(sdk.NewInt(9)), sdk.NewDecFromInt(sdk.NewInt(3))},            // 9 => 3
-		{sdk.NewDecFromInt(sdk.NewInt(2)), sdk.NewDecWithPrec(1414213562373095049, 18)}, // 2 => 1.414213562373095049
-		{smallestDec, sdk.NewDecWithPrec(1, 9)},                                         // 10^-18 => 10^-9
-		{smallestDec.MulInt64(3), sdk.NewDecWithPrec(1732050808, 18)},                   // 3*10^-18 => sqrt(3)*10^-9
+		{math.LegacyOneDec(), math.LegacyOneDec()},                                                     // 1.0 => 1.0
+		{math.LegacyNewDecWithPrec(25, 2), math.LegacyNewDecWithPrec(5, 1)},                            // 0.25 => 0.5
+		{math.LegacyNewDecWithPrec(4, 2), math.LegacyNewDecWithPrec(2, 1)},                             // 0.09 => 0.3
+		{math.LegacyNewDecFromInt(math.NewInt(9)), math.LegacyNewDecFromInt(math.NewInt(3))},           // 9 => 3
+		{math.LegacyNewDecFromInt(math.NewInt(2)), math.LegacyNewDecWithPrec(1414213562373095049, 18)}, // 2 => 1.414213562373095049
+		{smallestDec, math.LegacyNewDecWithPrec(1, 9)},                                                 // 10^-18 => 10^-9
+		{smallestDec.MulInt64(3), math.LegacyNewDecWithPrec(1732050808, 18)},                           // 3*10^-18 => sqrt(3)*10^-9
 	}
 
 	for i, tc := range testCases {
@@ -44,7 +44,7 @@ func TestSdkApproxSqrtVectors(t *testing.T) {
 	}
 }
 
-func testMonotonicityAround(t *testing.T, x sdk.Dec) {
+func testMonotonicityAround(t *testing.T, x math.LegacyDec) {
 	// test that sqrt(x) is monotonic around x
 	// i.e. sqrt(x-1) <= sqrt(x) <= sqrt(x+1)
 	sqrtX, err := MonotonicSqrt(x)
@@ -59,26 +59,26 @@ func testMonotonicityAround(t *testing.T, x sdk.Dec) {
 
 func TestSqrtMonotinicity(t *testing.T) {
 	type testcase struct {
-		smaller sdk.Dec
-		bigger  sdk.Dec
+		smaller math.LegacyDec
+		bigger  math.LegacyDec
 	}
 	testCases := []testcase{
-		{sdk.MustNewDecFromStr("120.120060020005000000"), sdk.MustNewDecFromStr("120.120060020005000001")},
+		{math.LegacyMustNewDecFromStr("120.120060020005000000"), math.LegacyMustNewDecFromStr("120.120060020005000001")},
 		{smallestDec, smallestDec.MulInt64(2)},
 	}
 	// create random test vectors for every bit-length
 	r := rand.New(rand.NewSource(rand.Int63()))
-	for i := 0; i < 255+sdk.DecimalPrecisionBits; i++ {
+	for i := 0; i < 255+math.LegacyDecimalPrecisionBits; i++ {
 		upperbound := big.NewInt(1)
 		upperbound.Lsh(upperbound, uint(i))
 		for j := 0; j < 100; j++ {
 			v := big.NewInt(0).Rand(r, upperbound)
-			d := sdk.NewDecFromBigIntWithPrec(v, 18)
+			d := math.LegacyNewDecFromBigIntWithPrec(v, 18)
 			testCases = append(testCases, testcase{d, d.Add(smallestDec)})
 		}
 	}
 	for i := 0; i < 1024; i++ {
-		d := sdk.NewDecWithPrec(int64(i), 18)
+		d := math.LegacyNewDecWithPrec(int64(i), 18)
 		testCases = append(testCases, testcase{d, d.Add(smallestDec)})
 	}
 
@@ -100,8 +100,8 @@ func TestSqrtMonotinicity(t *testing.T) {
 // and then setting x = sqrt(v)
 // this is because this is the set of values whose squares are perfectly representable.
 func TestPerfectSquares(t *testing.T) {
-	cases := []sdk.Dec{
-		sdk.NewDec(100),
+	cases := []math.LegacyDec{
+		math.LegacyNewDec(100),
 	}
 	r := rand.New(rand.NewSource(rand.Int63()))
 	tenToMin9 := big.NewInt(1_000_000_000)
@@ -111,7 +111,7 @@ func TestPerfectSquares(t *testing.T) {
 		for j := 0; j < 100; j++ {
 			v := big.NewInt(0).Rand(r, upperbound)
 			dec := big.NewInt(0).Rand(r, tenToMin9)
-			d := sdk.NewDecFromBigInt(v).Add(sdk.NewDecFromBigIntWithPrec(dec, 9))
+			d := math.LegacyNewDecFromBigInt(v).Add(math.LegacyNewDecFromBigIntWithPrec(dec, 9))
 			cases = append(cases, d.MulMut(d))
 		}
 	}
@@ -127,10 +127,10 @@ func TestPerfectSquares(t *testing.T) {
 }
 
 func TestSqrtRounding(t *testing.T) {
-	testCases := []sdk.Dec{
+	testCases := []math.LegacyDec{
 		// TODO: uncomment when SDK supports dec from str with bigger bitlenghths.
 		// it works if you override the sdk panic locally.
-		// sdk.MustNewDecFromStr("11662930532952632574132537947829685675668532938920838254939577167671385459971.396347723368091000"),
+		// math.LegacyMustNewDecFromStr("11662930532952632574132537947829685675668532938920838254939577167671385459971.396347723368091000"),
 	}
 	r := rand.New(rand.NewSource(rand.Int63()))
 	testCases = append(testCases, generateRandomDecForEachBitlen(r, 10)...)

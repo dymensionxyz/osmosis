@@ -5,10 +5,7 @@ import (
 	"testing"
 	"time"
 
-	dbm "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
-	tmtypes "github.com/cometbft/cometbft/proto/tendermint/types"
-	"github.com/cosmos/cosmos-sdk/store/rootmulti"
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -16,7 +13,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 )
 
-func createTestPool(t *testing.T, swapFee, exitFee sdk.Dec, poolAssets ...balancer.PoolAsset) *balancer.Pool {
+func createTestPool(t *testing.T, swapFee, exitFee math.LegacyDec, poolAssets ...balancer.PoolAsset) *balancer.Pool {
 	pool, err := balancer.NewBalancerPool(
 		1,
 		balancer.NewPoolParams(swapFee, exitFee, nil),
@@ -29,17 +26,8 @@ func createTestPool(t *testing.T, swapFee, exitFee sdk.Dec, poolAssets ...balanc
 	return &pool
 }
 
-func createTestContext(t *testing.T) sdk.Context {
-	db := dbm.NewMemDB()
-	logger := log.NewNopLogger()
-
-	ms := rootmulti.NewStore(db, logger)
-
-	return sdk.NewContext(ms, tmtypes.Header{}, false, logger)
-}
-
-func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares sdk.Int) {
-	allowedErrRatioDec, err := sdk.NewDecFromStr(allowedErrRatio)
+func assertExpectedSharesErrRatio(t *testing.T, expectedShares, actualShares math.Int) {
+	allowedErrRatioDec, err := math.LegacyNewDecFromStr(allowedErrRatio)
 	require.NoError(t, err)
 
 	errTolerance := osmomath.ErrTolerance{

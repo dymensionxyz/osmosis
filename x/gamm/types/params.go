@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
@@ -24,8 +25,8 @@ func NewParams(poolCreationFee sdk.Coins) Params {
 	return Params{
 		PoolCreationFee:      poolCreationFee,
 		EnableGlobalPoolFees: false,
-		GlobalFees:           GlobalFees{sdk.ZeroDec(), sdk.ZeroDec()},
-		TakerFee:             sdk.ZeroDec(),
+		GlobalFees:           GlobalFees{math.LegacyZeroDec(), math.LegacyZeroDec()},
+		TakerFee:             math.LegacyZeroDec(),
 	}
 }
 
@@ -34,8 +35,8 @@ func DefaultParams() Params {
 	return Params{
 		PoolCreationFee:      sdk.Coins{sdk.NewInt64Coin(sdk.DefaultBondDenom, 1000_000_000)},
 		EnableGlobalPoolFees: false,
-		GlobalFees:           GlobalFees{sdk.MustNewDecFromStr("0.02"), sdk.ZeroDec()},
-		TakerFee:             sdk.MustNewDecFromStr("0.01"),
+		GlobalFees:           GlobalFees{math.LegacyMustNewDecFromStr("0.02"), math.LegacyZeroDec()},
+		TakerFee:             math.LegacyMustNewDecFromStr("0.01"),
 	}
 }
 
@@ -86,7 +87,7 @@ func validateGlobalFees(i interface{}) error {
 		return ErrNegativeExitFee
 	}
 
-	if v.ExitFee.GTE(sdk.OneDec()) {
+	if v.ExitFee.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchExitFee
 	}
 
@@ -94,7 +95,7 @@ func validateGlobalFees(i interface{}) error {
 		return ErrNegativeSwapFee
 	}
 
-	if v.SwapFee.GTE(sdk.OneDec()) {
+	if v.SwapFee.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchSwapFee
 	}
 
@@ -102,7 +103,7 @@ func validateGlobalFees(i interface{}) error {
 }
 
 func validateTakerFees(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(math.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -113,7 +114,7 @@ func validateTakerFees(i interface{}) error {
 		return ErrNegativeExitFee
 	}
 
-	if v.GTE(sdk.OneDec()) {
+	if v.GTE(math.LegacyOneDec()) {
 		return ErrTooMuchExitFee
 	}
 

@@ -16,7 +16,7 @@ message GenesisState {
 }
 
 
-// Params holds parameters for the incentives module
+// Params holds parameters for the txfees module
 message Params {
   // epoch_identifier is what epoch type swap and burn will be triggered by
   // (day, week, etc.)

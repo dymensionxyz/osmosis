@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	math "cosmossdk.io/math"
+
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 
@@ -191,12 +193,12 @@ func NewBuildCreateBalancerPoolMsg(clientCtx client.Context, fs *flag.FlagSet) (
 		return nil, errors.New("deposit tokens and token weights should have same length")
 	}
 
-	swapFee, err := sdk.NewDecFromStr(pool.SwapFee)
+	swapFee, err := math.LegacyNewDecFromStr(pool.SwapFee)
 	if err != nil {
 		return nil, err
 	}
 
-	exitFee, err := sdk.NewDecFromStr(pool.ExitFee)
+	exitFee, err := math.LegacyNewDecFromStr(pool.ExitFee)
 	if err != nil {
 		return nil, err
 	}
@@ -274,23 +276,23 @@ func NewBuildCreateBalancerPoolMsg(clientCtx client.Context, fs *flag.FlagSet) (
 	return msg, nil
 }
 
-func shareAmountInParser(fs *flag.FlagSet) (sdk.Int, error) {
+func shareAmountInParser(fs *flag.FlagSet) (math.Int, error) {
 	return sdkIntParser(FlagShareAmountIn, fs)
 }
 
-func shareAmountOutParser(fs *flag.FlagSet) (sdk.Int, error) {
+func shareAmountOutParser(fs *flag.FlagSet) (math.Int, error) {
 	return sdkIntParser(FlagShareAmountOut, fs)
 }
 
-func sdkIntParser(flagName string, fs *flag.FlagSet) (sdk.Int, error) {
+func sdkIntParser(flagName string, fs *flag.FlagSet) (math.Int, error) {
 	amountStr, err := fs.GetString(flagName)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return math.ZeroInt(), err
 	}
 
-	res, ok := sdk.NewIntFromString(amountStr)
+	res, ok := math.NewIntFromString(amountStr)
 	if !ok {
-		return sdk.ZeroInt(), errors.New("invalid share amount")
+		return math.ZeroInt(), errors.New("invalid share amount")
 	}
 	return res, nil
 }
@@ -394,7 +396,7 @@ func NewBuildSwapExactAmountOutMsg(clientCtx client.Context, args []string, fs *
 		return nil, err
 	}
 
-	tokenInMaxAmount, ok := sdk.NewIntFromString(tokenInMaxAmountStr)
+	tokenInMaxAmount, ok := math.NewIntFromString(tokenInMaxAmountStr)
 	if !ok {
 		return nil, errors.New("invalid token in max amount")
 	}

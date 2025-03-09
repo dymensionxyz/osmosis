@@ -1,6 +1,9 @@
 package balancer
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 const (
 	ErrMsgFormatRepeatingPoolAssetsNotAllowed = formatRepeatingPoolAssetsNotAllowedErrFormat
@@ -18,10 +21,10 @@ var (
 	EnsureDenomInPool    = ensureDenomInPool
 )
 
-func (p *Pool) CalcSingleAssetJoin(tokenIn sdk.Coin, swapFee sdk.Dec, tokenInPoolAsset PoolAsset, totalShares sdk.Int) (numShares sdk.Int, err error) {
+func (p *Pool) CalcSingleAssetJoin(tokenIn sdk.Coin, swapFee math.LegacyDec, tokenInPoolAsset PoolAsset, totalShares math.Int) (numShares math.Int, err error) {
 	return p.calcSingleAssetJoin(tokenIn, swapFee, tokenInPoolAsset, totalShares)
 }
 
-func (p *Pool) CalcJoinSingleAssetTokensIn(tokensIn sdk.Coins, totalSharesSoFar sdk.Int, poolAssetsByDenom map[string]PoolAsset, swapFee sdk.Dec) (sdk.Int, sdk.Coins, error) {
+func (p *Pool) CalcJoinSingleAssetTokensIn(tokensIn sdk.Coins, totalSharesSoFar math.Int, poolAssetsByDenom map[string]PoolAsset, swapFee math.LegacyDec) (math.Int, sdk.Coins, error) {
 	return p.calcJoinSingleAssetTokensIn(tokensIn, totalSharesSoFar, poolAssetsByDenom, swapFee)
 }

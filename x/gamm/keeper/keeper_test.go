@@ -25,8 +25,14 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (suite *KeeperTestSuite) SetupTest() {
 	suite.Setup()
-
 	suite.queryClient = types.NewQueryClient(suite.QueryHelper)
+
+	params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
+	params.PoolCreationFee[0].Denom = "adym"
+	suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
+
+	// fund account for pool creation fee
+	suite.FundAcc(suite.TestAccs[0], suite.App.GAMMKeeper.GetParams(suite.Ctx).PoolCreationFee)
 }
 
 func (suite *KeeperTestSuite) prepareCustomBalancerPool(

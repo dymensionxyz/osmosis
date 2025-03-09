@@ -13,11 +13,11 @@ import (
 
 // RandPositiveInt get a rand positive sdk.Int
 func RandPositiveInt(r *rand.Rand, max sdk_math.Int) (sdk_math.Int, error) {
-	if !max.GTE(sdk.OneInt()) {
+	if !max.GTE(sdk_math.OneInt()) {
 		return sdk_math.Int{}, errors.New("max too small")
 	}
 
-	max = max.Sub(sdk.OneInt())
+	max = max.Sub(sdk_math.OneInt())
 
 	return sdk_math.NewIntFromBigInt(new(big.Int).Rand(r, max.BigInt())).Add(sdk_math.OneInt()), nil
 }
@@ -36,12 +36,12 @@ func RandomAmount(r *rand.Rand, max sdk_math.Int) sdk_math.Int {
 		randInt = big.NewInt(0).Rand(r, max.BigInt()) // up to max - 1
 	}
 
-	return sdk.NewIntFromBigInt(randInt)
+	return sdk_math.NewIntFromBigInt(randInt)
 }
 
 // RandomDecAmount generates a random decimal amount
 // Note: The range of RandomDecAmount includes max, and is, in fact, biased to return max as well as 0.
-func RandomDecAmount(r *rand.Rand, max sdk.Dec) sdk.Dec {
+func RandomDecAmount(r *rand.Rand, max sdk_math.LegacyDec) sdk_math.LegacyDec {
 	randInt := big.NewInt(0)
 
 	switch r.Intn(10) {
@@ -53,7 +53,7 @@ func RandomDecAmount(r *rand.Rand, max sdk.Dec) sdk.Dec {
 		randInt = big.NewInt(0).Rand(r, max.BigInt())
 	}
 
-	return sdk.NewDecFromBigIntWithPrec(randInt, sdk.Precision)
+	return sdk_math.LegacyNewDecFromBigIntWithPrec(randInt, sdk_math.LegacyPrecision)
 }
 
 // RandTimestamp generates a random timestamp

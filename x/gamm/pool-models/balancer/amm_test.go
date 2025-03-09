@@ -3,6 +3,7 @@ package balancer_test
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -25,24 +26,24 @@ func TestBalancerPoolParams(t *testing.T) {
 	// errors or succeeds as intended. Furthermore, it checks that
 	// NewPool panics in the error case.
 	tests := []struct {
-		SwapFee   sdk.Dec
-		ExitFee   sdk.Dec
+		SwapFee   math.LegacyDec
+		ExitFee   math.LegacyDec
 		shouldErr bool
 	}{
 		// Should work
 		{defaultSwapFee, defaultExitFee, noErr},
 		// Can't set the swap fee as negative
-		{sdk.NewDecWithPrec(-1, 2), defaultExitFee, wantErr},
+		{math.LegacyNewDecWithPrec(-1, 2), defaultExitFee, wantErr},
 		// Can't set the swap fee as 1
-		{sdk.NewDec(1), defaultExitFee, wantErr},
+		{math.LegacyNewDec(1), defaultExitFee, wantErr},
 		// Can't set the swap fee above 1
-		{sdk.NewDecWithPrec(15, 1), defaultExitFee, wantErr},
+		{math.LegacyNewDecWithPrec(15, 1), defaultExitFee, wantErr},
 		// Can't set the exit fee as negative
-		{defaultSwapFee, sdk.NewDecWithPrec(-1, 2), wantErr},
+		{defaultSwapFee, math.LegacyNewDecWithPrec(-1, 2), wantErr},
 		// Can't set the exit fee as 1
-		{defaultSwapFee, sdk.NewDec(1), wantErr},
+		{defaultSwapFee, math.LegacyNewDec(1), wantErr},
 		// Can't set the exit fee above 1
-		{defaultSwapFee, sdk.NewDecWithPrec(15, 1), wantErr},
+		{defaultSwapFee, math.LegacyNewDecWithPrec(15, 1), wantErr},
 	}
 
 	for i, params := range tests {
@@ -71,19 +72,19 @@ func (suite *KeeperTestSuite) TestEnsureDenomInPool() {
 	}{
 		"all of tokensIn is in pool asset map": {
 			poolAssets:  []balancer.PoolAsset{defaultOsmoPoolAsset, defaultAtomPoolAsset},
-			tokensIn:    sdk.NewCoins(sdk.NewCoin("uatom", sdk.OneInt())),
+			tokensIn:    sdk.NewCoins(sdk.NewCoin("uatom", math.OneInt())),
 			expectPass:  true,
 			expectedErr: nil,
 		},
 		"one of tokensIn is in pool asset map": {
 			poolAssets:  []balancer.PoolAsset{defaultOsmoPoolAsset, defaultAtomPoolAsset},
-			tokensIn:    sdk.NewCoins(sdk.NewCoin("uatom", sdk.OneInt()), sdk.NewCoin("foo", sdk.OneInt())),
+			tokensIn:    sdk.NewCoins(sdk.NewCoin("uatom", math.OneInt()), sdk.NewCoin("foo", math.OneInt())),
 			expectPass:  false,
 			expectedErr: types.ErrDenomNotFoundInPool,
 		},
 		"none of tokensIn is in pool asset map": {
 			poolAssets:  []balancer.PoolAsset{defaultOsmoPoolAsset, defaultAtomPoolAsset},
-			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", sdk.OneInt())),
+			tokensIn:    sdk.NewCoins(sdk.NewCoin("foo", math.OneInt())),
 			expectPass:  false,
 			expectedErr: types.ErrDenomNotFoundInPool,
 		},
