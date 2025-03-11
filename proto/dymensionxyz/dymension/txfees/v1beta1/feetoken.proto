@@ -11,15 +11,11 @@ option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 // Its price in osmo is derived through looking at the provided pool ID.
 // The pool ID must have base denom as one of its assets.
 message FeeToken {
-  option (gogoproto.equal) = true;
-
   string denom = 1 [ (gogoproto.moretags) = "yaml:\"denom\"" ];
 
   reserved 2;
 
-  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute
-      routes = 3 [
-    (gogoproto.moretags) = "yaml:\"routes\"",
-    (gogoproto.nullable) = false
-  ];
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute route =
+      3
+      [ (gogoproto.moretags) = "yaml:\"route\"", (gogoproto.nullable) = false ];
 }
