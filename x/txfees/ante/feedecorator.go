@@ -246,3 +246,27 @@ func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ct
 
 	return nil
 }
+
+// ConvertToBaseToken converts a fee amount in a whitelisted fee token to the base fee token amount.
+func (mfd MempoolFeeDecorator) ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
+	baseDenom, err := mfd.TxFeesKeeper.GetBaseDenom(ctx)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	if inputFee.Denom == baseDenom {
+		return inputFee, nil
+	}
+
+	feeToken, err := mfd.TxFeesKeeper.GetFeeToken(ctx, inputFee.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	spotPrice, err := mfd.TxFeesKeeper.spotPriceCalculator.CalculateSpotPrice(ctx, feeToken.PoolID, baseDenom, feeToken.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(baseDenom, spotPrice.MulInt(inputFee.Amount).RoundInt()), nil
+}

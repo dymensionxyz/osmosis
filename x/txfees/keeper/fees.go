@@ -9,7 +9,6 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -24,8 +23,8 @@ func (k Keeper) ChargeFeesFromPayer(
 	takerFeeCoin sdk.Coin,
 	beneficiary *sdk.AccAddress,
 ) error {
+	// Nothing to charge
 	if takerFeeCoin.IsZero() {
-		// Nothing to charge
 		return nil
 	}
 	// Charge the fee from the payer to x/txfees
@@ -52,8 +51,8 @@ func (k Keeper) ChargeFees(
 	beneficiary *sdk.AccAddress,
 	payer string, // optional, only used for the event
 ) error {
+	// Nothing to charge
 	if takerFee.IsZero() {
-		// Nothing to charge
 		return nil
 	}
 
@@ -151,16 +150,9 @@ func (k Keeper) swapFeeToBaseDenom(
 	}
 
 	// Swap the coin to base denom
-	var (
-		tokenOutAmount = math.ZeroInt() // Token amount in base denom
-		route          = []poolmanagertypes.SwapAmountInRoute{{
-			PoolId:        feetoken.PoolID,
-			TokenOutDenom: baseDenom,
-		}}
-	)
-
+	var tokenOutAmount math.Int
 	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
-		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, math.ZeroInt())
+		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, feetoken.Route, takerFeeCoin, math.ZeroInt())
 		return err
 	})
 	if err != nil {

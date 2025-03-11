@@ -25,8 +25,6 @@ type Keeper struct {
 	communityPool       types.CommunityPoolKeeper
 }
 
-var _ types.TxFeesKeeper = (*Keeper)(nil)
-
 func NewKeeper(
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
@@ -57,7 +55,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) GetFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
+func (k Keeper) getFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
 	store := ctx.KVStore(k.storeKey)
 	return prefix.NewStore(store, types.FeeTokensStorePrefix)
 }
