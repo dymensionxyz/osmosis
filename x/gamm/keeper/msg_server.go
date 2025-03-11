@@ -40,7 +40,7 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 	// validate the pool contains asset which is whitelisted
 	found := false
 	for _, asset := range msg.PoolAssets {
-		if ok, _ := params.PoolCreationFee.Find(asset.Token.Denom); ok {
+		if contains(params.AllowedPoolCreationDenoms, asset.Token.Denom) {
 			found = true
 			break
 		}
