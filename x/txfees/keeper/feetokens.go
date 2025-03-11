@@ -23,6 +23,15 @@ func (k Keeper) GetBaseDenom(ctx sdk.Context) (denom string, err error) {
 	return string(bz), nil
 }
 
+// MustGetBaseDenom returns the baseDenom or panics
+func (k Keeper) MustGetBaseDenom(ctx sdk.Context) string {
+	denom, err := k.GetBaseDenom(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return denom
+}
+
 // SetBaseDenom sets the base fee denom for the chain. Should only be used once.
 func (k Keeper) SetBaseDenom(ctx sdk.Context, denom string) error {
 	store := ctx.KVStore(k.storeKey)
