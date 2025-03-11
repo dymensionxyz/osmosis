@@ -119,7 +119,7 @@ func (mfd MempoolFeeDecorator) IsSufficientFee(ctx sdk.Context, minBaseGasPrice 
 	glDec := math.LegacyNewDec(int64(gasRequested))
 	requiredBaseFee := sdk.NewCoin(baseDenom, minBaseGasPrice.Mul(glDec).Ceil().RoundInt())
 
-	convertedFee, err := mfd.TxFeesKeeper.ConvertToBaseToken(ctx, feeCoin)
+	convertedFee, err := mfd.TxFeesKeeper.CalcFeeInBaseDenom(ctx, feeCoin)
 	if err != nil {
 		return err
 	}

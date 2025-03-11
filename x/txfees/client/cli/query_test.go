@@ -31,12 +31,12 @@ func (s *QueryTestSuite) SetupSuite() {
 		sdk.NewInt64Coin("uosmo", 1000000),
 		sdk.NewInt64Coin(basedenom, 120000000),
 	}
-	s.PrepareBalancerPoolWithCoins(poolAssets...)
+	id := s.PrepareBalancerPoolWithCoins(poolAssets...)
 	err = s.App.TxFeesKeeper.SetFeeToken(s.Ctx, types.FeeToken{
 		Denom: "uosmo",
 		Route: []pooltypes.SwapAmountInRoute{
 			{
-				PoolId:        1,
+				PoolId:        id,
 				TokenOutDenom: basedenom,
 			},
 		},
@@ -60,10 +60,16 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 			&types.QueryBaseDenomResponse{},
 		},
 		{
-			"Query poolID by denom",
-			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomPoolId",
-			&types.QueryDenomPoolIdRequest{Denom: "uosmo"},
-			&types.QueryDenomPoolIdResponse{},
+			"Query fee token by denom",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/FeeToken",
+			&types.QueryFeeTokenRequest{Denom: "uosmo"},
+			&types.QueryFeeTokenResponse{},
+		},
+		{
+			"Query denom route",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomRoute",
+			&types.QueryDenomRouteRequest{Denom: "uosmo"},
+			&types.QueryDenomRouteResponse{},
 		},
 		{
 			"Query fee tokens",
@@ -77,9 +83,10 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		tc := tc
 		s.Run(tc.name, func() {
 			s.SetupSuite()
+
 			err := s.QueryHelper.Invoke(gocontext.Background(), tc.query, tc.input, tc.output)
 			s.Require().NoError(err)
-			// s.StateNotAltered()
+			// s.StateNotAltered() // FIXME:
 		})
 	}
 }

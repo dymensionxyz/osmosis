@@ -97,7 +97,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 			},
 			{
 				name:         fmt.Sprintf("works with valid converted fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1000)),
+				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1001)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
@@ -156,8 +156,8 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 
 		// setup uion with 1:1 fee
 		suite.PrepareBalancerPoolWithCoins(
-			sdk.NewInt64Coin(sdk.DefaultBondDenom, 500),
-			sdk.NewInt64Coin(uion, 500),
+			sdk.NewInt64Coin(sdk.DefaultBondDenom, 50_000_000),
+			sdk.NewInt64Coin(uion, 50_000_000),
 		)
 
 		if tc.minGasPrices == nil {
