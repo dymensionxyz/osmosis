@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
+	pooltypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -31,7 +32,15 @@ func (s *QueryTestSuite) SetupSuite() {
 		sdk.NewInt64Coin(basedenom, 120000000),
 	}
 	s.PrepareBalancerPoolWithCoins(poolAssets...)
-	err = s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})
+	err = s.App.TxFeesKeeper.SetFeeToken(s.Ctx, types.FeeToken{
+		Denom: "uosmo",
+		Route: []pooltypes.SwapAmountInRoute{
+			{
+				PoolId:        1,
+				TokenOutDenom: basedenom,
+			},
+		},
+	})
 	s.Require().NoError(err)
 
 	s.Commit()
@@ -55,12 +64,6 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomPoolId",
 			&types.QueryDenomPoolIdRequest{Denom: "uosmo"},
 			&types.QueryDenomPoolIdResponse{},
-		},
-		{
-			"Query spot price by denom",
-			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomSpotPrice",
-			&types.QueryDenomSpotPriceRequest{Denom: "uosmo"},
-			&types.QueryDenomSpotPriceResponse{},
 		},
 		{
 			"Query fee tokens",

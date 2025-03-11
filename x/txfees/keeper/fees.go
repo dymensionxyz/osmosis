@@ -136,7 +136,6 @@ func (k Keeper) swapFeeToBaseDenom(
 	if err != nil {
 		return nil, nil, fmt.Errorf("get base denom: %w", err)
 	}
-	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 
 	// The fee is already in the base denom
 	if takerFeeCoin.Denom == baseDenom {
@@ -149,8 +148,10 @@ func (k Keeper) swapFeeToBaseDenom(
 		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
-	// Swap the coin to base denom
 	var tokenOutAmount math.Int
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
+
+	// Swap the coin to base denom
 	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
 		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, feetoken.Route, takerFeeCoin, math.ZeroInt())
 		return err
@@ -178,4 +179,25 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
 			break
 		}
 	}
+}
+
+// ConvertToBaseToken converts a fee amount in a whitelisted fee token to the base fee token amount.
+func (k Keeper) ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
+	baseDenom := k.MustGetBaseDenom(ctx)
+
+	if inputFee.Denom == baseDenom {
+		return inputFee, nil
+	}
+
+	feeToken, err := k.GetFeeToken(ctx, inputFee.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, feeToken.Route, inputFee)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(baseDenom, tokenOut), nil
 }

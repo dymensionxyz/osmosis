@@ -25,6 +25,11 @@ type PoolManager interface {
 		routes []poolmanagertypes.SwapAmountInRoute,
 		tokenIn sdk.Coin,
 		tokenOutMinAmount math.Int) (tokenOutAmount math.Int, err error)
+	MultihopEstimateOutGivenExactAmountIn(
+		ctx sdk.Context,
+		routes []poolmanagertypes.SwapAmountInRoute,
+		tokenIn sdk.Coin,
+	) (tokenOutAmount math.Int, err error)
 }
 
 type EpochKeeper interface {

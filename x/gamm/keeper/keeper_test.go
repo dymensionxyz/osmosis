@@ -29,6 +29,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 
 	params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
 	params.PoolCreationFee[0].Denom = "adym"
+	params.AllowedPoolCreationDenoms = []string{"adym"}
 	suite.App.GAMMKeeper.SetParams(suite.Ctx, params)
 
 	// fund account for pool creation fee
