@@ -105,7 +105,7 @@ func (h Hooks) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumbe
 // It checks if the base denom is included in the newly created pool.
 // If so, it adds the non-native denom as a fee token.
 func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId uint64) {
-	denoms, err := h.k.spotPriceCalculator.GetPoolDenoms(ctx, poolId)
+	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)
 	if err != nil {
 		h.k.Logger(ctx).Error("failed to get pool denoms", "error", err)
 		return
@@ -129,7 +129,7 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		feeToken, err := h.k.GetFeeToken(ctx, newDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
-		return
+			return
 		}
 		route = feeToken.Route
 		route = append(route, pooltypes.SwapAmountInRoute{
