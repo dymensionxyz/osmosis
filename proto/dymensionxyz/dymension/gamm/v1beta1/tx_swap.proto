@@ -8,19 +8,18 @@ import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 
-
 // ===================== MsgSwapExactAmountIn
 message MsgSwapExactAmountIn {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
-  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute routes = 2
-      [ (gogoproto.nullable) = false ];
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute routes =
+      2 [ (gogoproto.nullable) = false ];
   cosmos.base.v1beta1.Coin token_in = 3 [
     (gogoproto.moretags) = "yaml:\"token_in\"",
     (gogoproto.nullable) = false
   ];
   string token_out_min_amount = 4 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_out_min_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -29,7 +28,7 @@ message MsgSwapExactAmountIn {
 message MsgSwapExactAmountInResponse {
   string token_out_amount = 1 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_out_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -37,11 +36,11 @@ message MsgSwapExactAmountInResponse {
 
 message MsgSwapExactAmountOut {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
-  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute routes = 2
-      [ (gogoproto.nullable) = false ];
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute
+      routes = 2 [ (gogoproto.nullable) = false ];
   string token_in_max_amount = 3 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_in_max_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -54,7 +53,7 @@ message MsgSwapExactAmountOut {
 message MsgSwapExactAmountOutResponse {
   string token_in_amount = 1 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_in_amount\"",
     (gogoproto.nullable) = false
   ];

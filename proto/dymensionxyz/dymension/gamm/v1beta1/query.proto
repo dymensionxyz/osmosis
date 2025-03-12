@@ -16,7 +16,8 @@ option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 service Query {
   // Params returns gamm module params.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/params";
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/gamm/v1beta1/params";
   }
 
   rpc Pools(QueryPoolsRequest) returns (QueryPoolsResponse) {
@@ -26,26 +27,29 @@ service Query {
   // Deprecated: please use the alternative in x/poolmanager
   rpc NumPools(QueryNumPoolsRequest) returns (QueryNumPoolsResponse) {
     option deprecated = true;
-    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/num_pools";
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/gamm/v1beta1/num_pools";
   }
 
   rpc TotalLiquidity(QueryTotalLiquidityRequest)
       returns (QueryTotalLiquidityResponse) {
-    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/total_liquidity";
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/gamm/v1beta1/total_liquidity";
   }
 
   // PoolsWithFilter allows you to query specific pools with requested
   // parameters
   rpc PoolsWithFilter(QueryPoolsWithFilterRequest)
       returns (QueryPoolsWithFilterResponse) {
-    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/filtered_pools";
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/gamm/v1beta1/filtered_pools";
   }
 
   // Per Pool gRPC Endpoints
   rpc Pool(QueryPoolRequest) returns (QueryPoolResponse) {
-    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}";
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}";
   }
-
 
   // Simulates joining pool without a swap. Returns the amount of shares you'd
   // get and tokens needed to provide
@@ -54,13 +58,13 @@ service Query {
 
   rpc CalcJoinPoolShares(QueryCalcJoinPoolSharesRequest)
       returns (QueryCalcJoinPoolSharesResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/join_swap_exact_in";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools/"
+                                   "{pool_id}/join_swap_exact_in";
   }
   rpc CalcExitPoolCoinsFromShares(QueryCalcExitPoolCoinsFromSharesRequest)
       returns (QueryCalcExitPoolCoinsFromSharesResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/exit_swap_share_amount_in";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools/"
+                                   "{pool_id}/exit_swap_share_amount_in";
   }
 
   rpc PoolParams(QueryPoolParamsRequest) returns (QueryPoolParamsResponse) {
@@ -70,8 +74,8 @@ service Query {
 
   rpc TotalPoolLiquidity(QueryTotalPoolLiquidityRequest)
       returns (QueryTotalPoolLiquidityResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/gamm/v1beta1/pools/{pool_id}/total_pool_liquidity";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/pools/"
+                                   "{pool_id}/total_pool_liquidity";
   }
 
   rpc TotalShares(QueryTotalSharesRequest) returns (QueryTotalSharesResponse) {
@@ -89,14 +93,14 @@ service Query {
 
   rpc EstimateSwapExactAmountIn(QuerySwapExactAmountInRequest)
       returns (QuerySwapExactAmountInResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_in";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/"
+                                   "{pool_id}/estimate/swap_exact_amount_in";
   }
 
   rpc EstimateSwapExactAmountOut(QuerySwapExactAmountOutRequest)
       returns (QuerySwapExactAmountOutResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_out";
+    option (google.api.http).get = "/dymensionxyz/dymension/gamm/v1beta1/"
+                                   "{pool_id}/estimate/swap_exact_amount_out";
   }
 }
 
@@ -134,7 +138,6 @@ message QueryNumPoolsResponse {
   uint64 num_pools = 1 [ (gogoproto.moretags) = "yaml:\"num_pools\"" ];
 }
 
-
 //=============================== CalcJoinPoolShares
 message QueryCalcJoinPoolSharesRequest {
   uint64 pool_id = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
@@ -146,7 +149,7 @@ message QueryCalcJoinPoolSharesRequest {
 message QueryCalcJoinPoolSharesResponse {
   string share_out_amount = 1 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"share_out_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -161,7 +164,7 @@ message QueryCalcExitPoolCoinsFromSharesRequest {
   uint64 pool_id = 1;
   string share_in_amount = 2 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
 }
@@ -217,7 +220,7 @@ message QueryCalcJoinPoolNoSwapSharesResponse {
   ];
   string shares_out = 2 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable) = false
   ];
 }
@@ -264,16 +267,17 @@ message QuerySwapExactAmountInRequest {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
   uint64 pool_id = 2 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
   string token_in = 3 [ (gogoproto.moretags) = "yaml:\"token_in\"" ];
-  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute routes = 4 [
-    (gogoproto.moretags) = "yaml:\"routes\"",
-    (gogoproto.nullable) = false
-  ];
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute routes =
+      4 [
+        (gogoproto.moretags) = "yaml:\"routes\"",
+        (gogoproto.nullable) = false
+      ];
 }
 
 message QuerySwapExactAmountInResponse {
   string token_out_amount = 1 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_out_amount\"",
     (gogoproto.nullable) = false
   ];
@@ -283,7 +287,8 @@ message QuerySwapExactAmountInResponse {
 message QuerySwapExactAmountOutRequest {
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
   uint64 pool_id = 2 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
-  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute routes = 3 [
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountOutRoute
+      routes = 3 [
     (gogoproto.moretags) = "yaml:\"routes\"",
     (gogoproto.nullable) = false
   ];
@@ -293,7 +298,7 @@ message QuerySwapExactAmountOutRequest {
 message QuerySwapExactAmountOutResponse {
   string token_in_amount = 1 [
     (cosmos_proto.scalar) = "cosmos.Int",
-(gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.moretags) = "yaml:\"token_in_amount\"",
     (gogoproto.nullable) = false
   ];

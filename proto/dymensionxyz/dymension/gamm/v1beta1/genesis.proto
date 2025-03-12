@@ -8,11 +8,10 @@ import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/gamm/types";
 
-
 // GenesisState defines the gamm module's genesis state.
 message GenesisState {
   repeated google.protobuf.Any pools = 1
-  [ (cosmos_proto.accepts_interface) = "PoolI" ];
+      [ (cosmos_proto.accepts_interface) = "PoolI" ];
   // will be renamed to next_pool_id in an upcoming version
   uint64 next_pool_number = 2;
   Params params = 3 [ (gogoproto.nullable) = false ];
@@ -34,7 +33,7 @@ message Params {
 
   string taker_fee = 4 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.moretags) = "yaml:\"taker_fee\"",
     (gogoproto.nullable) = false
   ];
@@ -43,13 +42,13 @@ message Params {
 message GlobalFees {
   string swap_fee = 1 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.moretags) = "yaml:\"swap_fee\"",
     (gogoproto.nullable) = false
   ];
   string exit_fee = 2 [
     (cosmos_proto.scalar) = "cosmos.Dec",
-(gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.moretags) = "yaml:\"exit_fee\"",
     (gogoproto.nullable) = false
   ];
