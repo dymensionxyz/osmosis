@@ -69,4 +69,48 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 	}
 }
 
-//TODO: pool hooks
+// TestPoolCreationHooks validates fee token registration through sequential pool creation
+func (suite *KeeperTestSuite) TestPoolCreationHooks() {
+	baseDenom := suite.App.TxFeesKeeper.MustGetBaseDenom(suite.Ctx)
+
+	gammParams := suite.App.GAMMKeeper.GetParams(suite.Ctx)
+	gammParams.AllowedPoolCreationDenoms = []string{baseDenom, "tokenBase2"}
+	suite.App.GAMMKeeper.SetParams(suite.Ctx, gammParams)
+
+	// Initial pool: base <-> tokenA
+	pool1 := suite.PrepareBalancerPoolWithCoins(
+		sdk.NewCoin(baseDenom, math.NewInt(1e18)),
+		sdk.NewCoin("tokenA", math.NewInt(1e18)),
+	)
+
+	// Verify tokenA registration
+	feeTokenA, err := suite.App.TxFeesKeeper.GetFeeToken(suite.Ctx, "tokenA")
+	suite.Require().NoError(err)
+	suite.Require().Equal(pool1, feeTokenA.Route[0].PoolId)
+
+	// Second pool: base <-> tokenBase2
+	pool2 := suite.PrepareBalancerPoolWithCoins(
+		sdk.NewCoin(baseDenom, math.NewInt(1e18)),
+		sdk.NewCoin("tokenBase2", math.NewInt(1e18)),
+	)
+
+	// Verify tokenBase2 registration
+	feeTokenBase2, err := suite.App.TxFeesKeeper.GetFeeToken(suite.Ctx, "tokenBase2")
+	suite.Require().NoError(err)
+	suite.Require().Equal(pool2, feeTokenBase2.Route[0].PoolId)
+
+	// Third pool: tokenBase2 <-> tokenB
+	pool3 := suite.PrepareBalancerPoolWithCoins(
+		sdk.NewCoin("tokenBase2", math.NewInt(1e18)),
+		sdk.NewCoin("tokenB", math.NewInt(1e18)),
+	)
+
+	// Verify tokenB has composite route
+	feeTokenB, err := suite.App.TxFeesKeeper.GetFeeToken(suite.Ctx, "tokenB")
+	suite.Require().NoError(err)
+	suite.Require().Len(feeTokenB.Route, 2)
+	suite.Require().Equal(pool3, feeTokenB.Route[0].PoolId)
+	suite.Require().Equal(pool2, feeTokenB.Route[1].PoolId)
+
+	// FIXME: create tokenB <-> basedenom and assert it updates to this route
+}

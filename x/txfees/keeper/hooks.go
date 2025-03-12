@@ -126,16 +126,16 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			TokenOutDenom: registeredDenom,
 		})
 	} else {
-		feeToken, err := h.k.GetFeeToken(ctx, newDenom)
+		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
 			return
 		}
-		route = feeToken.Route
 		route = append(route, pooltypes.SwapAmountInRoute{
 			PoolId:        poolId,
 			TokenOutDenom: registeredDenom,
 		})
+		route = append(route, feeToken.Route...)
 	}
 
 	feeToken := types.FeeToken{

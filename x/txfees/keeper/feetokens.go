@@ -1,11 +1,12 @@
 package keeper
 
 import (
+	"fmt"
+
 	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 
-	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -50,7 +51,7 @@ func (k Keeper) HasFeeToken(ctx sdk.Context, denom string) bool {
 func (k Keeper) GetFeeToken(ctx sdk.Context, denom string) (types.FeeToken, error) {
 	prefixStore := k.getFeeTokensStore(ctx)
 	if !prefixStore.Has([]byte(denom)) {
-		return types.FeeToken{}, sdkerrors.Wrapf(types.ErrInvalidFeeToken, "%s", denom)
+		return types.FeeToken{}, fmt.Errorf("denom not found (%s)", denom)
 	}
 	bz := prefixStore.Get([]byte(denom))
 
