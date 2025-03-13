@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"errors"
 	"fmt"
 
 	"cosmossdk.io/math"
@@ -105,27 +104,70 @@ func (h Hooks) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumbe
 // It checks if the base denom is included in the newly created pool.
 // If so, it adds the non-native denom as a fee token.
 func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId uint64) {
+	var feeToken types.FeeToken
+
 	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)
 	if err != nil {
 		h.k.Logger(ctx).Error("failed to get pool denoms", "error", err)
 		return
 	}
 
-	newDenom, registeredDenom, err := h.GetNotRegisteredDenom(ctx, denoms)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to get non-registered denom", "error", err)
+	if len(denoms) != 2 {
+		h.k.Logger(ctx).Error("expected exactly 2 pool denoms", "denoms", denoms)
 		return
 	}
 
-	// get the swapRoute for the 2nd pool asset
-	var route []pooltypes.SwapAmountInRoute
+	basedenom := h.k.MustGetBaseDenom(ctx)
 
-	if registeredDenom == h.k.MustGetBaseDenom(ctx) {
-		route = append(route, pooltypes.SwapAmountInRoute{
-			PoolId:        poolId,
-			TokenOutDenom: registeredDenom,
-		})
+	// check and handle the case where one of the denoms is basedenom
+	// it will override the an existing route if it exists (as it must be a longer path)
+	if denoms[0] == basedenom || denoms[1] == basedenom {
+		var newDenom string
+
+		if denoms[0] == basedenom {
+			newDenom = denoms[1]
+		} else if denoms[1] == basedenom {
+			newDenom = denoms[0]
+		}
+
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: []pooltypes.SwapAmountInRoute{
+				{
+					PoolId:        poolId,
+					TokenOutDenom: basedenom,
+				},
+			},
+		}
+
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
+		return
 	} else {
+		// no basedenom in the pool, register new token with multi-hop route
+		d1Reg := h.k.HasFeeToken(ctx, denoms[0])
+		d2Reg := h.k.HasFeeToken(ctx, denoms[1])
+
+		var newDenom, registeredDenom string
+		switch {
+		case !d1Reg && !d2Reg:
+			h.k.Logger(ctx).Error("no route to basedenom exist")
+			return
+		case d1Reg && d2Reg:
+			h.k.Logger(ctx).Error("both denoms are already registered")
+			return
+		case d1Reg:
+			newDenom, registeredDenom = denoms[1], denoms[0]
+		default: // d2Reg
+			newDenom, registeredDenom = denoms[0], denoms[1]
+		}
+
+		// get the swapRoute for the 2nd pool asset
+		var route []pooltypes.SwapAmountInRoute
+
 		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
@@ -136,20 +178,17 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			TokenOutDenom: registeredDenom,
 		})
 		route = append(route, feeToken.Route...)
-	}
 
-	feeToken := types.FeeToken{
-		Denom: newDenom,
-		Route: route,
-	}
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: route,
+		}
 
-	// validate the route between feeToken and baseDenom
-	// FIXME:
-
-	err = h.k.SetFeeToken(ctx, feeToken)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-		return
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
 	}
 }
 
@@ -163,39 +202,4 @@ func (h Hooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint
 
 // AfterSwap hook is a noop.
 func (h Hooks) AfterSwap(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) {
-}
-
-func contains(strarr []string, str string) bool {
-	for _, v := range strarr {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
-}
-
-// GetNotRegisteredDenom returns the non-registered denom in the pool that is neither base denom nor registered fee token
-func (h Hooks) GetNotRegisteredDenom(ctx sdk.Context, denoms []string) (string, string, error) {
-	if len(denoms) != 2 {
-		return "", "", fmt.Errorf("expected exactly 2 pool denoms, got %d: %v", len(denoms), denoms)
-	}
-
-	d1Reg := h.k.IsRegisteredDenom(ctx, denoms[0])
-	d2Reg := h.k.IsRegisteredDenom(ctx, denoms[1])
-
-	switch {
-	case !d1Reg && !d2Reg:
-		return "", "", errors.New("both denoms are unregistered")
-	case d1Reg && d2Reg:
-		return "", "", errors.New("both denoms are already registered")
-	case d1Reg:
-		return denoms[1], denoms[0], nil
-	default: // d2Reg
-		return denoms[0], denoms[1], nil
-	}
-}
-
-func (k Keeper) IsRegisteredDenom(ctx sdk.Context, denom string) bool {
-	return k.MustGetBaseDenom(ctx) == denom || k.HasFeeToken(ctx, denom)
 }

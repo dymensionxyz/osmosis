@@ -112,5 +112,15 @@ func (suite *KeeperTestSuite) TestPoolCreationHooks() {
 	suite.Require().Equal(pool3, feeTokenB.Route[0].PoolId)
 	suite.Require().Equal(pool2, feeTokenB.Route[1].PoolId)
 
-	// FIXME: create tokenB <-> basedenom and assert it updates to this route
+	// Fourth pool: tokenB <-> basedenom
+	pool4 := suite.PrepareBalancerPoolWithCoins(
+		sdk.NewCoin("tokenB", math.NewInt(1e18)),
+		sdk.NewCoin(baseDenom, math.NewInt(1e18)),
+	)
+
+	// Verify tokenB has updated route
+	feeTokenB, err = suite.App.TxFeesKeeper.GetFeeToken(suite.Ctx, "tokenB")
+	suite.Require().NoError(err)
+	suite.Require().Len(feeTokenB.Route, 1)
+	suite.Require().Equal(pool4, feeTokenB.Route[0].PoolId)
 }
