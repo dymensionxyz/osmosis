@@ -36,17 +36,17 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("foo", math.NewInt(100)),
 			beneficiary:       &accs[1],
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(50))), // 50 = 99 - 49 (99 since 0.01% is the default swap taker fee)
-			expBeneficiaryRev: sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(49))), // 49 = 99 / 2
+			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(50))),
+			expBeneficiaryRev: sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(50))),
 			expCommunityRev:   nil,
 		},
-		"beneficiary, non fee token": {
+		"beneficiary, two hop fee token": {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("baz", math.NewInt(100)),
 			beneficiary:       &accs[1],
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
-			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(50))),
+			expBeneficiaryRev: sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(50))),
+			expCommunityRev:   nil,
 		},
 		"no beneficiary, base denom": {
 			payer:             accs[0],
@@ -60,17 +60,17 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("foo", math.NewInt(100)),
 			beneficiary:       nil,
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(99))), // 0.01% is the default fee
+			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(100))),
 			expBeneficiaryRev: nil,
 			expCommunityRev:   nil,
 		},
-		"no beneficiary, non fee token": {
+		"no beneficiary, multi hop fee token": {
 			payer:             accs[0],
 			takerFee:          sdk.NewCoin("baz", math.NewInt(100)),
 			beneficiary:       nil,
-			expTakerFee:       sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100))),
+			expTakerFee:       sdk.NewCoins(sdk.NewCoin("adym", math.NewInt(100))),
 			expBeneficiaryRev: nil,
-			expCommunityRev:   sdk.NewDecCoinsFromCoins(sdk.NewCoins(sdk.NewCoin("baz", math.NewInt(100)))...),
+			expCommunityRev:   nil,
 		},
 	}
 
@@ -93,16 +93,16 @@ func (s *KeeperTestSuite) TestChargeFees() {
 			err := s.App.TxFeesKeeper.SetBaseDenom(s.Ctx, "adym")
 			s.Require().NoError(err)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(1e18)), sdk.NewCoin("foo", math.NewInt(1e18))}
 			s.PrepareBalancerPoolWithCoins(pool1coins...)
 
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(1e18)), sdk.NewCoin("foo", math.NewInt(1e18))}
 			s.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(1e18)), sdk.NewCoin("adym", math.NewInt(1e18))}
 			s.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(1e18)), sdk.NewCoin("baz", math.NewInt(1e18))}
 			s.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			initialTxFeesBalance := s.App.BankKeeper.GetAllBalances(s.Ctx, s.App.AccountKeeper.GetModuleAddress(types.ModuleName))

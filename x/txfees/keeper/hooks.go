@@ -151,8 +151,6 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
 		return
 	}
-
-	return
 }
 
 // AfterJoinPool hook is a noop.
@@ -200,13 +198,4 @@ func (h Hooks) GetNotRegisteredDenom(ctx sdk.Context, denoms []string) (string, 
 
 func (k Keeper) IsRegisteredDenom(ctx sdk.Context, denom string) bool {
 	return k.MustGetBaseDenom(ctx) == denom || k.HasFeeToken(ctx, denom)
-}
-
-// getOtherDenom returns the other denom in the pool that is not the base denom
-// assumes that the pool has only 2 denoms
-func getOtherDenom(denoms []string, idx uint64) string {
-	if idx == 0 {
-		return denoms[1]
-	}
-	return denoms[0]
 }
