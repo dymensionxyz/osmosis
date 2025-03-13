@@ -98,7 +98,7 @@ func (k Keeper) SetFeeTokens(ctx sdk.Context, feetokens []types.FeeToken) error 
 
 // SetFeeToken sets a new fee token record for a specific denom.
 // PoolID is just the pool to swap rate between alt fee token and native fee token.
-// If the feeToken pool ID is 0, deletes the fee Token entry.
+// If the len of the feeToken route is 0, deletes the fee Token entry.
 func (k Keeper) SetFeeToken(ctx sdk.Context, feeToken types.FeeToken) error {
 	prefixStore := k.getFeeTokensStore(ctx)
 

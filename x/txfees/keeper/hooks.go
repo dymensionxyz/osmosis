@@ -128,7 +128,7 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 
 		if denoms[0] == basedenom {
 			newDenom = denoms[1]
-		} else if denoms[1] == basedenom {
+		} else {
 			newDenom = denoms[0]
 		}
 
@@ -159,7 +159,7 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			h.k.Logger(ctx).Error("no route to basedenom exist")
 			return
 		case d1Reg && d2Reg:
-			h.k.Logger(ctx).Error("both denoms are already registered")
+			h.k.Logger(ctx).Debug("both denoms are already registered")
 			return
 		case d1Reg:
 			newDenom, registeredDenom = denoms[1], denoms[0]
