@@ -35,6 +35,7 @@ func (q Querier) FeeTokens(ctx context.Context, _ *types.QueryFeeTokensRequest) 
 
 	return &types.QueryFeeTokensResponse{FeeTokens: feeTokens}, nil
 }
+
 func (k Keeper) DenomRoute(goCtx context.Context, req *types.QueryDenomRouteRequest) (*types.QueryDenomRouteResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -47,6 +48,7 @@ func (k Keeper) DenomRoute(goCtx context.Context, req *types.QueryDenomRouteRequ
 		Route: feeToken.Route,
 	}, nil
 }
+
 func (k Keeper) FeeToken(goCtx context.Context, req *types.QueryFeeTokenRequest) (*types.QueryFeeTokenResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -59,6 +61,7 @@ func (k Keeper) FeeToken(goCtx context.Context, req *types.QueryFeeTokenRequest)
 		FeeToken: feeToken,
 	}, nil
 }
+
 func (q Querier) BaseDenom(ctx context.Context, _ *types.QueryBaseDenomRequest) (*types.QueryBaseDenomResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 

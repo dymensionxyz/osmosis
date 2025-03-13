@@ -53,7 +53,7 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
-	//Skip on deliverTx, as in Cosmos-SDK
+	// Skip on deliverTx, as in Cosmos-SDK
 	// (https://github.com/cosmos/cosmos-sdk/blob/60e6274d0fdaeb86da4521f7ee8b8b2178a845b5/x/auth/ante/validator_tx_fee.go#L24)
 	if !ctx.IsCheckTx() && !ctx.IsReCheckTx() {
 		return next(ctx, tx, simulate)

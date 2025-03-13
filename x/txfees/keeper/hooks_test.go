@@ -63,7 +63,7 @@ func (suite *KeeperTestSuite) TestTxFeesAfterEpochEnd() {
 		balances = suite.App.BankKeeper.GetAllBalances(suite.Ctx, moduleAddrFee)
 		totalSupplyAfter := suite.App.BankKeeper.GetSupply(suite.Ctx, tc.burnedDenom).Amount
 
-		//Check for token burn
+		// Check for token burn
 		suite.Assert().True(balances.IsZero(), tc.name)
 		suite.Require().True(totalSupplyAfter.LT(totalSupplyBefore), tc.name)
 	}

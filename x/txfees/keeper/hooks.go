@@ -18,8 +18,10 @@ type Hooks struct {
 	k Keeper
 }
 
-var _ epochstypes.EpochHooks = Hooks{}
-var _ gammtypes.GammHooks = Hooks{}
+var (
+	_ epochstypes.EpochHooks = Hooks{}
+	_ gammtypes.GammHooks    = Hooks{}
+)
 
 // Return the wrapper struct
 func (k Keeper) Hooks() Hooks {
@@ -42,10 +44,10 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 	baseDenom, _ := k.GetBaseDenom(ctx)
 
-	//get all balances of this module
+	// get all balances of this module
 	balances := k.bankKeeper.GetAllBalances(ctx, moduleAddr)
 
-	//swap all to dym
+	// swap all to dym
 	for _, coinBalance := range balances {
 		if coinBalance.Denom == baseDenom {
 			continue
