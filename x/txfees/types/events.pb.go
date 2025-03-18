@@ -27,7 +27,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type EventChargeFee struct {
 	Payer    string `protobuf:"bytes,1,opt,name=payer,proto3" json:"payer,omitempty"`
 	TakerFee string `protobuf:"bytes,2,opt,name=taker_fee,json=takerFee,proto3" json:"taker_fee,omitempty"`
-	// Beneficiary is the address that will receive the fee. Optional: may be empty.
+	// Beneficiary is the address that will receive the fee. Optional: may be
+	// empty.
 	Beneficiary        string `protobuf:"bytes,3,opt,name=beneficiary,proto3" json:"beneficiary,omitempty"`
 	BeneficiaryRevenue string `protobuf:"bytes,4,opt,name=beneficiary_revenue,json=beneficiaryRevenue,proto3" json:"beneficiary_revenue,omitempty"`
 	CommunityPool      bool   `protobuf:"varint,5,opt,name=community_pool,json=communityPool,proto3" json:"community_pool,omitempty"`

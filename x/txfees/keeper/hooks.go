@@ -9,7 +9,7 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	epochstypes "github.com/osmosis-labs/osmosis/v15/x/epochs/types"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
+	pooltypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -18,8 +18,10 @@ type Hooks struct {
 	k Keeper
 }
 
-var _ epochstypes.EpochHooks = Hooks{}
-var _ gammtypes.GammHooks = Hooks{}
+var (
+	_ epochstypes.EpochHooks = Hooks{}
+	_ gammtypes.GammHooks    = Hooks{}
+)
 
 // Return the wrapper struct
 func (k Keeper) Hooks() Hooks {
@@ -42,10 +44,10 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 	baseDenom, _ := k.GetBaseDenom(ctx)
 
-	//get all balances of this module
+	// get all balances of this module
 	balances := k.bankKeeper.GetAllBalances(ctx, moduleAddr)
 
-	//swap all to dym
+	// swap all to dym
 	for _, coinBalance := range balances {
 		if coinBalance.Denom == baseDenom {
 			continue
@@ -65,14 +67,8 @@ func (k Keeper) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumb
 		}
 
 		// Do the swap of this fee token denom to base denom.
-		route := []poolmanagertypes.SwapAmountInRoute{
-			{
-				PoolId:        feetoken.PoolID,
-				TokenOutDenom: baseDenom,
-			},
-		}
 		wrappedRouteExactAmountInFn := func(ctx sdk.Context) error {
-			_, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, coinBalance, math.ZeroInt())
+			_, err := k.poolManager.RouteExactAmountIn(ctx, moduleAddr, feetoken.Route, coinBalance, math.ZeroInt())
 			return err
 		}
 		err = osmoutils.ApplyFuncIfNoError(ctx, wrappedRouteExactAmountInFn)
@@ -106,52 +102,95 @@ func (h Hooks) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumbe
 /* -------------------------------------------------------------------------- */
 /*                                 pool hooks                                 */
 /* -------------------------------------------------------------------------- */
-
-// AfterPoolCreated creates a gauge for each pool’s lockable duration.
+// AfterPoolCreated is called after CreatePool.
+// It checks if the base denom is included in the newly created pool.
+// If so, it adds the non-native denom as a fee token.
 func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId uint64) {
-	//check if base denom included in the pool
-	baseDenom, err := h.k.GetBaseDenom(ctx)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to get base denom", "error", err)
-		return
-	}
-	denoms, err := h.k.spotPriceCalculator.GetPoolDenoms(ctx, poolId)
+	var feeToken types.FeeToken
+
+	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)
 	if err != nil {
 		h.k.Logger(ctx).Error("failed to get pool denoms", "error", err)
 		return
 	}
 
 	if len(denoms) != 2 {
-		h.k.Logger(ctx).Debug("expecting pools of 2 assets", "denoms", denoms)
-		return
-	}
-	if !contains(denoms, baseDenom) {
-		h.k.Logger(ctx).Debug("base denom not included in the pool. skipping", "baseDenom", baseDenom, "denoms", denoms)
+		h.k.Logger(ctx).Error("expected exactly 2 pool denoms", "denoms", denoms)
 		return
 	}
 
-	//get the non-native denom
-	var nonNativeDenom string
-	if denoms[0] == baseDenom {
-		nonNativeDenom = denoms[1]
+	basedenom := h.k.MustGetBaseDenom(ctx)
+
+	// check and handle the case where one of the denoms is basedenom
+	// it will override the an existing route if it exists (as it must be a longer path)
+	if denoms[0] == basedenom || denoms[1] == basedenom {
+		var newDenom string
+
+		if denoms[0] == basedenom {
+			newDenom = denoms[1]
+		} else {
+			newDenom = denoms[0]
+		}
+
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: []pooltypes.SwapAmountInRoute{
+				{
+					PoolId:        poolId,
+					TokenOutDenom: basedenom,
+				},
+			},
+		}
+
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
+		return
 	} else {
-		nonNativeDenom = denoms[0]
-	}
+		// no basedenom in the pool, register new token with multi-hop route
+		d1Reg := h.k.HasFeeToken(ctx, denoms[0])
+		d2Reg := h.k.HasFeeToken(ctx, denoms[1])
 
-	_, err = h.k.GetFeeToken(ctx, nonNativeDenom)
-	if err == nil {
-		h.k.Logger(ctx).Error("fee token already exists", "denom", nonNativeDenom)
-		return
-	}
+		var newDenom, registeredDenom string
+		switch {
+		case !d1Reg && !d2Reg:
+			h.k.Logger(ctx).Error("no route to basedenom exist")
+			return
+		case d1Reg && d2Reg:
+			h.k.Logger(ctx).Debug("both denoms are already registered")
+			return
+		case d1Reg:
+			newDenom, registeredDenom = denoms[1], denoms[0]
+		default: // d2Reg
+			newDenom, registeredDenom = denoms[0], denoms[1]
+		}
 
-	feeToken := types.FeeToken{
-		PoolID: poolId,
-		Denom:  nonNativeDenom,
-	}
-	err = h.k.setFeeToken(ctx, feeToken)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-		return
+		// get the swapRoute for the 2nd pool asset
+		var route []pooltypes.SwapAmountInRoute
+
+		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
+			return
+		}
+		route = append(route, pooltypes.SwapAmountInRoute{
+			PoolId:        poolId,
+			TokenOutDenom: registeredDenom,
+		})
+		route = append(route, feeToken.Route...)
+
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: route,
+		}
+
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
 	}
 }
 
@@ -165,14 +204,4 @@ func (h Hooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint
 
 // AfterSwap hook is a noop.
 func (h Hooks) AfterSwap(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) {
-}
-
-func contains(strarr []string, str string) bool {
-	for _, v := range strarr {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
 }

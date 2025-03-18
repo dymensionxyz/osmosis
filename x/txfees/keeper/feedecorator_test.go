@@ -79,7 +79,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 				txFee:        sdk.NewCoins(),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
-				expectPass:   isCheckTx != 1, //should pass on deliverTx, fail on checkTx
+				expectPass:   isCheckTx != 1, // should pass on deliverTx, fail on checkTx
 			},
 			{
 				name:         fmt.Sprintf("works with valid basedenom fee - %s", txType[isCheckTx]),
@@ -93,11 +93,11 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 				txFee:        sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 10)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
-				expectPass:   isCheckTx != 1, //should pass on deliverTx, fail on checkTx
+				expectPass:   isCheckTx != 1, // should pass on deliverTx, fail on checkTx
 			},
 			{
 				name:         fmt.Sprintf("works with valid converted fee - %s", txType[isCheckTx]),
-				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1000)),
+				txFee:        sdk.NewCoins(sdk.NewInt64Coin(uion, 1001)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
 				expectPass:   true,
@@ -114,7 +114,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 				txFee:        sdk.NewCoins(sdk.NewInt64Coin("moooooo", 1000)),
 				minGasPrices: point1BaseDenomMinGasPrices,
 				isCheckTx:    isCheckTx == 1,
-				expectPass:   isCheckTx != 1, //should pass on deliverTx, fail on checkTx,
+				expectPass:   isCheckTx != 1, // should pass on deliverTx, fail on checkTx,
 			},
 			{
 				name:         "min gas price not containing basedenom gets treated as min gas price 0",
@@ -156,8 +156,8 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 
 		// setup uion with 1:1 fee
 		suite.PrepareBalancerPoolWithCoins(
-			sdk.NewInt64Coin(sdk.DefaultBondDenom, 500),
-			sdk.NewInt64Coin(uion, 500),
+			sdk.NewInt64Coin(sdk.DefaultBondDenom, 50_000_000),
+			sdk.NewInt64Coin(uion, 50_000_000),
 		)
 
 		if tc.minGasPrices == nil {
@@ -212,7 +212,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 			// ensure fee was collected
 			if !tc.txFee.IsZero() {
 				var moduleName string
-				//check dym in the fee collector
+				// check dym in the fee collector
 				if tc.txFee[0].Denom == baseDenom {
 					moduleName = types.FeeCollectorName
 				} else {

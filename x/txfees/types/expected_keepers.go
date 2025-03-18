@@ -10,9 +10,9 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
-// SpotPriceCalculator defines the contract that must be fulfilled by a spot price calculator
+// GAMMKeeper defines the contract that must be fulfilled by a spot price calculator
 // The x/gamm keeper is expected to satisfy this interface.
-type SpotPriceCalculator interface {
+type GAMMKeeper interface {
 	CalculateSpotPrice(ctx sdk.Context, poolId uint64, quoteDenom, baseDenom string) (math.LegacyDec, error)
 	GetPoolDenoms(ctx sdk.Context, poolId uint64) ([]string, error)
 }
@@ -25,6 +25,11 @@ type PoolManager interface {
 		routes []poolmanagertypes.SwapAmountInRoute,
 		tokenIn sdk.Coin,
 		tokenOutMinAmount math.Int) (tokenOutAmount math.Int, err error)
+	MultihopEstimateOutGivenExactAmountIn(
+		ctx sdk.Context,
+		routes []poolmanagertypes.SwapAmountInRoute,
+		tokenIn sdk.Coin,
+	) (tokenOutAmount math.Int, err error)
 }
 
 type EpochKeeper interface {
@@ -55,7 +60,7 @@ type BankKeeper interface {
 
 // TxFeesKeeper defines the expected transaction fee keeper
 type TxFeesKeeper interface {
-	ConvertToBaseToken(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error)
+	CalcFeeInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error)
 	GetBaseDenom(ctx sdk.Context) (denom string, err error)
 	GetFeeToken(ctx sdk.Context, denom string) (FeeToken, error)
 }

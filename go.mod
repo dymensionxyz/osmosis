@@ -10,13 +10,11 @@ require (
 	cosmossdk.io/math v1.4.0
 	cosmossdk.io/store v1.1.1
 	github.com/cometbft/cometbft v0.38.15
-	github.com/cometbft/cometbft-db v0.14.1
 	github.com/cosmos/cosmos-db v1.1.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/cosmos/iavl v1.2.2
 	github.com/dymensionxyz/dymension/v3 v3.2.0-rc01.0.20250306180031-86acf62aee54
-	github.com/dymensionxyz/gerr-cosmos v1.1.0
 	github.com/dymensionxyz/sdk-utils v0.2.13-0.20250114202609-b3e820f5b629
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
@@ -94,6 +92,7 @@ require (
 	github.com/cockroachdb/pebble v1.1.2 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
+	github.com/cometbft/cometbft-db v0.14.1 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8 v8.1.0 // indirect
@@ -111,6 +110,7 @@ require (
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
+	github.com/dymensionxyz/gerr-cosmos v1.1.0 // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/ethereum/go-ethereum v1.10.26 // indirect

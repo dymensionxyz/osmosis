@@ -9,7 +9,6 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
-	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -24,8 +23,8 @@ func (k Keeper) ChargeFeesFromPayer(
 	takerFeeCoin sdk.Coin,
 	beneficiary *sdk.AccAddress,
 ) error {
+	// Nothing to charge
 	if takerFeeCoin.IsZero() {
-		// Nothing to charge
 		return nil
 	}
 	// Charge the fee from the payer to x/txfees
@@ -52,8 +51,8 @@ func (k Keeper) ChargeFees(
 	beneficiary *sdk.AccAddress,
 	payer string, // optional, only used for the event
 ) error {
+	// Nothing to charge
 	if takerFee.IsZero() {
-		// Nothing to charge
 		return nil
 	}
 
@@ -137,7 +136,6 @@ func (k Keeper) swapFeeToBaseDenom(
 	if err != nil {
 		return nil, nil, fmt.Errorf("get base denom: %w", err)
 	}
-	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 
 	// The fee is already in the base denom
 	if takerFeeCoin.Denom == baseDenom {
@@ -150,17 +148,12 @@ func (k Keeper) swapFeeToBaseDenom(
 		return nil, sdk.Coins{takerFeeCoin}, nil
 	}
 
-	// Swap the coin to base denom
-	var (
-		tokenOutAmount = math.ZeroInt() // Token amount in base denom
-		route          = []poolmanagertypes.SwapAmountInRoute{{
-			PoolId:        feetoken.PoolID,
-			TokenOutDenom: baseDenom,
-		}}
-	)
+	var tokenOutAmount math.Int
+	moduleAddr := k.accountKeeper.GetModuleAddress(types.ModuleName)
 
+	// Swap the coin to base denom
 	err = osmoutils.ApplyFuncIfNoError(ctx, func(ctx sdk.Context) error {
-		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, route, takerFeeCoin, math.ZeroInt())
+		tokenOutAmount, err = k.poolManager.RouteExactAmountIn(ctx, moduleAddr, feetoken.Route, takerFeeCoin, math.ZeroInt())
 		return err
 	})
 	if err != nil {
@@ -186,4 +179,25 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
 			break
 		}
 	}
+}
+
+// CalcFeeInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
+func (k Keeper) CalcFeeInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
+	baseDenom := k.MustGetBaseDenom(ctx)
+
+	if inputFee.Denom == baseDenom {
+		return inputFee, nil
+	}
+
+	feeToken, err := k.GetFeeToken(ctx, inputFee.Denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, feeToken.Route, inputFee)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(baseDenom, tokenOut), nil
 }

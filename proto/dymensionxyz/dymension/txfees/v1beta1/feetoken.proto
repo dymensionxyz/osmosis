@@ -2,6 +2,7 @@ syntax = "proto3";
 package dymensionxyz.dymension.txfees.v1beta1;
 
 import "gogoproto/gogo.proto";
+import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 
@@ -10,8 +11,11 @@ option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 // Its price in osmo is derived through looking at the provided pool ID.
 // The pool ID must have base denom as one of its assets.
 message FeeToken {
-  option (gogoproto.equal) = true;
-
   string denom = 1 [ (gogoproto.moretags) = "yaml:\"denom\"" ];
-  uint64 poolID = 2 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
+
+  reserved 2;
+
+  repeated dymensionxyz.dymension.poolmanager.v1beta1.SwapAmountInRoute route =
+      3
+      [ (gogoproto.moretags) = "yaml:\"route\"", (gogoproto.nullable) = false ];
 }

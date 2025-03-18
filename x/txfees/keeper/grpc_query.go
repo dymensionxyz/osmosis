@@ -3,9 +3,7 @@ package keeper
 import (
 	"context"
 
-	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/dymensionxyz/gerr-cosmos/gerrc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -38,50 +36,30 @@ func (q Querier) FeeTokens(ctx context.Context, _ *types.QueryFeeTokensRequest) 
 	return &types.QueryFeeTokensResponse{FeeTokens: feeTokens}, nil
 }
 
-func (q Querier) DenomSpotPrice(ctx context.Context, req *types.QueryDenomSpotPriceRequest) (*types.QueryDenomSpotPriceResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if len(req.Denom) == 0 {
-		return nil, sdkerrors.Wrap(gerrc.ErrInvalidArgument, "empty denom")
-	}
+func (k Keeper) DenomRoute(goCtx context.Context, req *types.QueryDenomRouteRequest) (*types.QueryDenomRouteResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	baseDenom, err := q.GetBaseDenom(sdkCtx)
+	feeToken, err := k.GetFeeToken(ctx, req.Denom)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.NotFound, "fee token not found")
 	}
 
-	feeToken, err := q.GetFeeToken(sdkCtx, req.Denom)
-	if err != nil {
-		return nil, err
-	}
-
-	spotPrice, err := q.spotPriceCalculator.CalculateSpotPrice(sdkCtx, feeToken.PoolID, baseDenom, feeToken.Denom)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryDenomSpotPriceResponse{PoolID: feeToken.PoolID, SpotPrice: spotPrice}, nil
+	return &types.QueryDenomRouteResponse{
+		Route: feeToken.Route,
+	}, nil
 }
 
-func (q Querier) DenomPoolId(ctx context.Context, req *types.QueryDenomPoolIdRequest) (*types.QueryDenomPoolIdResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if len(req.Denom) == 0 {
-		return nil, sdkerrors.Wrap(gerrc.ErrInvalidArgument, "empty denom")
-	}
+func (k Keeper) FeeToken(goCtx context.Context, req *types.QueryFeeTokenRequest) (*types.QueryFeeTokenResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	feeToken, err := q.Keeper.GetFeeToken(sdkCtx, req.GetDenom())
+	feeToken, err := k.GetFeeToken(ctx, req.Denom)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.NotFound, "fee token not found")
 	}
 
-	return &types.QueryDenomPoolIdResponse{PoolID: feeToken.GetPoolID()}, nil
+	return &types.QueryFeeTokenResponse{
+		FeeToken: feeToken,
+	}, nil
 }
 
 func (q Querier) BaseDenom(ctx context.Context, _ *types.QueryBaseDenomRequest) (*types.QueryBaseDenomResponse, error) {

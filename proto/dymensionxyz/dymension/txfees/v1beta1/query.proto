@@ -8,6 +8,7 @@ import "cosmos_proto/cosmos.proto";
 
 import "dymensionxyz/dymension/txfees/v1beta1/feetoken.proto";
 import "dymensionxyz/dymension/txfees/v1beta1/genesis.proto";
+import "dymensionxyz/dymension/poolmanager/v1beta1/swap_route.proto";
 
 option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
 
@@ -18,25 +19,24 @@ service Query {
         "/dymensionxyz/dymension/txfees/v1beta1/params";
   }
 
+  // FeeToken returns a single fee token by denom
+  rpc FeeToken(QueryFeeTokenRequest) returns (QueryFeeTokenResponse) {
+    option (google.api.http).get =
+        "/dymensionxyz/dymension/txfees/v1beta1/fee_tokens/{denom}";
+  }
+
   // FeeTokens returns a list of all the accepted fee tokens and their
-  // corresponding pools. It does not include the BaseDenom, which has its own
-  // query endpoint
+  // corresponding pools.
+  // It does not include the BaseDenom, which has its own query endpoint
   rpc FeeTokens(QueryFeeTokensRequest) returns (QueryFeeTokensResponse) {
     option (google.api.http).get =
         "/dymensionxyz/dymension/txfees/v1beta1/fee_tokens";
   }
 
-  // DenomSpotPrice returns all spot prices by each registered token denom.
-  rpc DenomSpotPrice(QueryDenomSpotPriceRequest)
-      returns (QueryDenomSpotPriceResponse) {
+  // Returns the swap route for a specified denom
+  rpc DenomRoute(QueryDenomRouteRequest) returns (QueryDenomRouteResponse) {
     option (google.api.http).get =
-        "/dymensionxyz/dymension/txfees/v1beta1/spot_price_by_denom";
-  }
-
-  // Returns the poolID for a specified denom input.
-  rpc DenomPoolId(QueryDenomPoolIdRequest) returns (QueryDenomPoolIdResponse) {
-    option (google.api.http).get =
-        "/dymensionxyz/dymension/txfees/v1beta1/denom_pool_id/{denom}";
+        "/dymensionxyz/dymension/txfees/v1beta1/denom_route/{denom}";
   }
 
   // Returns a list of all base denom tokens and their corresponding pools.
@@ -51,6 +51,12 @@ message QueryParamsResponse {
   Params params = 1 [ (gogoproto.nullable) = false ];
 }
 
+message QueryFeeTokenRequest { string denom = 1; }
+
+message QueryFeeTokenResponse {
+  FeeToken fee_token = 1 [ (gogoproto.nullable) = false ];
+}
+
 message QueryFeeTokensRequest {}
 message QueryFeeTokensResponse {
   repeated FeeToken fee_tokens = 1 [
@@ -59,22 +65,11 @@ message QueryFeeTokensResponse {
   ];
 }
 
-// QueryDenomSpotPriceRequest defines grpc request structure for querying spot
-// price for the specified tx fee denom
-message QueryDenomSpotPriceRequest {
-  string denom = 1 [ (gogoproto.moretags) = "yaml:\"denom\"" ];
-}
+message QueryDenomRouteRequest { string denom = 1; }
 
-// QueryDenomSpotPriceRequest defines grpc response structure for querying spot
-// price for the specified tx fee denom
-message QueryDenomSpotPriceResponse {
-  uint64 poolID = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
-  string spot_price = 2 [
-    (gogoproto.moretags) = "yaml:\"spot_price\"",
-    (cosmos_proto.scalar) = "cosmos.Dec",
-    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
-    (gogoproto.nullable) = false
-  ];
+message QueryDenomRouteResponse {
+  repeated poolmanager.v1beta1.SwapAmountInRoute route = 1
+      [ (gogoproto.nullable) = false ];
 }
 
 message QueryDenomPoolIdRequest {

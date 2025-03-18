@@ -17,15 +17,13 @@ type Keeper struct {
 	storeKey   storetypes.StoreKey
 	paramSpace paramtypes.Subspace
 
-	accountKeeper       types.AccountKeeper
-	epochKeeper         types.EpochKeeper
-	bankKeeper          types.BankKeeper
-	poolManager         types.PoolManager
-	spotPriceCalculator types.SpotPriceCalculator
-	communityPool       types.CommunityPoolKeeper
+	accountKeeper types.AccountKeeper
+	epochKeeper   types.EpochKeeper
+	bankKeeper    types.BankKeeper
+	poolManager   types.PoolManager
+	gammKeeper    types.GAMMKeeper
+	communityPool types.CommunityPoolKeeper
 }
-
-var _ types.TxFeesKeeper = (*Keeper)(nil)
 
 func NewKeeper(
 	storeKey storetypes.StoreKey,
@@ -34,7 +32,7 @@ func NewKeeper(
 	epochKeeper types.EpochKeeper,
 	bankKeeper types.BankKeeper,
 	poolManager types.PoolManager,
-	spotPriceCalculator types.SpotPriceCalculator,
+	spotPriceCalculator types.GAMMKeeper,
 	communityPool types.CommunityPoolKeeper,
 ) Keeper {
 	if !paramSpace.HasKeyTable() {
@@ -42,14 +40,14 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		storeKey:            storeKey,
-		paramSpace:          paramSpace,
-		accountKeeper:       accountKeeper,
-		bankKeeper:          bankKeeper,
-		epochKeeper:         epochKeeper,
-		poolManager:         poolManager,
-		spotPriceCalculator: spotPriceCalculator,
-		communityPool:       communityPool,
+		storeKey:      storeKey,
+		paramSpace:    paramSpace,
+		accountKeeper: accountKeeper,
+		bankKeeper:    bankKeeper,
+		epochKeeper:   epochKeeper,
+		poolManager:   poolManager,
+		gammKeeper:    spotPriceCalculator,
+		communityPool: communityPool,
 	}
 }
 
@@ -57,7 +55,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-func (k Keeper) GetFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
+func (k Keeper) getFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
 	store := ctx.KVStore(k.storeKey)
 	return prefix.NewStore(store, types.FeeTokensStorePrefix)
 }

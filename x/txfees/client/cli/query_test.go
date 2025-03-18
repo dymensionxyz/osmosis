@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/testutils/apptesting"
+	pooltypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -30,8 +31,16 @@ func (s *QueryTestSuite) SetupSuite() {
 		sdk.NewInt64Coin("uosmo", 1000000),
 		sdk.NewInt64Coin(basedenom, 120000000),
 	}
-	s.PrepareBalancerPoolWithCoins(poolAssets...)
-	err = s.App.TxFeesKeeper.SetFeeTokens(s.Ctx, []types.FeeToken{{Denom: "uosmo", PoolID: 1}})
+	id := s.PrepareBalancerPoolWithCoins(poolAssets...)
+	err = s.App.TxFeesKeeper.SetFeeToken(s.Ctx, types.FeeToken{
+		Denom: "uosmo",
+		Route: []pooltypes.SwapAmountInRoute{
+			{
+				PoolId:        id,
+				TokenOutDenom: basedenom,
+			},
+		},
+	})
 	s.Require().NoError(err)
 
 	s.Commit()
@@ -51,16 +60,16 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 			&types.QueryBaseDenomResponse{},
 		},
 		{
-			"Query poolID by denom",
-			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomPoolId",
-			&types.QueryDenomPoolIdRequest{Denom: "uosmo"},
-			&types.QueryDenomPoolIdResponse{},
+			"Query fee token by denom",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/FeeToken",
+			&types.QueryFeeTokenRequest{Denom: "uosmo"},
+			&types.QueryFeeTokenResponse{},
 		},
 		{
-			"Query spot price by denom",
-			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomSpotPrice",
-			&types.QueryDenomSpotPriceRequest{Denom: "uosmo"},
-			&types.QueryDenomSpotPriceResponse{},
+			"Query denom route",
+			"/dymensionxyz.dymension.txfees.v1beta1.Query/DenomRoute",
+			&types.QueryDenomRouteRequest{Denom: "uosmo"},
+			&types.QueryDenomRouteResponse{},
 		},
 		{
 			"Query fee tokens",
@@ -74,9 +83,10 @@ func (s *QueryTestSuite) TestQueriesNeverAlterState() {
 		tc := tc
 		s.Run(tc.name, func() {
 			s.SetupSuite()
+
 			err := s.QueryHelper.Invoke(gocontext.Background(), tc.query, tc.input, tc.output)
 			s.Require().NoError(err)
-			// s.StateNotAltered()
+			// s.StateNotAltered() // FIXME:
 		})
 	}
 }
