@@ -113,7 +113,7 @@ func (k *Keeper) SetRollapp(rollapp types.RollappKeeper) {
 
 // GetParams returns the total set params.
 func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
-	k.paramSpace.GetParamSet(ctx, &params)
+	k.paramSpace.GetParamSetIfExists(ctx, &params)
 	return params
 }
 
