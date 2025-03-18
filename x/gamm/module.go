@@ -17,6 +17,7 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -24,6 +25,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"github.com/osmosis-labs/osmosis/v15/x/gamm/client/cli"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/keeper"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
@@ -135,3 +137,11 @@ func (AppModule) IsAppModule() {}
 
 // IsOnePerModuleType
 func (AppModule) IsOnePerModuleType() {}
+
+func (am AppModule) GetQueryCmd() *cobra.Command {
+	return cli.GetQueryCmd()
+}
+
+func (am AppModule) GetTxCmd() *cobra.Command {
+	return cli.NewTxCmd()
+}
