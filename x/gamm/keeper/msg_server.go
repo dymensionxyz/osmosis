@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"slices"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -39,7 +40,7 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 	// validate the pool contains asset which is whitelisted
 	found := false
 	for _, asset := range msg.PoolAssets {
-		if contains(params.AllowedPoolCreationDenoms, asset.Token.Denom) {
+		if slices.Contains(params.AllowedPoolCreationDenoms, asset.Token.Denom) {
 			found = true
 			break
 		}
@@ -68,7 +69,7 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 		existingPoolDenoms := osmoutils.CoinsDenoms(pool.GetTotalPoolLiquidity(ctx))
 		sameAssets := true
 		for _, asset := range msg.PoolAssets {
-			if contains(existingPoolDenoms, asset.Token.Denom) {
+			if slices.Contains(existingPoolDenoms, asset.Token.Denom) {
 				continue
 			}
 			sameAssets = false
@@ -86,16 +87,6 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 
 	poolId, err := server.keeper.CreatePool(goCtx, msg)
 	return &balancer.MsgCreateBalancerPoolResponse{PoolID: poolId}, err
-}
-
-// Function to check if a slice contains a string
-func contains(slice []string, str string) bool {
-	for _, v := range slice {
-		if v == str {
-			return true
-		}
-	}
-	return false
 }
 
 // JoinPool routes `JoinPoolNoSwap` where we do an abstract calculation on needed lp liquidity coins to get the designated
