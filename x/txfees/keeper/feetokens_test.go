@@ -176,3 +176,71 @@ func (suite *KeeperTestSuite) TestBaseInCoinConversions() {
 		}
 	}
 }
+
+func (suite *KeeperTestSuite) TestCalcWithMultiRoute() {
+	baseDenom := sdk.DefaultBondDenom
+	denom := "foo"
+
+	pool1 := sdk.NewCoins(sdk.NewInt64Coin(baseDenom, 10_000_000), sdk.NewInt64Coin("uion", 10_000_000))
+	pool2 := sdk.NewCoins(sdk.NewInt64Coin("uion", 10_000_000), sdk.NewInt64Coin(denom, 10_000_000))
+
+	tests := []struct {
+		name                string
+		inputCoin           sdk.Coin
+		expectedConvertable bool
+		expectedOutput      sdk.Coin
+	}{
+		{
+			name:      "from coin",
+			inputCoin: sdk.NewInt64Coin(denom, 1000),
+			// expected to get approximately 10 base denom (truncated to 9)
+			expectedOutput:      sdk.NewInt64Coin(baseDenom, 999),
+			expectedConvertable: true,
+		},
+		{
+			name:                "from basedenom",
+			inputCoin:           sdk.NewInt64Coin(baseDenom, 1000),
+			expectedOutput:      sdk.NewInt64Coin(denom, 999),
+			expectedConvertable: true,
+		},
+	}
+
+	for _, tc := range tests {
+		suite.SetupTest()
+
+		_ = suite.PrepareBalancerPoolWithCoins(
+			pool1...,
+		)
+
+		_ = suite.PrepareBalancerPoolWithCoins(
+			pool2...,
+		)
+
+		var converted sdk.Coin
+		var err error
+
+		if tc.inputCoin.Denom == baseDenom {
+			converted, err = suite.App.TxFeesKeeper.CalcBaseInCoin(suite.Ctx, tc.inputCoin, denom)
+		} else {
+			converted, err = suite.App.TxFeesKeeper.CalcCoinInBaseDenom(suite.Ctx, tc.inputCoin)
+		}
+		if tc.expectedConvertable {
+			suite.Require().NoError(err, "test: %s", tc.name)
+
+			// Calculate the difference as a percentage of the original amount
+			diff := tc.expectedOutput.Amount.Sub(converted.Amount)
+			diffPercentage := math.LegacyNewDecFromInt(diff).Quo(math.LegacyNewDecFromInt(tc.expectedOutput.Amount)).MulInt64(100)
+
+			// The difference should be at most 0.5% of the original amount
+			suite.Require().LessOrEqual(
+				diffPercentage.MustFloat64(),
+				0.5,
+				"test: %s - difference too large, got %.2f%%",
+				tc.name,
+				diffPercentage.MustFloat64(),
+			)
+		} else {
+			suite.Require().Error(err, "test: %s", tc.name)
+		}
+	}
+}
