@@ -11,8 +11,6 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-
 	keeper "github.com/osmosis-labs/osmosis/v15/x/txfees/keeper"
 )
 
@@ -119,7 +117,7 @@ func (mfd MempoolFeeDecorator) IsSufficientFee(ctx sdk.Context, minBaseGasPrice 
 	glDec := math.LegacyNewDec(int64(gasRequested))
 	requiredBaseFee := sdk.NewCoin(baseDenom, minBaseGasPrice.Mul(glDec).Ceil().RoundInt())
 
-	convertedFee, err := mfd.TxFeesKeeper.CalcFeeInBaseDenom(ctx, feeCoin)
+	convertedFee, err := mfd.TxFeesKeeper.CalcCoinInBaseDenom(ctx, feeCoin)
 	if err != nil {
 		return err
 	}
@@ -216,7 +214,7 @@ func (dfd DeductFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate bo
 }
 
 // DeductFees deducts fees from the given account and transfers them to the set module account.
-func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ctx sdk.Context, acc authtypes.AccountI, fees sdk.Coins) error {
+func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ctx sdk.Context, acc sdk.AccountI, fees sdk.Coins) error {
 	// Checks the validity of the fee tokens (sorted, have positive amount, valid and unique denomination)
 	if !fees.IsValid() {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "invalid fee amount: %s", fees)

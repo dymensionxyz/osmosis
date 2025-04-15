@@ -12,7 +12,7 @@ func (suite *KeeperTestSuite) TestBaseDenom() {
 	suite.Require().NoError(err)
 	suite.Require().Equal(sdk.DefaultBondDenom, baseDenom)
 
-	converted, err := suite.App.TxFeesKeeper.CalcFeeInBaseDenom(suite.Ctx, sdk.NewInt64Coin(sdk.DefaultBondDenom, 10))
+	converted, err := suite.App.TxFeesKeeper.CalcCoinInBaseDenom(suite.Ctx, sdk.NewInt64Coin(sdk.DefaultBondDenom, 10))
 	suite.Require().True(converted.IsEqual(sdk.NewInt64Coin(sdk.DefaultBondDenom, 10)))
 	suite.Require().NoError(err)
 }
@@ -74,7 +74,7 @@ func (suite *KeeperTestSuite) TestFeeTokenConversions() {
 			tc.feeTokenPoolInput,
 		)
 
-		converted, err := suite.App.TxFeesKeeper.CalcFeeInBaseDenom(suite.Ctx, tc.inputFee)
+		converted, err := suite.App.TxFeesKeeper.CalcCoinInBaseDenom(suite.Ctx, tc.inputFee)
 		if tc.expectedConvertable {
 			suite.Require().NoError(err, "test: %s", tc.name)
 			suite.Require().Equal(tc.expectedOutput, converted)

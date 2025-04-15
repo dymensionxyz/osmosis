@@ -181,8 +181,8 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
 	}
 }
 
-// CalcFeeInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
-func (k Keeper) CalcFeeInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
+// CalcCoinInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
+func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
 	baseDenom := k.MustGetBaseDenom(ctx)
 
 	if inputFee.Denom == baseDenom {
