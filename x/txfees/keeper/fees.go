@@ -9,6 +9,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	pooltypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -201,3 +202,89 @@ func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coi
 
 	return sdk.NewCoin(baseDenom, tokenOut), nil
 }
+
+// CalcBaseInCoin converts a coin in the base denomination to a specified fee token denomination.
+// It requires that the input coin must be in the base denomination. The function retrieves
+// the fee token information for the specified denomination and calculates the output amount
+// using a reversed swap route. If the fee token is not found or any error occurs during the
+// swap estimation, it returns an error.
+func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string) (sdk.Coin, error) {
+	baseDenom := k.MustGetBaseDenom(ctx)
+	if inputCoin.Denom != baseDenom {
+		return sdk.Coin{}, fmt.Errorf("input coin must be in base denom %s, got %s", baseDenom, inputCoin.Denom)
+	}
+
+	feeToken, err := k.GetFeeToken(ctx, denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// prepate new In route
+	reverseRoute := reverseInRoute(feeToken.Route, denom)
+	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, reverseRoute, inputCoin)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(denom, tokenOut), nil
+}
+
+func reverseInRoute(feeTokenRoute []pooltypes.SwapAmountInRoute, denom string) []pooltypes.SwapAmountInRoute {
+	newInRoute := make([]pooltypes.SwapAmountInRoute, len(feeTokenRoute))
+
+	lstIdx := len(feeTokenRoute) - 1
+	for i := lstIdx; i >= 0; i-- {
+		inRoute := feeTokenRoute[i]
+		var outDenom string
+		if i > 0 {
+			outDenom = feeTokenRoute[i-1].TokenOutDenom
+		} else {
+			outDenom = denom
+		}
+
+		j := lstIdx - i
+		newInRoute[j] = pooltypes.SwapAmountInRoute{
+			PoolId:        inRoute.PoolId,
+			TokenOutDenom: outDenom,
+		}
+	}
+
+	return newInRoute
+}
+
+/*
+
+
+// // prepeare reverse route
+	// outRoutes := make([]pooltypes.SwapAmountOutRoute, len(feeToken.Route))
+	// lstIdx := len(feeToken.Route) - 1
+	// for i := lstIdx; i >= 0; i-- {
+	// 	inRoute := feeToken.Route[i]
+
+	// 	j := lstIdx - i
+	// 	outRoutes[j] = pooltypes.SwapAmountOutRoute{
+	// 		PoolId:       inRoute.PoolId,
+	// 		TokenInDenom: inRoute.TokenOutDenom, // Swap input and output
+	// 	}
+	// }
+
+
+
+func ConvertInRouteToOutRoute(inRoutes []pooltypes.SwapAmountInRoute, baseDenom string) []pooltypes.SwapAmountOutRoute {
+	outRoutes := make([]pooltypes.SwapAmountOutRoute, len(inRoutes))
+	for i := len(inRoutes) - 1; i >= 0; i-- {
+		inRoute := inRoutes[i]
+		outRoutes[len(inRoutes)-1-i] = pooltypes.SwapAmountOutRoute{
+			PoolId:        inRoute.PoolId,
+			TokenInDenom:  inRoute.TokenOutDenom, // Swap input and output
+			TokenOutDenom: inRoute.TokenInDenom,
+		}
+	}
+	// Set base denom as the input for the first route
+	if len(outRoutes) > 0 {
+		outRoutes[0].TokenInDenom = baseDenom
+	}
+	return outRoutes
+}
+
+*/
