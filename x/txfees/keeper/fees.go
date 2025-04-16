@@ -214,6 +214,10 @@ func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string
 		return sdk.Coin{}, fmt.Errorf("input coin must be in base denom %s, got %s", baseDenom, inputCoin.Denom)
 	}
 
+	if denom == baseDenom {
+		return inputCoin, nil
+	}
+
 	feeToken, err := k.GetFeeToken(ctx, denom)
 	if err != nil {
 		return sdk.Coin{}, err
