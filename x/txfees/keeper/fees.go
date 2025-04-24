@@ -9,6 +9,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	gammtypes "github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+	pooltypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
@@ -181,8 +182,8 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
 	}
 }
 
-// CalcFeeInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
-func (k Keeper) CalcFeeInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
+// CalcCoinInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
+func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
 	baseDenom := k.MustGetBaseDenom(ctx)
 
 	if inputFee.Denom == baseDenom {
@@ -200,4 +201,57 @@ func (k Keeper) CalcFeeInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin
 	}
 
 	return sdk.NewCoin(baseDenom, tokenOut), nil
+}
+
+// CalcBaseInCoin converts a coin in the base denomination to a specified fee token denomination.
+// It requires that the input coin must be in the base denomination. The function retrieves
+// the fee token information for the specified denomination and calculates the output amount
+// using a reversed swap route. If the fee token is not found or any error occurs during the
+// swap estimation, it returns an error.
+func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string) (sdk.Coin, error) {
+	baseDenom := k.MustGetBaseDenom(ctx)
+	if inputCoin.Denom != baseDenom {
+		return sdk.Coin{}, fmt.Errorf("input coin must be in base denom %s, got %s", baseDenom, inputCoin.Denom)
+	}
+
+	if denom == baseDenom {
+		return inputCoin, nil
+	}
+
+	feeToken, err := k.GetFeeToken(ctx, denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// prepate new In route
+	reverseRoute := reverseInRoute(feeToken.Route, denom)
+	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, reverseRoute, inputCoin)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(denom, tokenOut), nil
+}
+
+func reverseInRoute(feeTokenRoute []pooltypes.SwapAmountInRoute, denom string) []pooltypes.SwapAmountInRoute {
+	newInRoute := make([]pooltypes.SwapAmountInRoute, len(feeTokenRoute))
+
+	lstIdx := len(feeTokenRoute) - 1
+	for i := lstIdx; i >= 0; i-- {
+		inRoute := feeTokenRoute[i]
+		var outDenom string
+		if i > 0 {
+			outDenom = feeTokenRoute[i-1].TokenOutDenom
+		} else {
+			outDenom = denom
+		}
+
+		j := lstIdx - i
+		newInRoute[j] = pooltypes.SwapAmountInRoute{
+			PoolId:        inRoute.PoolId,
+			TokenOutDenom: outDenom,
+		}
+	}
+
+	return newInRoute
 }
