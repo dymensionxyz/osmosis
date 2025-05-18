@@ -9,10 +9,6 @@ import (
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
 
-const (
-	TypeMsgCreateBalancerPool = "create_balancer_pool"
-)
-
 var (
 	_ sdk.Msg                        = &MsgCreateBalancerPool{}
 	_ poolmanagertypes.CreatePoolMsg = &MsgCreateBalancerPool{}
@@ -32,8 +28,6 @@ func NewMsgCreateBalancerPool(
 	}
 }
 
-func (msg MsgCreateBalancerPool) Route() string { return types.RouterKey }
-func (msg MsgCreateBalancerPool) Type() string  { return TypeMsgCreateBalancerPool }
 func (msg MsgCreateBalancerPool) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {

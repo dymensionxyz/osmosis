@@ -16,6 +16,8 @@ service Msg {
 
 // ===================== MsgCreatePool
 message MsgCreateBalancerPool {
+  option (cosmos.msg.v1.signer) = "sender";
+
   string sender = 1 [ (gogoproto.moretags) = "yaml:\"sender\"" ];
 
   dymensionxyz.dymension.gamm.v1beta1.PoolParams pool_params = 2

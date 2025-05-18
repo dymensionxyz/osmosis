@@ -46,14 +46,6 @@ func TestMsgCreateBalancerPool_ValidateBasic(t *testing.T) {
 		return after(*msg)
 	}
 
-	default_msg := createMsg(func(msg balancer.MsgCreateBalancerPool) balancer.MsgCreateBalancerPool {
-		// Do nothing
-		return msg
-	})
-
-	require.Equal(t, default_msg.Route(), types.RouterKey)
-	require.Equal(t, default_msg.Type(), "create_balancer_pool")
-
 	tests := []struct {
 		name       string
 		msg        balancer.MsgCreateBalancerPool

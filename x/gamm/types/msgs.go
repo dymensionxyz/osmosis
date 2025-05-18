@@ -10,16 +10,15 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// constants.
-const (
-	TypeMsgSwapExactAmountIn       = "swap_exact_amount_in"
-	TypeMsgSwapExactAmountOut      = "swap_exact_amount_out"
-	TypeMsgJoinPool                = "join_pool"
-	TypeMsgExitPool                = "exit_pool"
-	TypeMsgJoinSwapExternAmountIn  = "join_swap_extern_amount_in"
-	TypeMsgJoinSwapShareAmountOut  = "join_swap_share_amount_out"
-	TypeMsgExitSwapExternAmountOut = "exit_swap_extern_amount_out"
-	TypeMsgExitSwapShareAmountIn   = "exit_swap_share_amount_in"
+var (
+	_ sdk.Msg = &MsgSwapExactAmountIn{}
+	_ sdk.Msg = &MsgSwapExactAmountOut{}
+	_ sdk.Msg = &MsgJoinPool{}
+	_ sdk.Msg = &MsgExitPool{}
+	_ sdk.Msg = &MsgJoinSwapExternAmountIn{}
+	_ sdk.Msg = &MsgJoinSwapShareAmountOut{}
+	_ sdk.Msg = &MsgExitSwapExternAmountOut{}
+	_ sdk.Msg = &MsgExitSwapShareAmountIn{}
 )
 
 func ValidateFutureGovernor(governor string) error {
@@ -62,10 +61,6 @@ func ValidateFutureGovernor(governor string) error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgSwapExactAmountIn{}
-
-func (msg MsgSwapExactAmountIn) Route() string { return RouterKey }
-func (msg MsgSwapExactAmountIn) Type() string  { return TypeMsgSwapExactAmountIn }
 func (msg MsgSwapExactAmountIn) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -88,10 +83,6 @@ func (msg MsgSwapExactAmountIn) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgSwapExactAmountOut{}
-
-func (msg MsgSwapExactAmountOut) Route() string { return RouterKey }
-func (msg MsgSwapExactAmountOut) Type() string  { return TypeMsgSwapExactAmountOut }
 func (msg MsgSwapExactAmountOut) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -114,10 +105,6 @@ func (msg MsgSwapExactAmountOut) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgJoinPool{}
-
-func (msg MsgJoinPool) Route() string { return RouterKey }
-func (msg MsgJoinPool) Type() string  { return TypeMsgJoinPool }
 func (msg MsgJoinPool) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -136,10 +123,6 @@ func (msg MsgJoinPool) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgExitPool{}
-
-func (msg MsgExitPool) Route() string { return RouterKey }
-func (msg MsgExitPool) Type() string  { return TypeMsgExitPool }
 func (msg MsgExitPool) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -158,10 +141,6 @@ func (msg MsgExitPool) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgJoinSwapExternAmountIn{}
-
-func (msg MsgJoinSwapExternAmountIn) Route() string { return RouterKey }
-func (msg MsgJoinSwapExternAmountIn) Type() string  { return TypeMsgJoinSwapExternAmountIn }
 func (msg MsgJoinSwapExternAmountIn) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -179,10 +158,6 @@ func (msg MsgJoinSwapExternAmountIn) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgJoinSwapShareAmountOut{}
-
-func (msg MsgJoinSwapShareAmountOut) Route() string { return RouterKey }
-func (msg MsgJoinSwapShareAmountOut) Type() string  { return TypeMsgJoinSwapShareAmountOut }
 func (msg MsgJoinSwapShareAmountOut) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -205,10 +180,6 @@ func (msg MsgJoinSwapShareAmountOut) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgExitSwapExternAmountOut{}
-
-func (msg MsgExitSwapExternAmountOut) Route() string { return RouterKey }
-func (msg MsgExitSwapExternAmountOut) Type() string  { return TypeMsgExitSwapExternAmountOut }
 func (msg MsgExitSwapExternAmountOut) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
@@ -226,10 +197,6 @@ func (msg MsgExitSwapExternAmountOut) ValidateBasic() error {
 	return nil
 }
 
-var _ sdk.Msg = &MsgExitSwapShareAmountIn{}
-
-func (msg MsgExitSwapShareAmountIn) Route() string { return RouterKey }
-func (msg MsgExitSwapShareAmountIn) Type() string  { return TypeMsgExitSwapShareAmountIn }
 func (msg MsgExitSwapShareAmountIn) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
