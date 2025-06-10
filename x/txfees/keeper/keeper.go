@@ -7,15 +7,15 @@ import (
 
 	"cosmossdk.io/store/prefix"
 	storetypes "cosmossdk.io/store/types"
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/osmosis-labs/osmosis/v15/x/txfees/types"
 )
 
 type Keeper struct {
-	storeKey storetypes.StoreKey
-	cdc      codec.BinaryCodec
+	storeKey   storetypes.StoreKey
+	paramSpace paramtypes.Subspace
 
 	accountKeeper types.AccountKeeper
 	epochKeeper   types.EpochKeeper
@@ -27,7 +27,7 @@ type Keeper struct {
 
 func NewKeeper(
 	storeKey storetypes.StoreKey,
-	cdc codec.BinaryCodec,
+	paramSpace paramtypes.Subspace,
 	accountKeeper types.AccountKeeper,
 	epochKeeper types.EpochKeeper,
 	bankKeeper types.BankKeeper,
@@ -35,10 +35,13 @@ func NewKeeper(
 	spotPriceCalculator types.GAMMKeeper,
 	communityPool types.CommunityPoolKeeper,
 ) Keeper {
+	if !paramSpace.HasKeyTable() {
+		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
+	}
 
 	return Keeper{
 		storeKey:      storeKey,
-		cdc:           cdc,
+		paramSpace:    paramSpace,
 		accountKeeper: accountKeeper,
 		bankKeeper:    bankKeeper,
 		epochKeeper:   epochKeeper,
@@ -57,28 +60,12 @@ func (k Keeper) getFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
 	return prefix.NewStore(store, types.FeeTokensStorePrefix)
 }
 
-// func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
-// 	k.paramSpace.GetParamSet(ctx, &params)
-// 	return params
-// }
-
-// // SetParams sets the total set of params.
-// func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-// 	k.paramSpace.SetParamSet(ctx, &params)
-// }
-
-// GetParams get all parameters as types.Params
-func (k Keeper) GetParams(ctx sdk.Context) types.Params {
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.ParamsKey)
-	var params types.Params
-	k.cdc.MustUnmarshal(b, &params)
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
+	k.paramSpace.GetParamSet(ctx, &params)
 	return params
 }
 
-// SetParams set the params
+// SetParams sets the total set of params.
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
-	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshal(&params)
-	store.Set(types.ParamsKey, b)
+	k.paramSpace.SetParamSet(ctx, &params)
 }
