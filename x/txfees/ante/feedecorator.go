@@ -51,10 +51,31 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 		return ctx, errorsmod.Wrap(sdkerrors.ErrInvalidGasLimit, "must provide positive gas")
 	}
 
+	// FIXME: should be checked on deliverTx as well (https://github.com/dymensionxyz/osmosis/issues/103)
 	// Skip on deliverTx, as in Cosmos-SDK
 	// (https://github.com/cosmos/cosmos-sdk/blob/60e6274d0fdaeb86da4521f7ee8b8b2178a845b5/x/auth/ante/validator_tx_fee.go#L24)
 	if !ctx.IsCheckTx() && !ctx.IsReCheckTx() {
 		return next(ctx, tx, simulate)
+	}
+
+	msgs := tx.GetMsgs()
+
+	// Allow zero fee for excluded msg
+	// for simplicity, we only check when there is single msg
+	if len(msgs) == 1 {
+		typeURL := sdk.MsgTypeURL(msgs[0])
+		params := mfd.TxFeesKeeper.GetParams(ctx)
+
+		// convert to map for faster lookup
+		feeExcludeList := make(map[string]struct{}, len(params.FeeExcludeList))
+		for _, typ := range params.FeeExcludeList {
+			feeExcludeList[typ] = struct{}{}
+		}
+
+		// check if the msg type is in the fee exclude list
+		if _, ok := feeExcludeList[typeURL]; ok {
+			return next(ctx, tx, simulate)
+		}
 	}
 
 	baseDenom, err := mfd.TxFeesKeeper.GetBaseDenom(ctx)
