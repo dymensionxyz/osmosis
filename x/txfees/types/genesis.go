@@ -20,11 +20,6 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	err = gs.Params.Validate()
-	if err != nil {
-		return err
-	}
-
 	for _, feeToken := range gs.Feetokens {
 		err := sdk.ValidateDenom(feeToken.Denom)
 		if err != nil {

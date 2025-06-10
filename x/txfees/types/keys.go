@@ -20,4 +20,5 @@ const (
 var (
 	BaseDenomKey         = []byte("base_denom")
 	FeeTokensStorePrefix = []byte("fee_tokens")
+	ParamsKey            = []byte("params")
 )
