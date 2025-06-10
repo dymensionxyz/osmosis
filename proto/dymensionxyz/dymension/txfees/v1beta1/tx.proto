@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package dymensionxyz.dymension.txfees.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/msg/v1/msg.proto";
+import "dymensionxyz/dymension/txfees/v1beta1/params.proto";
+
+option go_package = "github.com/osmosis-labs/osmosis/v15/x/txfees/types";
+
+// Msg defines the txfees Msg service.
+service Msg {
+  // UpdateParams defines a governance operation for updating the txfees module
+  // parameters. The authority is defined in the keeper.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(gogoproto.moretags) = "yaml:\"authority\""];
+
+  // params defines the txfees parameters to update.
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {} 
