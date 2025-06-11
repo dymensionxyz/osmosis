@@ -143,7 +143,7 @@ func (mfd MempoolFeeDecorator) IsSufficientFee(ctx sdk.Context, minBaseGasPrice 
 		return err
 	}
 	// check to ensure that the convertedFee should always be greater than or equal to the requireBaseFee
-	if !(convertedFee.IsGTE(requiredBaseFee)) {
+	if !convertedFee.IsGTE(requiredBaseFee) {
 		return errorsmod.Wrapf(sdkerrors.ErrInsufficientFee, "insufficient fees; got: %s which converts to %s. required: %s", feeCoin, convertedFee, requiredBaseFee)
 	}
 
