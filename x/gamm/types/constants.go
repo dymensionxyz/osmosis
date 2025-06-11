@@ -19,6 +19,9 @@ const (
 )
 
 var (
+	// DYM represents 1 DYM. Equals to 10^18 base denom.
+	DYM = math.NewIntWithDecimal(1, 18)
+
 	// pools can be created with min and max number of assets defined with this constants
 	MinNumOfAssetsInPool = 2
 	MaxNumOfAssetsInPool = 2

@@ -19,9 +19,9 @@ const (
 // TestSwapExactAmountIn_Events tests that events are correctly emitted
 // when calling SwapExactAmountIn.
 func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
-	const (
-		tokenInMinAmount = 1
-		tokenIn          = 500
+	var (
+		tokenInMinAmount = int64(1)
+		tokenInAmt       = types.DYM.MulRaw(2)
 	)
 
 	testcases := map[string]struct {
@@ -34,7 +34,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 	}{
 		"zero hops": {
 			routes:            []poolmanagertypes.SwapAmountInRoute{},
-			tokenIn:           sdk.NewCoin("foo", math.NewInt(tokenIn)),
+			tokenIn:           sdk.NewCoin("foo", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(tokenInMinAmount),
 			expectError:       true,
 		},
@@ -45,10 +45,21 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:               sdk.NewCoin("adym", math.NewInt(tokenIn)),
+			tokenIn:               sdk.NewCoin("adym", tokenInAmt),
 			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    1,
 			expectedMessageEvents: 1,
+		},
+		"one hop - low swap amount": {
+			routes: []poolmanagertypes.SwapAmountInRoute{
+				{
+					PoolId:        2,
+					TokenOutDenom: "bar",
+				},
+			},
+			tokenIn:           sdk.NewCoin("adym", tokenInAmt.QuoRaw(10)),
+			tokenOutMinAmount: math.NewInt(tokenInMinAmount),
+			expectError:       true,
 		},
 		"one hop - taker fee swap": {
 			routes: []poolmanagertypes.SwapAmountInRoute{
@@ -57,7 +68,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:               sdk.NewCoin("baz", math.NewInt(tokenIn)),
+			tokenIn:               sdk.NewCoin("baz", tokenInAmt),
 			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    3, // 1 hop for swap, 2 while charging fee (baz->adym)
 			expectedMessageEvents: 1,
@@ -73,7 +84,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "baz",
 				},
 			},
-			tokenIn:               sdk.NewCoin("adym", math.NewInt(tokenIn)),
+			tokenIn:               sdk.NewCoin("adym", tokenInAmt),
 			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    2,
 			expectedMessageEvents: 1,
@@ -89,7 +100,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "adym",
 				},
 			},
-			tokenIn:               sdk.NewCoin("foo", math.NewInt(tokenIn)),
+			tokenIn:               sdk.NewCoin("foo", tokenInAmt),
 			tokenOutMinAmount:     math.NewInt(tokenInMinAmount),
 			expectedSwapEvents:    3, // 2 for hops, 1 while charging fee
 			expectedMessageEvents: 1,
@@ -105,7 +116,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 					TokenOutDenom: "baz",
 				},
 			},
-			tokenIn:           sdk.NewCoin(doesNotExistDenom, math.NewInt(tokenIn)),
+			tokenIn:           sdk.NewCoin(doesNotExistDenom, tokenInAmt),
 			tokenOutMinAmount: math.NewInt(tokenInMinAmount),
 			expectError:       true,
 		},
@@ -117,18 +128,19 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 			ctx := suite.Ctx
 			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
+			suite.FundAcc(suite.TestAccs[0], sdk.NewCoins(sdk.NewCoin("adym", tokenInAmt)))
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("adym", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("baz", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
@@ -137,7 +149,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 			ctx = ctx.WithEventManager(sdk.NewEventManager())
 			suite.Equal(0, len(ctx.EventManager().Events()))
 
-			response, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
+			response, err := msgServer.SwapExactAmountIn(ctx, &types.MsgSwapExactAmountIn{
 				Sender:            suite.TestAccs[0].String(),
 				Routes:            tc.routes,
 				TokenIn:           tc.tokenIn,
@@ -158,9 +170,9 @@ func (suite *KeeperTestSuite) TestSwapExactAmountIn_Events() {
 // TestSwapExactAmountOut_Events tests that events are correctly emitted
 // when calling SwapExactAmountOut.
 func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
-	const (
+	var (
 		tokenInMaxAmount = int64Max
-		tokenOut         = 500
+		tokenOutAmt      = types.DYM.MulRaw(2)
 	)
 
 	testcases := map[string]struct {
@@ -178,10 +190,20 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "adym",
 				},
 			},
-			tokenOut:              sdk.NewCoin("bar", math.NewInt(tokenOut)),
+			tokenOut:              sdk.NewCoin("bar", tokenOutAmt),
 			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    1,
 			expectedMessageEvents: 1,
+		},
+		"one hop - low swap amount": {
+			routes: []poolmanagertypes.SwapAmountOutRoute{
+				{
+					PoolId:       2,
+					TokenInDenom: "adym",
+				},
+			},
+			tokenOut:    sdk.NewCoin("bar", tokenOutAmt.QuoRaw(10)),
+			expectError: true,
 		},
 		"one hop - with taker fee": {
 			routes: []poolmanagertypes.SwapAmountOutRoute{
@@ -190,7 +212,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:              sdk.NewCoin("adym", math.NewInt(tokenOut)),
+			tokenOut:              sdk.NewCoin("adym", tokenOutAmt),
 			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    2, // 1 swap, 1 while charging fee
 			expectedMessageEvents: 1,
@@ -206,7 +228,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:              sdk.NewCoin("foo", math.NewInt(tokenOut)),
+			tokenOut:              sdk.NewCoin("foo", tokenOutAmt),
 			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    2,
 			expectedMessageEvents: 1,
@@ -222,7 +244,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "adym",
 				},
 			},
-			tokenOut:              sdk.NewCoin("foo", math.NewInt(tokenOut)),
+			tokenOut:              sdk.NewCoin("foo", tokenOutAmt),
 			tokenInMaxAmount:      math.NewInt(tokenInMaxAmount),
 			expectedSwapEvents:    3, // 1 for hops, 1 for taker fee swap, 1 while charging fee
 			expectedMessageEvents: 1,
@@ -238,7 +260,7 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 					TokenInDenom: "baz",
 				},
 			},
-			tokenOut:         sdk.NewCoin(doesNotExistDenom, math.NewInt(tokenOut)),
+			tokenOut:         sdk.NewCoin(doesNotExistDenom, tokenOutAmt),
 			tokenInMaxAmount: math.NewInt(tokenInMaxAmount),
 			expectError:      true,
 		},
@@ -251,17 +273,17 @@ func (suite *KeeperTestSuite) TestSwapExactAmountOut_Events() {
 			suite.App.TxFeesKeeper.SetBaseDenom(ctx, "adym")
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("adym", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("baz", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)

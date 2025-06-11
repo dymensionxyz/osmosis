@@ -34,7 +34,7 @@ type Keeper struct {
 	bankKeeper          types.BankKeeper
 	communityPoolKeeper types.CommunityPoolKeeper
 	poolManager         types.PoolManager
-	txfeeKeeper         types.TxFeeKeeper
+	TxFeesKeeper        types.TxFeeKeeper
 	rollappKeeper       types.RollappKeeper
 }
 
@@ -102,7 +102,7 @@ func (k *Keeper) SetPoolManager(poolManager types.PoolManager) {
 // SetTxFees sets the tx fees keeper.
 // must be called when initializing the keeper.
 func (k *Keeper) SetTxFees(txfees types.TxFeeKeeper) {
-	k.txfeeKeeper = txfees
+	k.TxFeesKeeper = txfees
 }
 
 // SetRollapp sets the tx fees keeper.

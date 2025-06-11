@@ -18,7 +18,7 @@ func (k Keeper) chargeTakerFee(
 	sender sdk.AccAddress,
 	beneficiary *sdk.AccAddress,
 ) error {
-	err := k.txfeeKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
+	err := k.TxFeesKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
 	if err != nil {
 		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
 	}

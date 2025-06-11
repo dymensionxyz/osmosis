@@ -18,7 +18,7 @@ import (
 
 /* ----------------------------- Testing ExactIn ---------------------------- */
 func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
-	tokenInAmt := int64(100000)
+	tokenInAmt := types.DYM.MulRaw(2)
 	testcases := map[string]struct {
 		routes            []poolmanagertypes.SwapAmountInRoute
 		tokenIn           sdk.Coin
@@ -29,7 +29,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 	}{
 		"zero hops": {
 			routes:            []poolmanagertypes.SwapAmountInRoute{},
-			tokenIn:           sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("foo", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: false,
 			expectError:       true,
@@ -41,7 +41,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "foo",
 				},
 			},
-			tokenIn:           sdk.NewCoin("adym", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("adym", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: true,
 			expectError:       false,
@@ -53,7 +53,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "adym",
 				},
 			},
-			tokenIn:           sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("foo", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: true,
 			expectError:       false,
@@ -65,7 +65,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "bar",
 				},
 			},
-			tokenIn:           sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("foo", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: false,
 			expectError:       false,
@@ -77,7 +77,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "foo",
 				},
 			},
-			tokenIn:           sdk.NewCoin("bar", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("bar", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: false,
 			expectError:       false,
@@ -89,7 +89,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "baz",
 				},
 			},
-			tokenIn:           sdk.NewCoin("bar", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("bar", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: false,
 			expectError:       false,
@@ -101,7 +101,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 					TokenOutDenom: "adym",
 				},
 			},
-			tokenIn:           sdk.NewCoin("bar", math.NewInt(tokenInAmt)),
+			tokenIn:           sdk.NewCoin("bar", tokenInAmt),
 			tokenOutMinAmount: math.NewInt(1),
 			expectBeneficiary: true,
 			expectError:       false,
@@ -121,7 +121,8 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, "adym").Return(beneficiary, nil)
 			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, mock.Anything).Return(nil, errors.New("not a rollapp token"))
 
-			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			suite.Require().NoError(err)
 
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 			params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
@@ -133,17 +134,17 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			ctx := suite.Ctx
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("foo", math.NewInt(100000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("adym", math.NewInt(100000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("adym", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000)), sdk.NewCoin("baz", math.NewInt(100000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("baz", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			//get the balance of txfees before swap
@@ -155,7 +156,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(math.LegacyZeroDec()))
 
 			// make swap
-			_, err := msgServer.SwapExactAmountIn(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountIn{
+			_, err = msgServer.SwapExactAmountIn(ctx, &types.MsgSwapExactAmountIn{
 				Sender:            suite.TestAccs[0].String(),
 				Routes:            tc.routes,
 				TokenIn:           tc.tokenIn,
@@ -194,7 +195,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactIn() {
 }
 
 func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
-	tokenInAmt := int64(100000)
+	tokenInAmt := types.DYM.MulRaw(2)
 	testcases := map[string]struct {
 		routes            []poolmanagertypes.SwapAmountOutRoute
 		tokenOut          sdk.Coin
@@ -204,7 +205,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 	}{
 		"zero hops": {
 			routes:            []poolmanagertypes.SwapAmountOutRoute{},
-			tokenOut:          sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("foo", tokenInAmt),
 			expectBeneficiary: false,
 			expectError:       true,
 		},
@@ -215,7 +216,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "adym",
 				},
 			},
-			tokenOut:          sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("foo", tokenInAmt),
 			expectBeneficiary: true,
 			expectError:       false,
 		},
@@ -226,7 +227,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "foo",
 				},
 			},
-			tokenOut:          sdk.NewCoin("adym", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("adym", tokenInAmt),
 			expectBeneficiary: true,
 			expectError:       false,
 		},
@@ -237,7 +238,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "foo",
 				},
 			},
-			tokenOut:          sdk.NewCoin("bar", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("bar", tokenInAmt),
 			expectBeneficiary: false,
 			expectError:       false,
 		},
@@ -248,7 +249,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:          sdk.NewCoin("foo", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("foo", tokenInAmt),
 			expectBeneficiary: false,
 			expectError:       false,
 		},
@@ -259,7 +260,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "bar",
 				},
 			},
-			tokenOut:          sdk.NewCoin("baz", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("baz", tokenInAmt),
 			expectBeneficiary: false,
 			expectError:       false,
 		},
@@ -270,7 +271,7 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 					TokenInDenom: "baz",
 				},
 			},
-			tokenOut:          sdk.NewCoin("bar", math.NewInt(tokenInAmt)),
+			tokenOut:          sdk.NewCoin("bar", tokenInAmt),
 			expectBeneficiary: false,
 			expectSwap:        true,
 			expectError:       false,
@@ -290,7 +291,8 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, "adym").Return(beneficiary, nil)
 			rollappKeeper.On("GetRollappOwnerByDenom", mock.Anything, mock.Anything).Return(nil, errors.New("not a rollapp token"))
 
-			suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			err := suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, "adym")
+			suite.Require().NoError(err)
 
 			suite.FundAcc(suite.TestAccs[0], apptesting.DefaultAcctFunds)
 			params := suite.App.GAMMKeeper.GetParams(suite.Ctx)
@@ -302,17 +304,17 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			ctx := suite.Ctx
 			msgServer := keeper.NewMsgServerImpl(suite.App.GAMMKeeper)
 
-			pool1coins := []sdk.Coin{sdk.NewCoin("adym", math.NewInt(100000000)), sdk.NewCoin("foo", math.NewInt(100000000))}
+			pool1coins := []sdk.Coin{sdk.NewCoin("adym", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool1coins...)
 
 			//"bar" is treated as baseDenom (e.g. USDC)
-			pool2coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000000)), sdk.NewCoin("foo", math.NewInt(100000000))}
+			pool2coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("foo", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool2coins...)
 
-			pool3coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000000)), sdk.NewCoin("adym", math.NewInt(100000000))}
+			pool3coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("adym", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool3coins...)
 
-			pool4coins := []sdk.Coin{sdk.NewCoin("bar", math.NewInt(100000000)), sdk.NewCoin("baz", math.NewInt(100000000))}
+			pool4coins := []sdk.Coin{sdk.NewCoin("bar", types.DYM.MulRaw(10)), sdk.NewCoin("baz", types.DYM.MulRaw(10))}
 			suite.PrepareBalancerPoolWithCoins(pool4coins...)
 
 			//get the balance of txfees before swap
@@ -324,11 +326,11 @@ func (suite *KeeperTestSuite) TestTakerFeeCharged_ExactOut() {
 			suite.Require().True(suite.App.GAMMKeeper.GetParams(ctx).TakerFee.GT(math.LegacyZeroDec()))
 
 			// make swap
-			_, err := msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
+			_, err = msgServer.SwapExactAmountOut(sdk.WrapSDKContext(ctx), &types.MsgSwapExactAmountOut{
 				Sender:           suite.TestAccs[0].String(),
 				Routes:           tc.routes,
 				TokenOut:         tc.tokenOut,
-				TokenInMaxAmount: math.NewInt(1000000000000000000),
+				TokenInMaxAmount: math.NewInt(int64Max),
 			})
 			if tc.expectError {
 				suite.Require().Error(err, name)
@@ -465,6 +467,7 @@ func (suite *KeeperTestSuite) TestEstimateMultihopSwapExactAmountIn() {
 				test.param.routes,
 				reducedTokenInCoin,
 			)
+			suite.Require().NoError(errMultihop)
 			suite.Require().Equal(estimateMultihopTokenOutAmountWithTakerFee.TokenOutAmount, multihopTokenOutAmountTakerFeeReduced)
 		})
 	}

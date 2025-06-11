@@ -13,11 +13,12 @@ import (
 
 // FIXME: move to dymension main test suite
 
+// 100 tokens per denom
 var DefaultAcctFunds sdk.Coins = sdk.NewCoins(
-	sdk.NewCoin("adym", math.NewInt(100000000000000000)),
-	sdk.NewCoin("foo", math.NewInt(10000000000)),
-	sdk.NewCoin("bar", math.NewInt(10000000000)),
-	sdk.NewCoin("baz", math.NewInt(10000000000)),
+	sdk.NewCoin("adym", math.NewIntWithDecimal(100, 18)),
+	sdk.NewCoin("foo", math.NewIntWithDecimal(100, 18)),
+	sdk.NewCoin("bar", math.NewIntWithDecimal(100, 18)),
+	sdk.NewCoin("baz", math.NewIntWithDecimal(100, 18)),
 )
 
 var DefaultPoolAssets = []balancer.PoolAsset{

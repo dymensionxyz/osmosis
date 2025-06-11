@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
@@ -162,6 +163,15 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
+	// validate minimal swap amount of ~1DYM
+	convertedFee, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenIn)
+	if err != nil {
+		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")
+	}
+	if !convertedFee.Amount.GTE(types.DYM) {
+		return nil, types.ErrInsufficientAmount
+	}
+
 	takerFee := server.keeper.GetParams(ctx).TakerFee
 	tokenInAfterSubTakerFee, takerFeesCoins := server.keeper.SubTakerFee(msg.TokenIn, takerFee)
 
@@ -203,6 +213,15 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return nil, err
+	}
+
+	// validate minimal swap amount of ~1DYM
+	convertedFee, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenOut)
+	if err != nil {
+		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")
+	}
+	if !convertedFee.Amount.GTE(types.DYM) {
+		return nil, types.ErrInsufficientAmount
 	}
 
 	route := types.SwapAmountOutRoutes(msg.Routes)
