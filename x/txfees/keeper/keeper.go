@@ -61,7 +61,7 @@ func (k Keeper) getFeeTokensStore(ctx sdk.Context) storetypes.KVStore {
 }
 
 func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
-	k.paramSpace.GetParamSet(ctx, &params)
+	k.paramSpace.GetParamSetIfExists(ctx, &params)
 	return params
 }
 
