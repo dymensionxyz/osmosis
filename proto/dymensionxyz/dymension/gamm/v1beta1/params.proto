@@ -31,6 +31,14 @@ message Params {
 
   repeated string allowed_pool_creation_denoms = 5
       [ (gogoproto.moretags) = "yaml:\"allowed_pool_creation_denoms\"" ];
+
+  // Minimum swap amount in base denom. applies to both exact in and out.
+  string min_swap_amount = 6 [
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.moretags) = "yaml:\"min_swap_amount\"",
+    (gogoproto.nullable) = false
+  ];
 }
 
 message GlobalFees {

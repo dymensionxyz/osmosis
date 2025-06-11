@@ -10,26 +10,20 @@ import (
 
 // Parameter store keys.
 var (
+	// DYM represents 1 DYM. Equals to 10^18 base denom.
+	DYM = math.NewIntWithDecimal(1, 18)
+
 	KeyPoolCreationFee           = []byte("PoolCreationFee")
 	KeyEnabledGlobalFees         = []byte("EnabledGlobalFees")
 	KeyGlobalFees                = []byte("GlobalPoolFees")
 	KeyTakerFees                 = []byte("TakerFees")
 	KeyAllowedPoolCreationDenoms = []byte("AllowedPoolCreationDenoms")
+	KeyMinSwapAmount             = []byte("MinSwapAmount")
 )
 
 // ParamTable for gamm module.
 func ParamKeyTable() paramtypes.KeyTable {
 	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
-}
-
-func NewParams(poolCreationFee sdk.Coins) Params {
-	return Params{
-		PoolCreationFee:           poolCreationFee,
-		EnableGlobalPoolFees:      false,
-		GlobalFees:                GlobalFees{math.LegacyZeroDec(), math.LegacyZeroDec()},
-		TakerFee:                  math.LegacyZeroDec(),
-		AllowedPoolCreationDenoms: poolCreationFee.Denoms(),
-	}
 }
 
 // default gamm module parameters.
@@ -40,6 +34,7 @@ func DefaultParams() Params {
 		GlobalFees:                GlobalFees{math.LegacyMustNewDecFromStr("0.02"), math.LegacyZeroDec()},
 		TakerFee:                  math.LegacyMustNewDecFromStr("0.01"),
 		AllowedPoolCreationDenoms: []string{sdk.DefaultBondDenom},
+		MinSwapAmount:             DYM, // Default to 1 DYM (10^18 base denom)
 	}
 }
 
@@ -57,6 +52,9 @@ func (p Params) Validate() error {
 	if err := validateAllowedPoolCreationDenoms(p.AllowedPoolCreationDenoms); err != nil {
 		return err
 	}
+	if err := validateMinSwapAmount(p.MinSwapAmount); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -69,6 +67,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyGlobalFees, &p.GlobalFees, validateGlobalFees),
 		paramtypes.NewParamSetPair(KeyTakerFees, &p.TakerFee, validateTakerFees),
 		paramtypes.NewParamSetPair(KeyAllowedPoolCreationDenoms, &p.AllowedPoolCreationDenoms, validateAllowedPoolCreationDenoms),
+		paramtypes.NewParamSetPair(KeyMinSwapAmount, &p.MinSwapAmount, validateMinSwapAmount),
 	}
 }
 
@@ -142,6 +141,23 @@ func validateAllowedPoolCreationDenoms(i interface{}) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func validateMinSwapAmount(i interface{}) error {
+	v, ok := i.(math.Int)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNil() {
+		return fmt.Errorf("min swap amount cannot be nil")
+	}
+
+	if v.IsNegative() {
+		return fmt.Errorf("min swap amount cannot be negative: %s", v)
 	}
 
 	return nil
