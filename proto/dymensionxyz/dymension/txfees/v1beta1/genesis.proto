@@ -14,4 +14,3 @@ message GenesisState {
   string basedenom = 2;
   repeated FeeToken feetokens = 3 [ (gogoproto.nullable) = false ];
 }
-

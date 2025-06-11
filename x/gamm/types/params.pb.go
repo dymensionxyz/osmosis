@@ -34,7 +34,8 @@ type Params struct {
 	GlobalFees                GlobalFees                               `protobuf:"bytes,3,opt,name=global_fees,json=globalFees,proto3" json:"global_fees" yaml:"global_fees"`
 	TakerFee                  cosmossdk_io_math.LegacyDec              `protobuf:"bytes,4,opt,name=taker_fee,json=takerFee,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"taker_fee" yaml:"taker_fee"`
 	AllowedPoolCreationDenoms []string                                 `protobuf:"bytes,5,rep,name=allowed_pool_creation_denoms,json=allowedPoolCreationDenoms,proto3" json:"allowed_pool_creation_denoms,omitempty" yaml:"allowed_pool_creation_denoms"`
-	MinSwapAmount             cosmossdk_io_math.Int                    `protobuf:"bytes,6,opt,name=min_swap_amount,json=minSwapAmount,proto3,customtype=cosmossdk.io/math.Int" json:"min_swap_amount" yaml:"min_swap_amount"`
+	// Minimum swap amount in base denom. applies to both exact in and out.
+	MinSwapAmount cosmossdk_io_math.Int `protobuf:"bytes,6,opt,name=min_swap_amount,json=minSwapAmount,proto3,customtype=cosmossdk.io/math.Int" json:"min_swap_amount" yaml:"min_swap_amount"`
 }
 
 func (m *Params) Reset()         { *m = Params{} }

@@ -164,7 +164,7 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 		return nil, err
 	}
 
-	// validate minimal swap amount of ~1DYM
+	// validate minimal swap amount
 	swapAmtBaseDenom, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenIn)
 	if err != nil {
 		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")
@@ -216,7 +216,7 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 		return nil, err
 	}
 
-	// validate minimal swap amount of ~1DYM
+	// validate minimal swap amount
 	swapAmtBaseDenom, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenOut)
 	if err != nil {
 		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")

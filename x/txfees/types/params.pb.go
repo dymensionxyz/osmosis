@@ -28,7 +28,8 @@ type Params struct {
 	// epoch_identifier is what epoch type swap and burn will be triggered by
 	// (day, week, etc.)
 	EpochIdentifier string `protobuf:"bytes,1,opt,name=epoch_identifier,json=epochIdentifier,proto3" json:"epoch_identifier,omitempty" yaml:"epoch_identifier"`
-	// fee_exclude_list is a list of msgTypes that are excluded from validating fees
+	// fee_exclude_list is a list of msgTypes that are excluded from validating
+	// fees
 	FeeExcludeList []string `protobuf:"bytes,2,rep,name=fee_exclude_list,json=feeExcludeList,proto3" json:"fee_exclude_list,omitempty" yaml:"fee_exclude_list"`
 }
 
