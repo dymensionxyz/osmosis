@@ -185,10 +185,9 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 	// Otherwise, if the OUT denom is a RollApp, we reward the OUT RollApp owner.
 	// OUT denom is the last route's token out denom.
 	outDenom := msg.Routes[len(msg.Routes)-1].TokenOutDenom
-
 	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, msg.TokenIn.Denom, outDenom)
 
-	err = server.keeper.chargeTakerFee(ctx, takerFeesCoins, sender, beneficiary)
+	err = server.keeper.TxFeesKeeper.ChargeFeesFromPayer(ctx, sender, takerFeesCoins, beneficiary)
 	if err != nil {
 		return nil, err
 	}
@@ -249,11 +248,10 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	inDenom := msg.Routes[0].TokenInDenom
 	beneficiary := server.keeper.getTakerFeeBeneficiary(ctx, inDenom, msg.TokenOut.Denom)
 
-	err = server.keeper.chargeTakerFee(ctx, takerFeeCoin, sender, beneficiary)
+	err = server.keeper.TxFeesKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
 	if err != nil {
 		return nil, err
 	}
-
 	// Swap event is handled elsewhere
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(

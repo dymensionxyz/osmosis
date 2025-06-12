@@ -1,29 +1,9 @@
 package keeper
 
 import (
-	"fmt"
-
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-// ChargeTakerFee charges the taker fee to the sender
-// If the taker fee coin is the base denom, send it to the txfees module
-// If the taker fee coin is a registered fee token, send it to the txfees module
-// If the taker fee coin is not supported, swap it to the base denom on the first pool, then send it to the txfees module
-// Send some portion of the taker fee to the provided beneficiary
-func (k Keeper) chargeTakerFee(
-	ctx sdk.Context,
-	takerFeeCoin sdk.Coin,
-	sender sdk.AccAddress,
-	beneficiary *sdk.AccAddress,
-) error {
-	err := k.TxFeesKeeper.ChargeFeesFromPayer(ctx, sender, takerFeeCoin, beneficiary)
-	if err != nil {
-		return fmt.Errorf("charge fees: sender: %s: fee: %s: %w", sender, takerFeeCoin, err)
-	}
-	return nil
-}
 
 // While charging taker fee, we reward the owner of the rollapp involved in swap. In that case,
 // the owner is called the beneficiary. The following cases are possible:
