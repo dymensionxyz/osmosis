@@ -65,9 +65,9 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 	// for simplicity, we only check when there is single msg
 	if len(msgs) == 1 {
 		typeURL := sdk.MsgTypeURL(msgs[0])
-		excludeList := mfd.TxFeesKeeper.GetParams(ctx).FeeExcludeList
+		exemptMsgs := mfd.TxFeesKeeper.GetParams(ctx).FeeExemptMsgs
 
-		if slices.Contains(excludeList, typeURL) {
+		if slices.Contains(exemptMsgs, typeURL) {
 			return next(ctx, tx, simulate)
 		}
 	}

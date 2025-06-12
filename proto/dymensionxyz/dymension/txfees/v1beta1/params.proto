@@ -13,8 +13,8 @@ message Params {
   string epoch_identifier = 1
       [ (gogoproto.moretags) = "yaml:\"epoch_identifier\"" ];
 
-  // fee_exclude_list is a list of msgTypes that are excluded from validating
+  // fee_exempt_msgs is a list of msgTypes that are excluded from validating
   // fees
-  repeated string fee_exclude_list = 2
-      [ (gogoproto.moretags) = "yaml:\"fee_exclude_list\"" ];
+  repeated string fee_exempt_msgs = 2
+      [ (gogoproto.moretags) = "yaml:\"fee_exempt_msgs\"" ];
 }

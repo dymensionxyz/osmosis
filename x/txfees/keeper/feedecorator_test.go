@@ -282,7 +282,7 @@ func (suite *KeeperTestSuite) TestFeeDecorator_ExclusionList_AllowsZeroFee() {
 
 	// Set exclusion list param to include this message type
 	params := suite.App.TxFeesKeeper.GetParams(suite.Ctx)
-	params.FeeExcludeList = []string{msgTypeURL}
+	params.FeeExemptMsgs = []string{msgTypeURL}
 	suite.App.TxFeesKeeper.SetParams(suite.Ctx, params)
 
 	// run antehandler

@@ -9,13 +9,13 @@ import (
 // Parameter store keys.
 var (
 	KeyEpochIdentifier = []byte("EpochIdentifier")
-	KeyFeeExcludeList  = []byte("FeeExcludeList")
+	KeyFeeExemptMsgs   = []byte("FeeExemptMsgs")
 )
 
-func NewParams(epochIdentifier string, feeExcludeList []string) Params {
+func NewParams(epochIdentifier string, feeExemptMsgs []string) Params {
 	return Params{
 		EpochIdentifier: epochIdentifier,
-		FeeExcludeList:  feeExcludeList,
+		FeeExemptMsgs:   feeExemptMsgs,
 	}
 }
 
@@ -23,7 +23,7 @@ func NewParams(epochIdentifier string, feeExcludeList []string) Params {
 func DefaultParams() Params {
 	return Params{
 		EpochIdentifier: "day",
-		FeeExcludeList:  []string{},
+		FeeExemptMsgs:   []string{},
 	}
 }
 
@@ -36,7 +36,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyEpochIdentifier, &p.EpochIdentifier, validateString),
-		paramtypes.NewParamSetPair(KeyFeeExcludeList, &p.FeeExcludeList, validateStringSlice),
+		paramtypes.NewParamSetPair(KeyFeeExemptMsgs, &p.FeeExemptMsgs, validateStringSlice),
 	}
 }
 
