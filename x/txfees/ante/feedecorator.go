@@ -3,6 +3,7 @@ package ante
 import (
 	"bytes"
 	"fmt"
+	"slices"
 
 	errorsmod "cosmossdk.io/errors"
 	"cosmossdk.io/math"
@@ -64,16 +65,9 @@ func (mfd MempoolFeeDecorator) AnteHandle(ctx sdk.Context, tx sdk.Tx, simulate b
 	// for simplicity, we only check when there is single msg
 	if len(msgs) == 1 {
 		typeURL := sdk.MsgTypeURL(msgs[0])
-		params := mfd.TxFeesKeeper.GetParams(ctx)
+		excludeList := mfd.TxFeesKeeper.GetParams(ctx).FeeExcludeList
 
-		// convert to map for faster lookup
-		feeExcludeList := make(map[string]struct{}, len(params.FeeExcludeList))
-		for _, typ := range params.FeeExcludeList {
-			feeExcludeList[typ] = struct{}{}
-		}
-
-		// check if the msg type is in the fee exclude list
-		if _, ok := feeExcludeList[typeURL]; ok {
+		if slices.Contains(excludeList, typeURL) {
 			return next(ctx, tx, simulate)
 		}
 	}
