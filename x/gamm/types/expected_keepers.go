@@ -82,6 +82,7 @@ type TxFeeKeeper interface {
 	GetFeeToken(ctx sdk.Context, denom string) (txfeestypes.FeeToken, error)
 	GetBaseDenom(ctx sdk.Context) (denom string, err error)
 	ChargeFeesFromPayer(ctx sdk.Context, payer sdk.AccAddress, takerFeeCoin sdk.Coin, beneficiary *sdk.AccAddress) error
+	CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error)
 }
 
 type RollappKeeper interface {

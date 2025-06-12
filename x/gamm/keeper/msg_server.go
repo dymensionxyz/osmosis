@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
@@ -156,13 +157,23 @@ func (server msgServer) ExitPool(goCtx context.Context, msg *types.MsgExitPool) 
 
 func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgSwapExactAmountIn) (*types.MsgSwapExactAmountInResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	params := server.keeper.GetParams(ctx)
 
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
 
-	takerFee := server.keeper.GetParams(ctx).TakerFee
+	// validate minimal swap amount
+	swapAmtBaseDenom, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenIn)
+	if err != nil {
+		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")
+	}
+	if !swapAmtBaseDenom.Amount.GTE(params.MinSwapAmount) {
+		return nil, types.ErrInsufficientAmount
+	}
+
+	takerFee := params.TakerFee
 	tokenInAfterSubTakerFee, takerFeesCoins := server.keeper.SubTakerFee(msg.TokenIn, takerFee)
 
 	tokenOutAmount, err := server.keeper.poolManager.RouteExactAmountIn(ctx, sender, msg.Routes, tokenInAfterSubTakerFee, msg.TokenOutMinAmount)
@@ -198,11 +209,20 @@ func (server msgServer) SwapExactAmountIn(goCtx context.Context, msg *types.MsgS
 
 func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.MsgSwapExactAmountOut) (*types.MsgSwapExactAmountOutResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	takerFee := server.keeper.GetParams(ctx).TakerFee
+	params := server.keeper.GetParams(ctx)
 
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return nil, err
+	}
+
+	// validate minimal swap amount
+	swapAmtBaseDenom, err := server.keeper.TxFeesKeeper.CalcCoinInBaseDenom(ctx, msg.TokenOut)
+	if err != nil {
+		return nil, errorsmod.Wrapf(err, "failed to convert fee to base denom")
+	}
+	if !swapAmtBaseDenom.Amount.GTE(params.MinSwapAmount) {
+		return nil, types.ErrInsufficientAmount
 	}
 
 	route := types.SwapAmountOutRoutes(msg.Routes)
@@ -211,6 +231,7 @@ func (server msgServer) SwapExactAmountOut(goCtx context.Context, msg *types.Msg
 	}
 
 	// limit the TokenInMaxAmount to have enough for taker fee
+	takerFee := params.TakerFee
 	maxTokenIn := sdk.NewCoin(msg.Routes[0].TokenInDenom, msg.TokenInMaxAmount)
 	tokenInAfterSubTakerFee, _ := server.keeper.SubTakerFee(maxTokenIn, takerFee)
 

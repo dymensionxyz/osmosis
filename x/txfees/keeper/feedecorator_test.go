@@ -231,3 +231,62 @@ func (suite *KeeperTestSuite) TestFeeDecorator() {
 		}
 	}
 }
+
+func (suite *KeeperTestSuite) TestFeeDecorator_ExclusionList_AllowsZeroFee() {
+	baseDenom := sdk.DefaultBondDenom
+	// uion := "uion"
+	baseGas := uint64(10000)
+
+	// Setup test account and message
+	priv0, _, addr0 := testdata.KeyTestPubAddr()
+	acc1 := suite.App.AccountKeeper.NewAccountWithAddress(suite.Ctx, addr0)
+	suite.App.AccountKeeper.SetAccount(suite.Ctx, acc1)
+	msg := testdata.NewTestMsg(addr0)
+	msgTypeURL := sdk.MsgTypeURL(msg)
+
+	// Build tx with zero fee
+	txconfig := suite.App.GetTxConfig()
+	txBuilder := txconfig.NewTxBuilder()
+	signerData := authsigning.SignerData{
+		ChainID:       suite.Ctx.ChainID(),
+		AccountNumber: 0,
+		Sequence:      0,
+	}
+	gasLimit := baseGas
+	msgs := []sdk.Msg{msg}
+	sigV2, err := clienttx.SignWithPrivKey(
+		suite.Ctx,
+		1,
+		signerData,
+		txBuilder,
+		priv0,
+		txconfig, 0)
+	suite.Require().NoError(err)
+	err = txBuilder.SetSignatures(sigV2)
+	suite.Require().NoError(err)
+
+	zeroFee := sdk.NewCoins()
+	suite.FundAcc(addr0, zeroFee)
+	tx := suite.BuildTx(txBuilder, msgs, sigV2, "", zeroFee, gasLimit)
+
+	// Set a non-zero min gas price to ensure exclusion is what allows zero fee
+	minGasPrices := sdk.NewDecCoins(sdk.NewDecCoinFromDec(baseDenom, math.LegacyMustNewDecFromStr("0.1")))
+	suite.Ctx = suite.Ctx.WithIsCheckTx(true).WithMinGasPrices(minGasPrices)
+
+	mfd := ante.NewMempoolFeeDecorator(*suite.App.TxFeesKeeper, nil)
+	dfd := ante.NewDeductFeeDecorator(*suite.App.TxFeesKeeper, suite.App.AccountKeeper, suite.App.BankKeeper, nil)
+	antehandlerMFD := sdk.ChainAnteDecorators(mfd, dfd)
+
+	_, err = antehandlerMFD(suite.Ctx, tx, false)
+	suite.Require().Error(err, "tx with zero fee should fail")
+
+	// Set exclusion list param to include this message type
+	params := suite.App.TxFeesKeeper.GetParams(suite.Ctx)
+	params.FeeExemptMsgs = []string{msgTypeURL}
+	suite.App.TxFeesKeeper.SetParams(suite.Ctx, params)
+
+	// run antehandler
+	_, err = antehandlerMFD(suite.Ctx, tx, false)
+
+	suite.Require().NoError(err, "tx with excluded msg type and zero fee should pass")
+}

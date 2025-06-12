@@ -9,16 +9,13 @@ import (
 // Parameter store keys.
 var (
 	KeyEpochIdentifier = []byte("EpochIdentifier")
+	KeyFeeExemptMsgs   = []byte("FeeExemptMsgs")
 )
 
-// ParamTable for gamm module.
-func ParamKeyTable() paramtypes.KeyTable {
-	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
-}
-
-func NewParams(epochIdentifier string) Params {
+func NewParams(epochIdentifier string, feeExemptMsgs []string) Params {
 	return Params{
 		EpochIdentifier: epochIdentifier,
+		FeeExemptMsgs:   feeExemptMsgs,
 	}
 }
 
@@ -26,18 +23,20 @@ func NewParams(epochIdentifier string) Params {
 func DefaultParams() Params {
 	return Params{
 		EpochIdentifier: "day",
+		FeeExemptMsgs:   []string{},
 	}
 }
 
-// validate params.
-func (p Params) Validate() error {
-	return validateString(p.EpochIdentifier)
+// ParamTable for gamm module.
+func ParamKeyTable() paramtypes.KeyTable {
+	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
 }
 
 // Implements params.ParamSet.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 	return paramtypes.ParamSetPairs{
 		paramtypes.NewParamSetPair(KeyEpochIdentifier, &p.EpochIdentifier, validateString),
+		paramtypes.NewParamSetPair(KeyFeeExemptMsgs, &p.FeeExemptMsgs, validateStringSlice),
 	}
 }
 
@@ -48,6 +47,14 @@ func validateString(i interface{}) error {
 	}
 	if v == "" {
 		return fmt.Errorf("cannot be empty")
+	}
+	return nil
+}
+
+func validateStringSlice(i interface{}) error {
+	_, ok := i.([]string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
 }
