@@ -12,6 +12,7 @@ import (
 
 	"github.com/osmosis-labs/osmosis/osmomath"
 
+	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
 	poolmanagertypes "github.com/osmosis-labs/osmosis/v15/x/poolmanager/types"
 )
@@ -424,4 +425,73 @@ func (k Keeper) ExitSwapExactAmountOut(
 	}
 
 	return shareInAmount, nil
+}
+
+// SwapPoolAsset swaps one asset for another in a specific pool
+// The new asset is sent from the sender to the pool
+// The old asset is sent from the pool back to the sender
+func (k Keeper) SwapPoolAsset(
+	ctx sdk.Context,
+	sender sdk.AccAddress,
+	poolId uint64,
+	oldDenom string,
+	newDenom string,
+) error {
+	// Get the pool
+	pool, err := k.GetPoolAndPoke(ctx, poolId)
+	if err != nil {
+		return err
+	}
+
+	// Convert to balancer pool
+	balancerPool, ok := pool.(*balancer.Pool)
+	if !ok {
+		return fmt.Errorf("asset swap only supported for balancer pools, got %T", pool)
+	}
+
+	// Validate the swap operation
+	if err := balancerPool.ValidateSwapPoolAsset(oldDenom, newDenom); err != nil {
+		return err
+	}
+
+	// old asset liquidity
+	oldLiquidity, err := balancerPool.GetPoolAsset(oldDenom)
+	if err != nil {
+		return err
+	}
+
+	// Send new asset tokens from sender to the pool. we use the same amount of the old asset.
+	newLiquidity := sdk.NewCoins(sdk.NewCoin(newDenom, oldLiquidity.Token.Amount))
+	err = k.bankKeeper.SendCoins(ctx, sender, pool.GetAddress(), newLiquidity)
+	if err != nil {
+		return err
+	}
+
+	// Send old asset tokens from pool to sender
+	err = k.bankKeeper.SendCoins(ctx, pool.GetAddress(), sender, sdk.NewCoins(oldLiquidity.Token))
+	if err != nil {
+		return err
+	}
+
+	// Perform the asset swap
+	if err := balancerPool.SwapPoolAsset(oldDenom, newDenom); err != nil {
+		return err
+	}
+
+	// Update the pool in state
+	if err := k.setPool(ctx, balancerPool); err != nil {
+		return err
+	}
+
+	// Record total liquidity change
+	k.RecordTotalLiquidityDecrease(ctx, sdk.NewCoins(oldLiquidity.Token))
+	k.RecordTotalLiquidityIncrease(ctx, newLiquidity)
+
+	// FROM ORIGINAL CREATION
+	// k.hooks.AfterPoolCreated(ctx, sender, pool.GetId())
+	// k.RecordTotalLiquidityIncrease(ctx, pool.GetTotalPoolLiquidity(ctx))
+
+	// FIXME: event emission
+
+	return nil
 }
