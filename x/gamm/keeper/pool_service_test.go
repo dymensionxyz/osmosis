@@ -1081,3 +1081,69 @@ func (suite *KeeperTestSuite) TestPoolCreationFee() {
 		}
 	}
 }
+
+func (suite *KeeperTestSuite) TestSwapPoolAsset() {
+	oldAssets := sdk.NewCoins(sdk.NewCoin("assetA", math.NewInt(10000)), sdk.NewCoin("adym", math.NewInt(50)))
+
+	sender := suite.TestAccs[0]
+	poolID := suite.PrepareBalancerPoolWithCoins(oldAssets...)
+
+	// assert that the recorded liquidity is correct
+	recordedLiquidityBeforeSwap := suite.App.GAMMKeeper.GetTotalLiquidity(suite.Ctx)
+	suite.Require().Equal(recordedLiquidityBeforeSwap.AmountOf("adym"), math.NewInt(50))
+	suite.Require().Equal(recordedLiquidityBeforeSwap.AmountOf("assetA"), math.NewInt(10000))
+	suite.Require().Equal(recordedLiquidityBeforeSwap.AmountOf("assetB"), math.NewInt(0))
+
+	err := suite.App.GAMMKeeper.SwapPoolAsset(
+		suite.Ctx,
+		sender,
+		poolID,
+		"assetA",
+		"assetB",
+	)
+	suite.Require().Error(err, "should fail as sender does not have assetB")
+
+	// fund sender with small amount of assetB
+	suite.FundAcc(sender, sdk.NewCoins(sdk.NewCoin("assetB", math.NewInt(1000))))
+	err = suite.App.GAMMKeeper.SwapPoolAsset(
+		suite.Ctx,
+		sender,
+		poolID,
+		"assetA",
+		"assetB",
+	)
+	suite.Require().Error(err, "should fail as sender does not have enough assetB")
+
+	// fund sender with enough assetB
+	suite.FundAcc(sender, sdk.NewCoins(sdk.NewCoin("assetB", math.NewInt(10000))))
+	senderBalBeforeSwap := suite.App.BankKeeper.GetAllBalances(suite.Ctx, sender)
+	err = suite.App.GAMMKeeper.SwapPoolAsset(
+		suite.Ctx,
+		sender,
+		poolID,
+		"assetA",
+		"assetB",
+	)
+	suite.Require().NoError(err)
+
+	// Verify the swap was successful by getting the updated pool
+	updatedPool, err := suite.App.GAMMKeeper.GetPool(suite.Ctx, poolID)
+	suite.Require().NoError(err)
+
+	newPoolAssets := updatedPool.GetTotalPoolLiquidity(suite.Ctx)
+	suite.Require().True(newPoolAssets.AmountOf("adym").Equal(math.NewInt(50)))
+	suite.Require().True(newPoolAssets.AmountOf("assetA").Equal(math.NewInt(0)))
+	suite.Require().True(newPoolAssets.AmountOf("assetB").Equal(math.NewInt(10000)))
+
+	// check that the funds are correctly updated for the sender
+	senderBalAfterSwap := suite.App.BankKeeper.GetAllBalances(suite.Ctx, sender)
+	suite.Require().Equal(senderBalAfterSwap.AmountOf("adym"), senderBalBeforeSwap.AmountOf("adym"))
+	suite.Require().Equal(senderBalAfterSwap.AmountOf("assetA"), senderBalBeforeSwap.AmountOf("assetA").Add(math.NewInt(10000)))
+	suite.Require().Equal(senderBalAfterSwap.AmountOf("assetB"), senderBalBeforeSwap.AmountOf("assetB").Sub(math.NewInt(10000)))
+
+	// check recorded liquidity
+	recordedLiquidityAfterSwap := suite.App.GAMMKeeper.GetTotalLiquidity(suite.Ctx)
+	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("adym"), recordedLiquidityBeforeSwap.AmountOf("adym"))
+	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("assetA"), math.NewInt(0))
+	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("assetB"), math.NewInt(10000))
+}
