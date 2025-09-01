@@ -1094,7 +1094,7 @@ func (suite *KeeperTestSuite) TestSwapPoolAsset() {
 	suite.Require().Equal(recordedLiquidityBeforeSwap.AmountOf("assetA"), math.NewInt(10000))
 	suite.Require().Equal(recordedLiquidityBeforeSwap.AmountOf("assetB"), math.NewInt(0))
 
-	err := suite.App.GAMMKeeper.SwapPoolAsset(
+	err := suite.App.GAMMKeeper.ReplacePoolAsset(
 		suite.Ctx,
 		sender,
 		poolID,
@@ -1105,7 +1105,7 @@ func (suite *KeeperTestSuite) TestSwapPoolAsset() {
 
 	// fund sender with small amount of assetB
 	suite.FundAcc(sender, sdk.NewCoins(sdk.NewCoin("assetB", math.NewInt(1000))))
-	err = suite.App.GAMMKeeper.SwapPoolAsset(
+	err = suite.App.GAMMKeeper.ReplacePoolAsset(
 		suite.Ctx,
 		sender,
 		poolID,
@@ -1117,7 +1117,7 @@ func (suite *KeeperTestSuite) TestSwapPoolAsset() {
 	// fund sender with enough assetB
 	suite.FundAcc(sender, sdk.NewCoins(sdk.NewCoin("assetB", math.NewInt(10000))))
 	senderBalBeforeSwap := suite.App.BankKeeper.GetAllBalances(suite.Ctx, sender)
-	err = suite.App.GAMMKeeper.SwapPoolAsset(
+	err = suite.App.GAMMKeeper.ReplacePoolAsset(
 		suite.Ctx,
 		sender,
 		poolID,

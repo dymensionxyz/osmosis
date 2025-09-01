@@ -117,3 +117,8 @@ func (k Keeper) SetFeeToken(ctx sdk.Context, feeToken types.FeeToken) error {
 	prefixStore.Set([]byte(feeToken.Denom), bz)
 	return nil
 }
+
+// DeleteFeeToken deletes a fee token record for a specific denom.
+func (k Keeper) DeleteFeeToken(ctx sdk.Context, denom string) error {
+	return k.SetFeeToken(ctx, types.FeeToken{Denom: denom, Route: nil})
+}

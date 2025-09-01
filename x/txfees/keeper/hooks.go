@@ -141,13 +141,6 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 				},
 			},
 		}
-
-		err = h.k.SetFeeToken(ctx, feeToken)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-			return
-		}
-		return
 	} else {
 		// no basedenom in the pool, register new token with multi-hop route
 		d1Reg := h.k.HasFeeToken(ctx, denoms[0])
@@ -168,13 +161,12 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		}
 
 		// get the swapRoute for the 2nd pool asset
-		var route []pooltypes.SwapAmountInRoute
-
-		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
+		feeToken, err = h.k.GetFeeToken(ctx, registeredDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
 			return
 		}
+		var route []pooltypes.SwapAmountInRoute
 		route = append(route, pooltypes.SwapAmountInRoute{
 			PoolId:        poolId,
 			TokenOutDenom: registeredDenom,
@@ -185,13 +177,16 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			Denom: newDenom,
 			Route: route,
 		}
-
-		err = h.k.SetFeeToken(ctx, feeToken)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-			return
-		}
 	}
+
+	err = h.k.SetFeeToken(ctx, feeToken)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+		return
+	}
+
+	h.k.Logger(ctx).Info("created fee token route for new denom",
+		"denom", feeToken.Denom, "poolId", poolId, "routeLength", len(feeToken.Route))
 }
 
 // AfterJoinPool hook is a noop.
@@ -204,4 +199,84 @@ func (h Hooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint
 
 // AfterSwap hook is a noop.
 func (h Hooks) AfterSwap(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) {
+}
+
+// AfterReplacePoolAsset is called after an asset in a pool is replaced.
+// It updates the fee token routes by removing the route for the old denom
+// and creating a new route for the new denom if applicable.
+func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, newDenom string) {
+	baseDenom := h.k.MustGetBaseDenom(ctx)
+
+	// Remove the old fee token route if it exists
+	err := h.k.DeleteFeeToken(ctx, oldDenom)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to delete old fee token route", "denom", oldDenom, "error", err)
+		return
+	}
+
+	// Get current pool denoms to understand the pool structure
+	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to get pool denoms for new fee token", "poolId", poolId, "error", err)
+		return
+	}
+
+	// Find the other denom in the pool (not the new token)
+	var otherDenom string
+	for _, denom := range denoms {
+		if denom != newDenom {
+			otherDenom = denom
+			break
+		}
+	}
+
+	if otherDenom == "" {
+		h.k.Logger(ctx).Error("could not find other denom in pool", "poolId", poolId, "newDenom", newDenom)
+		return
+	}
+
+	var feeToken types.FeeToken
+
+	// Case 1: Other denom is base denom - direct route
+	if otherDenom == baseDenom {
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: []pooltypes.SwapAmountInRoute{
+				{
+					PoolId:        poolId,
+					TokenOutDenom: baseDenom,
+				},
+			},
+		}
+	} else {
+		// Case 2: Other denom is a registered fee token - multi-hop route
+		registeredFeeToken, err := h.k.GetFeeToken(ctx, otherDenom)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to get registered fee token", "denom", otherDenom, "error", err)
+			return
+		}
+
+		// Create route: newToken -> otherDenom -> ... -> baseDenom
+		var route []pooltypes.SwapAmountInRoute
+		route = append(route, pooltypes.SwapAmountInRoute{
+			PoolId:        poolId,
+			TokenOutDenom: otherDenom,
+		})
+		route = append(route, registeredFeeToken.Route...)
+
+		feeToken = types.FeeToken{
+			Denom: newDenom,
+			Route: route,
+		}
+	}
+
+	// Set the new fee token
+	err = h.k.SetFeeToken(ctx, feeToken)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to set new fee token route", "denom", newDenom, "error", err)
+		return
+	}
+
+	h.k.Logger(ctx).Info("created fee token route for new denom",
+		"denom", newDenom, "poolId", poolId, "routeLength", len(feeToken.Route))
 }
