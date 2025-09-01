@@ -427,10 +427,11 @@ func (k Keeper) ExitSwapExactAmountOut(
 	return shareInAmount, nil
 }
 
-// SwapPoolAsset swaps one asset for another in a specific pool
+// ReplacePoolAsset replaces one asset for another in a specific pool
 // The new asset is sent from the sender to the pool
 // The old asset is sent from the pool back to the sender
-func (k Keeper) SwapPoolAsset(
+// amounts and weights are not changed
+func (k Keeper) ReplacePoolAsset(
 	ctx sdk.Context,
 	sender sdk.AccAddress,
 	poolId uint64,
@@ -446,11 +447,11 @@ func (k Keeper) SwapPoolAsset(
 	// Convert to balancer pool
 	balancerPool, ok := pool.(*balancer.Pool)
 	if !ok {
-		return fmt.Errorf("asset swap only supported for balancer pools, got %T", pool)
+		return fmt.Errorf("asset replace only supported for balancer pools, got %T", pool)
 	}
 
 	// Validate the swap operation
-	if err := balancerPool.ValidateSwapPoolAsset(oldDenom, newDenom); err != nil {
+	if err := balancerPool.ValidateReplacePoolAsset(oldDenom, newDenom); err != nil {
 		return err
 	}
 
@@ -474,7 +475,7 @@ func (k Keeper) SwapPoolAsset(
 	}
 
 	// Perform the asset swap
-	if err := balancerPool.SwapPoolAsset(oldDenom, newDenom); err != nil {
+	if err := balancerPool.ReplacePoolAsset(oldDenom, newDenom); err != nil {
 		return err
 	}
 
@@ -487,11 +488,15 @@ func (k Keeper) SwapPoolAsset(
 	k.RecordTotalLiquidityDecrease(ctx, sdk.NewCoins(oldLiquidity.Token))
 	k.RecordTotalLiquidityIncrease(ctx, newLiquidity)
 
-	// FROM ORIGINAL CREATION
-	// k.hooks.AfterPoolCreated(ctx, sender, pool.GetId())
-	// k.RecordTotalLiquidityIncrease(ctx, pool.GetTotalPoolLiquidity(ctx))
+	k.hooks.AfterReplacePoolAsset(ctx, poolId, oldDenom, newDenom)
 
-	// FIXME: event emission
-
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.TypeEvtReplacePoolAsset,
+			sdk.NewAttribute(types.AttributeKeyPoolId, strconv.FormatUint(poolId, 10)),
+			sdk.NewAttribute(types.AttributeKeyOldToken, oldDenom),
+			sdk.NewAttribute(types.AttributeKeyNewToken, newDenom),
+		),
+	})
 	return nil
 }

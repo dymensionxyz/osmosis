@@ -8,6 +8,7 @@ const (
 	TypeEvtMigrateShares      = "migrate_shares"
 	TypeEvtSwapExactAmountIn  = "swap_exact_amount_in"
 	TypeEvtSwapExactAmountOut = "swap_exact_amount_out"
+	TypeEvtReplacePoolAsset   = "replace_pool_asset"
 
 	AttributeValueCategory     = ModuleName
 	AttributeKeyPoolId         = "pool_id"
@@ -18,4 +19,6 @@ const (
 	AttributeKeyClosingPrice   = "closing_price"
 	AttributeKeyTakerFee       = "taker_fee"
 	AttributeKeySwapFee        = "swap_fee"
+	AttributeKeyOldToken       = "old_token"
+	AttributeKeyNewToken       = "new_token"
 )

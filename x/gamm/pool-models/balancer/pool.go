@@ -978,16 +978,16 @@ func (p *Pool) ExitSwapExactAmountOut(
 	return sharesIn, nil
 }
 
-// validateSwapPoolAsset validates if a pool asset swap can be performed safely
-func (p *Pool) ValidateSwapPoolAsset(oldDenom, newDenom string) error {
+// ValidateReplacePoolAsset validates if a pool asset replace can be performed safely
+func (p *Pool) ValidateReplacePoolAsset(oldDenom, newDenom string) error {
 	// Validate pool has exactly 2 assets
 	if len(p.PoolAssets) != 2 {
-		return fmt.Errorf("asset swap only supported for 2-asset pools, got %d assets", len(p.PoolAssets))
+		return fmt.Errorf("asset replace only supported for 2-asset pools, got %d assets", len(p.PoolAssets))
 	}
 
 	// Check for active smooth weight changes
 	if p.PoolParams.SmoothWeightChangeParams != nil {
-		return fmt.Errorf("cannot swap assets while smooth weight change is active")
+		return fmt.Errorf("cannot replace assets while smooth weight change is active")
 	}
 
 	// Check if old asset exists
@@ -1005,9 +1005,9 @@ func (p *Pool) ValidateSwapPoolAsset(oldDenom, newDenom string) error {
 	return nil
 }
 
-// SwapPoolAsset replaces one asset with another while maintaining the same weight and amount.
-// This is designed for 2-asset pools where you want to swap one asset for another.
-func (p *Pool) SwapPoolAsset(oldDenom, newDenom string) error {
+// ReplacePoolAsset replaces one asset with another while maintaining the same weight and amount.
+// This is designed for 2-asset pools where you want to replace one asset with another.
+func (p *Pool) ReplacePoolAsset(oldDenom, newDenom string) error {
 	oldAssetIndex, oldAsset, err := p.getPoolAssetAndIndex(oldDenom)
 	if err != nil {
 		return err
