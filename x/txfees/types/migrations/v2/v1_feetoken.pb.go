@@ -5,11 +5,12 @@ package types
 
 import (
 	fmt "fmt"
-	_ "github.com/cosmos/gogoproto/gogoproto"
-	proto "github.com/cosmos/gogoproto/proto"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -77,14 +78,6 @@ func (m *FeeToken) GetPoolID() uint64 {
 		return m.PoolID
 	}
 	return 0
-}
-
-func init() {
-	proto.RegisterType((*FeeToken)(nil), "dymensionxyz.dymension.txfees.v1beta1.FeeToken")
-}
-
-func init() {
-	proto.RegisterFile("dymensionxyz/dymension/txfees/v1beta1/feetoken.proto", fileDescriptor_ca4a790beba5662b)
 }
 
 var fileDescriptor_ca4a790beba5662b = []byte{
