@@ -208,11 +208,7 @@ func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, n
 	baseDenom := h.k.MustGetBaseDenom(ctx)
 
 	// Remove the old fee token route if it exists
-	err := h.k.DeleteFeeToken(ctx, oldDenom)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to delete old fee token route", "denom", oldDenom, "error", err)
-		return
-	}
+	h.k.DeleteFeeToken(ctx, oldDenom)
 
 	// Get current pool denoms to understand the pool structure
 	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)

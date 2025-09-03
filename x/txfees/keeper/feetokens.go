@@ -103,9 +103,7 @@ func (k Keeper) SetFeeToken(ctx sdk.Context, feeToken types.FeeToken) error {
 	prefixStore := k.getFeeTokensStore(ctx)
 
 	if len(feeToken.Route) == 0 {
-		if prefixStore.Has([]byte(feeToken.Denom)) {
-			prefixStore.Delete([]byte(feeToken.Denom))
-		}
+		k.DeleteFeeToken(ctx, feeToken.Denom)
 		return nil
 	}
 
@@ -119,6 +117,6 @@ func (k Keeper) SetFeeToken(ctx sdk.Context, feeToken types.FeeToken) error {
 }
 
 // DeleteFeeToken deletes a fee token record for a specific denom.
-func (k Keeper) DeleteFeeToken(ctx sdk.Context, denom string) error {
-	return k.SetFeeToken(ctx, types.FeeToken{Denom: denom, Route: nil})
+func (k Keeper) DeleteFeeToken(ctx sdk.Context, denom string) {
+	k.getFeeTokensStore(ctx).Delete([]byte(denom))
 }
