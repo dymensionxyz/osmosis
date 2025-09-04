@@ -166,11 +166,14 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
 			return
 		}
-		var route []pooltypes.SwapAmountInRoute
+		// Create multi-hop route: newDenom -> registeredDenom -> baseDenom
+		route := make([]pooltypes.SwapAmountInRoute, 0, len(feeToken.Route)+1)
+		// First hop: newDenom -> registeredDenom via the new pool
 		route = append(route, pooltypes.SwapAmountInRoute{
 			PoolId:        poolId,
 			TokenOutDenom: registeredDenom,
 		})
+		// Remaining hops: registeredDenom -> baseDenom via existing route
 		route = append(route, feeToken.Route...)
 
 		feeToken = types.FeeToken{
