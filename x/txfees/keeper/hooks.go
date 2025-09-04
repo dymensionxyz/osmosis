@@ -141,6 +141,13 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 				},
 			},
 		}
+
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
+		return
 	} else {
 		// no basedenom in the pool, register new token with multi-hop route
 		d1Reg := h.k.HasFeeToken(ctx, denoms[0])
@@ -161,12 +168,13 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		}
 
 		// get the swapRoute for the 2nd pool asset
-		feeToken, err = h.k.GetFeeToken(ctx, registeredDenom)
+		var route []pooltypes.SwapAmountInRoute
+
+		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
 			return
 		}
-		var route []pooltypes.SwapAmountInRoute
 		route = append(route, pooltypes.SwapAmountInRoute{
 			PoolId:        poolId,
 			TokenOutDenom: registeredDenom,
@@ -177,16 +185,13 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 			Denom: newDenom,
 			Route: route,
 		}
-	}
 
-	err = h.k.SetFeeToken(ctx, feeToken)
-	if err != nil {
-		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-		return
+		err = h.k.SetFeeToken(ctx, feeToken)
+		if err != nil {
+			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+			return
+		}
 	}
-
-	h.k.Logger(ctx).Info("created fee token route for new denom",
-		"denom", feeToken.Denom, "poolId", poolId, "routeLength", len(feeToken.Route))
 }
 
 // AfterJoinPool hook is a noop.
