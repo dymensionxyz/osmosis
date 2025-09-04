@@ -168,8 +168,7 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 		}
 
 		// get the swapRoute for the 2nd pool asset
-		var route []pooltypes.SwapAmountInRoute
-
+		route := make([]pooltypes.SwapAmountInRoute, 0, len(feeToken.Route)+1)
 		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
 		if err != nil {
 			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
@@ -258,7 +257,7 @@ func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, n
 		}
 
 		// Create route: newToken -> otherDenom -> ... -> baseDenom
-		var route []pooltypes.SwapAmountInRoute
+		route := make([]pooltypes.SwapAmountInRoute, 0, len(registeredFeeToken.Route)+1)
 		route = append(route, pooltypes.SwapAmountInRoute{
 			PoolId:        poolId,
 			TokenOutDenom: otherDenom,
