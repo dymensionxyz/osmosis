@@ -10,6 +10,8 @@ import (
 	"github.com/osmosis-labs/osmosis/v15/osmoutils"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/pool-models/balancer"
 	"github.com/osmosis-labs/osmosis/v15/x/gamm/types"
+
+	irotypes "github.com/dymensionxyz/dymension/v3/x/iro/types"
 )
 
 type msgServer struct {
@@ -38,12 +40,17 @@ func (server msgServer) CreateBalancerPool(goCtx context.Context, msg *balancer.
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := server.keeper.GetParams(ctx)
 
-	// validate the pool contains asset which is whitelisted
 	found := false
 	for _, asset := range msg.PoolAssets {
+		// validate the pool contains asset which is whitelisted
 		if slices.Contains(params.AllowedPoolCreationDenoms, asset.Token.Denom) {
 			found = true
-			break
+		}
+
+		// validate the pool does not contain launchpad assets
+		_, ok := irotypes.RollappIDFromIRODenom(asset.Token.Denom)
+		if ok {
+			return nil, errorsmod.Wrapf(types.ErrLaunchpadAsset, "pool cannot contain launchpad assets")
 		}
 	}
 	if !found {

@@ -9,6 +9,9 @@ type GammHooks interface {
 	// AfterPoolCreated is called after CreatePool
 	AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId uint64)
 
+	// AfterReplacePoolAsset is called after an asset in a pool is replaced
+	AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, newDenom string)
+
 	// AfterJoinPool is called after JoinPool, JoinSwapExternAmountIn, and JoinSwapShareAmountOut
 	AfterJoinPool(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, enterCoins sdk.Coins, shareOutAmount math.Int)
 
@@ -50,5 +53,11 @@ func (h MultiGammHooks) AfterExitPool(ctx sdk.Context, sender sdk.AccAddress, po
 func (h MultiGammHooks) AfterSwap(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, input sdk.Coins, output sdk.Coins) {
 	for i := range h {
 		h[i].AfterSwap(ctx, sender, poolId, input, output)
+	}
+}
+
+func (h MultiGammHooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, newDenom string) {
+	for i := range h {
+		h[i].AfterReplacePoolAsset(ctx, poolId, oldDenom, newDenom)
 	}
 }
