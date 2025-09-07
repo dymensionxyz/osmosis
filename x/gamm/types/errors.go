@@ -77,4 +77,5 @@ var (
 
 	ErrPoolAssetNotAllowed = sdkerrors.Register(ModuleName, 67, "pool must cointain one of the whitelisted assets")
 	ErrPoolAlreadyExists   = sdkerrors.Register(ModuleName, 68, "pool with same assets already exists")
+	ErrLaunchpadAsset      = sdkerrors.Register(ModuleName, 69, "pool cannot contain launchpad assets")
 )

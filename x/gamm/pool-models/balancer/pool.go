@@ -977,3 +977,53 @@ func (p *Pool) ExitSwapExactAmountOut(
 
 	return sharesIn, nil
 }
+
+// ValidateReplacePoolAsset validates if a pool asset replace can be performed safely
+func (p *Pool) ValidateReplacePoolAsset(oldDenom, newDenom string) error {
+	// Validate pool has exactly 2 assets
+	if len(p.PoolAssets) != 2 {
+		return fmt.Errorf("asset replace only supported for 2-asset pools, got %d assets", len(p.PoolAssets))
+	}
+
+	// Check for active smooth weight changes
+	if p.PoolParams.SmoothWeightChangeParams != nil {
+		return fmt.Errorf("cannot replace assets while smooth weight change is active")
+	}
+
+	// Check if old asset exists
+	_, ok := getPoolAssetByDenom(p.PoolAssets, oldDenom)
+	if !ok {
+		return fmt.Errorf("asset %s not found in pool", oldDenom)
+	}
+
+	// Check if new asset already exists
+	_, ok = getPoolAssetByDenom(p.PoolAssets, newDenom)
+	if ok {
+		return fmt.Errorf("asset %s already exists in pool", newDenom)
+	}
+
+	return nil
+}
+
+// ReplacePoolAsset replaces one asset with another while maintaining the same weight and amount.
+// This is designed for 2-asset pools where you want to replace one asset with another.
+func (p *Pool) ReplacePoolAsset(oldDenom, newDenom string) error {
+	oldAssetIndex, oldAsset, err := p.getPoolAssetAndIndex(oldDenom)
+	if err != nil {
+		return err
+	}
+
+	// Create new asset with same weight and amount as old asset
+	newAsset := PoolAsset{
+		Token:  sdk.NewCoin(newDenom, oldAsset.Token.Amount),
+		Weight: oldAsset.Weight,
+	}
+
+	// Replace the old asset with the new one
+	p.PoolAssets[oldAssetIndex] = newAsset
+
+	// Re-sort assets by denom to maintain consistency
+	sortPoolAssetsByDenom(p.PoolAssets)
+
+	return nil
+}
