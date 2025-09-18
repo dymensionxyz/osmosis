@@ -106,8 +106,6 @@ func (h Hooks) AfterEpochEnd(ctx sdk.Context, epochIdentifier string, epochNumbe
 // It checks if the base denom is included in the newly created pool.
 // If so, it adds the non-native denom as a fee token.
 func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId uint64) {
-	var feeToken types.FeeToken
-
 	denoms, err := h.k.gammKeeper.GetPoolDenoms(ctx, poolId)
 	if err != nil {
 		h.k.Logger(ctx).Error("failed to get pool denoms", "error", err)
@@ -121,76 +119,48 @@ func (h Hooks) AfterPoolCreated(ctx sdk.Context, sender sdk.AccAddress, poolId u
 
 	basedenom := h.k.MustGetBaseDenom(ctx)
 
+	var newDenom, existingDenom string
 	// check and handle the case where one of the denoms is basedenom
-	// it will override the an existing route if it exists (as it must be a longer path)
-	if denoms[0] == basedenom || denoms[1] == basedenom {
-		var newDenom string
-
-		if denoms[0] == basedenom {
-			newDenom = denoms[1]
-		} else {
-			newDenom = denoms[0]
-		}
-
-		feeToken = types.FeeToken{
-			Denom: newDenom,
-			Route: []pooltypes.SwapAmountInRoute{
-				{
-					PoolId:        poolId,
-					TokenOutDenom: basedenom,
-				},
-			},
-		}
-
-		err = h.k.SetFeeToken(ctx, feeToken)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-			return
-		}
-		return
+	// it will override an existing route if it exists (as it must be a longer path)
+	if denoms[0] == basedenom {
+		newDenom = denoms[1]
+		existingDenom = denoms[0]
+	} else if denoms[1] == basedenom {
+		newDenom = denoms[0]
+		existingDenom = denoms[1]
 	} else {
 		// no basedenom in the pool, register new token with multi-hop route
-		d1Reg := h.k.HasFeeToken(ctx, denoms[0])
-		d2Reg := h.k.HasFeeToken(ctx, denoms[1])
+		d1Registered := h.k.HasFeeToken(ctx, denoms[0])
+		d2Registered := h.k.HasFeeToken(ctx, denoms[1])
 
-		var newDenom, registeredDenom string
 		switch {
-		case !d1Reg && !d2Reg:
+		case !d1Registered && !d2Registered:
 			h.k.Logger(ctx).Error("no route to basedenom exist")
 			return
-		case d1Reg && d2Reg:
+		case d1Registered && d2Registered:
 			h.k.Logger(ctx).Debug("both denoms are already registered")
 			return
-		case d1Reg:
-			newDenom, registeredDenom = denoms[1], denoms[0]
-		default: // d2Reg
-			newDenom, registeredDenom = denoms[0], denoms[1]
-		}
-
-		// get the swapRoute for the 2nd pool asset
-		route := make([]pooltypes.SwapAmountInRoute, 0, len(feeToken.Route)+1)
-		feeToken, err := h.k.GetFeeToken(ctx, registeredDenom)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to get fee token", "error", err)
-			return
-		}
-		route = append(route, pooltypes.SwapAmountInRoute{
-			PoolId:        poolId,
-			TokenOutDenom: registeredDenom,
-		})
-		route = append(route, feeToken.Route...)
-
-		feeToken = types.FeeToken{
-			Denom: newDenom,
-			Route: route,
-		}
-
-		err = h.k.SetFeeToken(ctx, feeToken)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to set fee token", "error", err)
-			return
+		case d1Registered:
+			newDenom, existingDenom = denoms[1], denoms[0]
+		default: // d2Registered
+			newDenom, existingDenom = denoms[0], denoms[1]
 		}
 	}
+
+	feeToken, err := h.createFeeTokenForDenom(ctx, poolId, newDenom, existingDenom)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to create fee token route", "denom", newDenom, "error", err)
+		return
+	}
+
+	err = h.k.SetFeeToken(ctx, feeToken)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to set fee token", "error", err)
+		return
+	}
+
+	h.k.Logger(ctx).Info("created fee token route for new denom",
+		"denom", feeToken.Denom, "poolId", poolId, "routeLength", len(feeToken.Route))
 }
 
 // AfterJoinPool hook is a noop.
@@ -209,8 +179,6 @@ func (h Hooks) AfterSwap(ctx sdk.Context, sender sdk.AccAddress, poolId uint64, 
 // It updates the fee token routes by removing the route for the old denom
 // and creating a new route for the new denom if applicable.
 func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, newDenom string) {
-	baseDenom := h.k.MustGetBaseDenom(ctx)
-
 	// Remove the old fee token route if it exists
 	h.k.DeleteFeeToken(ctx, oldDenom)
 
@@ -235,39 +203,11 @@ func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, n
 		return
 	}
 
-	var feeToken types.FeeToken
-
-	// Case 1: Other denom is base denom - direct route
-	if otherDenom == baseDenom {
-		feeToken = types.FeeToken{
-			Denom: newDenom,
-			Route: []pooltypes.SwapAmountInRoute{
-				{
-					PoolId:        poolId,
-					TokenOutDenom: baseDenom,
-				},
-			},
-		}
-	} else {
-		// Case 2: Other denom is a registered fee token - multi-hop route
-		registeredFeeToken, err := h.k.GetFeeToken(ctx, otherDenom)
-		if err != nil {
-			h.k.Logger(ctx).Error("failed to get registered fee token", "denom", otherDenom, "error", err)
-			return
-		}
-
-		// Create route: newToken -> otherDenom -> ... -> baseDenom
-		route := make([]pooltypes.SwapAmountInRoute, 0, len(registeredFeeToken.Route)+1)
-		route = append(route, pooltypes.SwapAmountInRoute{
-			PoolId:        poolId,
-			TokenOutDenom: otherDenom,
-		})
-		route = append(route, registeredFeeToken.Route...)
-
-		feeToken = types.FeeToken{
-			Denom: newDenom,
-			Route: route,
-		}
+	// Create fee token route for the new denom
+	feeToken, err := h.createFeeTokenForDenom(ctx, poolId, newDenom, otherDenom)
+	if err != nil {
+		h.k.Logger(ctx).Error("failed to create fee token route", "denom", newDenom, "error", err)
+		return
 	}
 
 	// Set the new fee token
@@ -279,4 +219,46 @@ func (h Hooks) AfterReplacePoolAsset(ctx sdk.Context, poolId uint64, oldDenom, n
 
 	h.k.Logger(ctx).Info("created fee token route for new denom",
 		"denom", newDenom, "poolId", poolId, "routeLength", len(feeToken.Route))
+}
+
+// createFeeTokenForDenom creates a fee token route for the given denom based on the pool structure.
+// It returns the created FeeToken and any error encountered.
+func (h Hooks) createFeeTokenForDenom(ctx sdk.Context, poolId uint64, denomToRegister, otherDenom string) (types.FeeToken, error) {
+	baseDenom := h.k.MustGetBaseDenom(ctx)
+
+	var feeToken types.FeeToken
+
+	// Case 1: Other denom is base denom - direct route
+	if otherDenom == baseDenom {
+		feeToken = types.FeeToken{
+			Denom: denomToRegister,
+			Route: []pooltypes.SwapAmountInRoute{
+				{
+					PoolId:        poolId,
+					TokenOutDenom: baseDenom,
+				},
+			},
+		}
+	} else {
+		// Case 2: Other denom is a registered fee token - multi-hop route
+		registeredFeeToken, err := h.k.GetFeeToken(ctx, otherDenom)
+		if err != nil {
+			return types.FeeToken{}, fmt.Errorf("failed to get registered fee token for %s: %w", otherDenom, err)
+		}
+
+		// Create route: denomToRegister -> otherDenom -> ... -> baseDenom
+		route := make([]pooltypes.SwapAmountInRoute, 0, len(registeredFeeToken.Route)+1)
+		route = append(route, pooltypes.SwapAmountInRoute{
+			PoolId:        poolId,
+			TokenOutDenom: otherDenom,
+		})
+		route = append(route, registeredFeeToken.Route...)
+
+		feeToken = types.FeeToken{
+			Denom: denomToRegister,
+			Route: route,
+		}
+	}
+
+	return feeToken, nil
 }
