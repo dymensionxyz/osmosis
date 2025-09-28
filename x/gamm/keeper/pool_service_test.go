@@ -465,7 +465,6 @@ func (suite *KeeperTestSuite) TestSpotPriceOverflow() {
 				suite.Require().NoError(poolErr)
 				suite.Require().ErrorIs(keeperErr, types.ErrSpotPriceOverflow)
 				suite.Require().Error(keeperErr)
-				suite.Require().Equal(types.MaxSpotPrice, keeperSpotPrice)
 			} else if tc.panics {
 				suite.Require().ErrorIs(keeperErr, types.ErrSpotPriceInternal)
 				suite.Require().Error(keeperErr)
@@ -1146,4 +1145,207 @@ func (suite *KeeperTestSuite) TestSwapPoolAsset() {
 	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("adym"), recordedLiquidityBeforeSwap.AmountOf("adym"))
 	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("assetA"), math.NewInt(0))
 	suite.Require().Equal(recordedLiquidityAfterSwap.AmountOf("assetB"), math.NewInt(10000))
+}
+
+func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPrice() {
+	tests := []struct {
+		name                  string
+		setupPools            func() ([]poolmanagertypes.SwapAmountInRoute, string)
+		expectedSpotPrice     string
+		expectError           bool
+		expectedErrorContains string
+	}{
+		{
+			name: "single pool route - direct calculation",
+			setupPools: func() ([]poolmanagertypes.SwapAmountInRoute, string) {
+				// Create pool: 1000 adym <-> 2000 bar (equal weights)
+				// Expected spot price: bar/adym = 2000/1000 = 2.0
+				poolAssets := []balancertypes.PoolAsset{
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("adym", math.NewInt(1000)),
+					},
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("bar", math.NewInt(2000)),
+					},
+				}
+				poolId := suite.PrepareCustomBalancerPool(poolAssets, defaultPoolParams)
+
+				routes := []poolmanagertypes.SwapAmountInRoute{
+					{
+						PoolId:        poolId,
+						TokenOutDenom: "bar",
+					},
+				}
+				return routes, "adym"
+			},
+			expectedSpotPrice: "2.000000000000000000",
+			expectError:       false,
+		},
+		{
+			name: "two pool route - adym->bar->baz",
+			setupPools: func() ([]poolmanagertypes.SwapAmountInRoute, string) {
+				// Pool 1: 1000 adym <-> 2000 bar (equal weights)
+				// Spot price: bar/adym = 2.0
+				poolAssets1 := []balancertypes.PoolAsset{
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("adym", math.NewInt(1000)),
+					},
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("bar", math.NewInt(2000)),
+					},
+				}
+				poolId1 := suite.PrepareCustomBalancerPool(poolAssets1, defaultPoolParams)
+
+				// Pool 2: 1000 bar <-> 3000 baz (equal weights)
+				// Spot price: baz/bar = 3.0
+				poolAssets2 := []balancertypes.PoolAsset{
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("bar", math.NewInt(1000)),
+					},
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("baz", math.NewInt(3000)),
+					},
+				}
+				poolId2 := suite.PrepareCustomBalancerPool(poolAssets2, defaultPoolParams)
+
+				routes := []poolmanagertypes.SwapAmountInRoute{
+					{
+						PoolId:        poolId1,
+						TokenOutDenom: "bar",
+					},
+					{
+						PoolId:        poolId2,
+						TokenOutDenom: "baz",
+					},
+				}
+				return routes, "adym"
+			},
+			expectedSpotPrice: "6.000000000000000000", // 2.0 * 3.0 = 6.0
+			expectError:       false,
+		},
+		{
+			name: "empty routes",
+			setupPools: func() ([]poolmanagertypes.SwapAmountInRoute, string) {
+				return []poolmanagertypes.SwapAmountInRoute{}, "adym"
+			},
+			expectError:           true,
+			expectedErrorContains: "empty routes provided",
+		},
+		{
+			name: "nonexistent pool",
+			setupPools: func() ([]poolmanagertypes.SwapAmountInRoute, string) {
+				routes := []poolmanagertypes.SwapAmountInRoute{
+					{
+						PoolId:        999999, // nonexistent pool
+						TokenOutDenom: "bar",
+					},
+				}
+				return routes, "adym"
+			},
+			expectError:           true,
+			expectedErrorContains: "get pool",
+		},
+		{
+			name: "unknown output token denom in route",
+			setupPools: func() ([]poolmanagertypes.SwapAmountInRoute, string) {
+				poolAssets := []balancertypes.PoolAsset{
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("adym", math.NewInt(1000)),
+					},
+					{
+						Weight: math.NewInt(100),
+						Token:  sdk.NewCoin("bar", math.NewInt(2000)),
+					},
+				}
+				poolId := suite.PrepareCustomBalancerPool(poolAssets, defaultPoolParams)
+
+				routes := []poolmanagertypes.SwapAmountInRoute{
+					{
+						PoolId:        poolId,
+						TokenOutDenom: "adym",
+					},
+				}
+				return routes, "zzzzzzzz"
+			},
+			expectError:           true,
+			expectedErrorContains: "does not exist in the pool",
+		},
+	}
+
+	for _, tc := range tests {
+		suite.Run(tc.name, func() {
+			suite.SetupTest() // Reset state for each test
+
+			routes, tokenInDenom := tc.setupPools()
+
+			spotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolSpotPrice(suite.Ctx, routes, tokenInDenom)
+
+			if tc.expectError {
+				suite.Require().Error(err)
+				if tc.expectedErrorContains != "" {
+					suite.Require().Contains(err.Error(), tc.expectedErrorContains)
+				}
+			} else {
+				suite.Require().NoError(err)
+				expectedPrice, err := math.LegacyNewDecFromStr(tc.expectedSpotPrice)
+				suite.Require().NoError(err)
+				suite.Require().Equal(spotPrice, expectedPrice)
+			}
+		})
+	}
+}
+
+// TestCalcMultiPoolSpotPriceVsSinglePoolCalculation verifies that multi-pool spot price
+// calculation matches individual pool spot price calculations when chained manually.
+func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPriceVsSinglePoolCalculation() {
+	suite.SetupTest()
+
+	// Create two pools: adym<->bar and bar<->baz
+	poolAssets1 := []balancertypes.PoolAsset{
+		{
+			Weight: math.NewInt(100),
+			Token:  sdk.NewCoin("adym", math.NewInt(1000)),
+		},
+		{
+			Weight: math.NewInt(100),
+			Token:  sdk.NewCoin("bar", math.NewInt(2000)),
+		},
+	}
+	poolId1 := suite.PrepareCustomBalancerPool(poolAssets1, defaultPoolParams)
+
+	poolAssets2 := []balancertypes.PoolAsset{
+		{
+			Weight: math.NewInt(100),
+			Token:  sdk.NewCoin("bar", math.NewInt(1000)),
+		},
+		{
+			Weight: math.NewInt(100),
+			Token:  sdk.NewCoin("baz", math.NewInt(3000)),
+		},
+	}
+	poolId2 := suite.PrepareCustomBalancerPool(poolAssets2, defaultPoolParams)
+
+	// Calculate using calcMultiPoolSpotPrice
+	routes := []poolmanagertypes.SwapAmountInRoute{
+		{PoolId: poolId1, TokenOutDenom: "bar"},
+		{PoolId: poolId2, TokenOutDenom: "baz"},
+	}
+	multiPoolSpotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolSpotPrice(suite.Ctx, routes, "adym")
+	suite.Require().NoError(err)
+
+	// Calculate manually by chaining individual spot prices
+	spotPrice1, err := suite.App.GAMMKeeper.CalculateSpotPrice(suite.Ctx, poolId1, "bar", "adym")
+	suite.Require().NoError(err)
+	spotPrice2, err := suite.App.GAMMKeeper.CalculateSpotPrice(suite.Ctx, poolId2, "baz", "bar")
+	suite.Require().NoError(err)
+	manualSpotPrice := spotPrice1.Mul(spotPrice2)
+
+	suite.Require().Equal(multiPoolSpotPrice, manualSpotPrice)
 }

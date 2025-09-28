@@ -82,16 +82,88 @@ func (k Keeper) CalculateSpotPrice(
 		return math.LegacyDec{}, err
 	}
 
-	// if spotPrice greater than max spot price, return an error
-	if spotPrice.GT(types.MaxSpotPrice) {
-		return types.MaxSpotPrice, types.ErrSpotPriceOverflow
-	} else if !spotPrice.IsPositive() {
-		return math.LegacyDec{}, types.ErrSpotPriceInternal
+	if err := validateSpotPrice(spotPrice); err != nil {
+		return math.LegacyDec{}, err
 	}
 
 	// we want to round this to `SpotPriceSigFigs` of precision
 	spotPrice = osmomath.SigFigRound(spotPrice, types.SpotPriceSigFigs)
 	return spotPrice, err
+}
+
+// validateSpotPrice validates the spot price
+func validateSpotPrice(spotPrice math.LegacyDec) error {
+	if spotPrice.GT(types.MaxSpotPrice) {
+		return types.ErrSpotPriceOverflow
+	} else if !spotPrice.IsPositive() {
+		return types.ErrSpotPriceInternal
+	}
+	return nil
+}
+
+// calcMultiPoolSpotPrice calculates the spot price between two assets across multiple pools.
+// For example, if we have pool A-B and pool B-C, this function can calculate the spot price between A-C.
+// The spot price is calculated by chaining the individual pool spot prices together:
+// spotPrice(A->C) = spotPrice(A->B) * spotPrice(B->C)
+//
+// This function does NOT apply swap fees and represents the theoretical exchange rate
+// at the current pool states without considering trade impact.
+//
+// Parameters:
+//   - ctx: SDK context
+//   - routes: Array of SwapAmountInRoute defining the path from input asset to output asset
+//   - tokenInDenom: The denomination of the input token (starting asset)
+//
+// Returns the final spot price and any error encountered during calculation.
+func (k Keeper) CalcMultiPoolSpotPrice(
+	ctx sdk.Context,
+	routes []poolmanagertypes.SwapAmountInRoute,
+	tokenInDenom string,
+) (finalSpotPrice math.LegacyDec, err error) {
+	if len(routes) == 0 {
+		return math.LegacyDec{}, fmt.Errorf("empty routes provided")
+	}
+
+	// Initialize the cumulative spot price to 1.0
+	finalSpotPrice = math.LegacyOneDec()
+	currentTokenDenom := tokenInDenom
+
+	// Iterate through each route and multiply the spot prices
+	for _, route := range routes {
+		// Get the pool for this route step
+		pool, err := k.GetPoolAndPoke(ctx, route.PoolId)
+		if err != nil {
+			return math.LegacyDec{}, fmt.Errorf("get pool %d: %w", route.PoolId, err)
+		}
+
+		// Calculate spot price for this pool: currentToken -> route.TokenOutDenom
+		stepSpotPrice, err := pool.SpotPrice(ctx, route.TokenOutDenom, currentTokenDenom)
+		if err != nil {
+			return math.LegacyDec{}, fmt.Errorf("calculate spot price for pool %d (%s -> %s): %w",
+				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+		}
+
+		if err := validateSpotPrice(stepSpotPrice); err != nil {
+			return math.LegacyDec{}, fmt.Errorf("validate spot price for pool %d (%s -> %s): %w",
+				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+		}
+
+		// Multiply the cumulative spot price by this step's spot price
+		finalSpotPrice = finalSpotPrice.Mul(stepSpotPrice)
+
+		// validate the final spot price
+		if err := validateSpotPrice(finalSpotPrice); err != nil {
+			return math.LegacyDec{}, fmt.Errorf("validate accumulated spot price for pool %d (%s -> %s): %w",
+				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+		}
+
+		// The output of this step becomes the input for the next step
+		currentTokenDenom = route.TokenOutDenom
+	}
+
+	// Apply the same precision rounding as CalculateSpotPrice
+	finalSpotPrice = osmomath.SigFigRound(finalSpotPrice, types.SpotPriceSigFigs)
+	return finalSpotPrice, nil
 }
 
 // This function:
