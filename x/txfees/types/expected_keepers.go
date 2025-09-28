@@ -13,7 +13,7 @@ import (
 // GAMMKeeper defines the contract that must be fulfilled by a spot price calculator
 // The x/gamm keeper is expected to satisfy this interface.
 type GAMMKeeper interface {
-	CalculateSpotPrice(ctx sdk.Context, poolId uint64, quoteDenom, baseDenom string) (math.LegacyDec, error)
+	CalcMultiPoolSpotPrice(ctx sdk.Context, routes []poolmanagertypes.SwapAmountInRoute, tokenInDenom string) (math.LegacyDec, error)
 	GetPoolDenoms(ctx sdk.Context, poolId uint64) ([]string, error)
 }
 
