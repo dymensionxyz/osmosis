@@ -200,8 +200,8 @@ func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coi
 		return sdk.Coin{}, err
 	}
 
-	tokenOut := spotPrice.MulInt(inputFee.Amount).TruncateInt()
-	return sdk.NewCoin(baseDenom, tokenOut), nil
+	tokenOutAmt := spotPrice.MulInt(inputFee.Amount).TruncateInt()
+	return sdk.NewCoin(baseDenom, tokenOutAmt), nil
 }
 
 // CalcBaseInCoin converts a coin in the base denomination to a specified fee token denomination.
@@ -224,15 +224,15 @@ func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string
 		return sdk.Coin{}, err
 	}
 
-	// prepate new In route
+	// prepare new In route
 	reverseRoute := reverseInRoute(feeToken.Route, denom)
 	spotPrice, err := k.gammKeeper.CalcMultiPoolSpotPrice(ctx, reverseRoute, inputCoin.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
 
-	tokenOut := spotPrice.MulInt(inputCoin.Amount).TruncateInt()
-	return sdk.NewCoin(denom, tokenOut), nil
+	tokenOutAmt := spotPrice.MulInt(inputCoin.Amount).TruncateInt()
+	return sdk.NewCoin(denom, tokenOutAmt), nil
 }
 
 func reverseInRoute(feeTokenRoute []pooltypes.SwapAmountInRoute, denom string) []pooltypes.SwapAmountInRoute {
