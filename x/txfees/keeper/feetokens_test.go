@@ -34,15 +34,15 @@ func (suite *KeeperTestSuite) TestCalcCoinInBaseDenom() {
 			name:                "equal value",
 			poolAssets:          equalPoolAssets,
 			inputFee:            sdk.NewInt64Coin("uion", 1000),
-			expectedOutput:      sdk.NewInt64Coin(baseDenom, 999), // truncated
+			expectedOutput:      sdk.NewInt64Coin(baseDenom, 1000),
 			expectedConvertable: true,
 		},
 		{
 			name:       "unequal value",
 			poolAssets: diffPoolAssets,
 			inputFee:   sdk.NewInt64Coin("uion", 1000),
-			// expected to get approximately 5 base denom (truncated to 4)
-			expectedOutput:      sdk.NewInt64Coin(baseDenom, 499),
+			// expected to get approximately 5 base denom
+			expectedOutput:      sdk.NewInt64Coin(baseDenom, 500),
 			expectedConvertable: true,
 		},
 		{
@@ -95,7 +95,7 @@ func (suite *KeeperTestSuite) TestBaseInCoinConversions() {
 			poolAssets:          equalPoolAssets,
 			inputBaseCoin:       sdk.NewInt64Coin(baseDenom, 1000),
 			targetDenom:         "uion",
-			expectedOutput:      sdk.NewInt64Coin("uion", 999),
+			expectedOutput:      sdk.NewInt64Coin("uion", 1000),
 			expectedConvertable: true,
 		},
 		{
@@ -103,7 +103,7 @@ func (suite *KeeperTestSuite) TestBaseInCoinConversions() {
 			poolAssets:          diffPoolAssets,
 			inputBaseCoin:       sdk.NewInt64Coin(baseDenom, 500),
 			targetDenom:         "uion",
-			expectedOutput:      sdk.NewInt64Coin("uion", 999),
+			expectedOutput:      sdk.NewInt64Coin("uion", 1000),
 			expectedConvertable: true,
 		},
 		{

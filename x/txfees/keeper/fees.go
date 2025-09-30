@@ -182,7 +182,7 @@ func (k Keeper) appendTakerFeeAttribute(ctx sdk.Context) {
 	}
 }
 
-// CalcCoinInBaseDenom converts a fee amount in a whitelisted fee token to the base fee token amount.
+// CalcCoinInBaseDenom converts a fee amount in a registered fee token to the base fee token amount.
 func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coin, error) {
 	baseDenom := k.MustGetBaseDenom(ctx)
 
@@ -195,19 +195,20 @@ func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coi
 		return sdk.Coin{}, err
 	}
 
-	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, feeToken.Route, inputFee)
+	spotPrice, err := k.gammKeeper.CalcMultiPoolSpotPrice(ctx, feeToken.Route, inputFee.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
 
-	return sdk.NewCoin(baseDenom, tokenOut), nil
+	tokenOutAmt := spotPrice.MulInt(inputFee.Amount).TruncateInt()
+	return sdk.NewCoin(baseDenom, tokenOutAmt), nil
 }
 
 // CalcBaseInCoin converts a coin in the base denomination to a specified fee token denomination.
 // It requires that the input coin must be in the base denomination. The function retrieves
 // the fee token information for the specified denomination and calculates the output amount
 // using a reversed swap route. If the fee token is not found or any error occurs during the
-// swap estimation, it returns an error.
+// price estimation, it returns an error.
 func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string) (sdk.Coin, error) {
 	baseDenom := k.MustGetBaseDenom(ctx)
 	if inputCoin.Denom != baseDenom {
@@ -223,14 +224,15 @@ func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string
 		return sdk.Coin{}, err
 	}
 
-	// prepate new In route
+	// prepare new In route
 	reverseRoute := reverseInRoute(feeToken.Route, denom)
-	tokenOut, err := k.poolManager.MultihopEstimateOutGivenExactAmountIn(ctx, reverseRoute, inputCoin)
+	spotPrice, err := k.gammKeeper.CalcMultiPoolSpotPrice(ctx, reverseRoute, inputCoin.Denom)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
 
-	return sdk.NewCoin(denom, tokenOut), nil
+	tokenOutAmt := spotPrice.MulInt(inputCoin.Amount).TruncateInt()
+	return sdk.NewCoin(denom, tokenOutAmt), nil
 }
 
 func reverseInRoute(feeTokenRoute []pooltypes.SwapAmountInRoute, denom string) []pooltypes.SwapAmountInRoute {
