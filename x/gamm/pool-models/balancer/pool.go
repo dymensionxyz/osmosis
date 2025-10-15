@@ -648,6 +648,55 @@ func (p Pool) SpotPrice(ctx sdk.Context, quoteAsset, baseAsset string) (spotPric
 	return spotPrice, err
 }
 
+// SpotPriceForAmount converts a specific amount of base asset to quote asset,
+// using the same weight-ratio formula as SpotPrice.
+// This is more accurate than SpotPrice for unbalanced pools because multiplying
+// by the amount reduces the probability of precision loss resulting in zero.
+//
+// The calculation: outputAmount = (Base Weight / Quote Weight) * (Quote Supply * Base Amount) / Base Supply
+//
+// This does NOT include swap fees or slippage - it's a pure ratio calculation
+// scaled by the amount, making it suitable for conversions without simulating actual swaps.
+//
+// Parameters:
+// - ctx: SDK context
+// - quoteAsset: the denomination of the token to receive (output)
+// - baseAssetAmount: coin with the denomination and amount of base asset to convert
+//
+// Returns the converted amount in quote asset denomination.
+func (p Pool) SpotPriceForAmount(
+	ctx sdk.Context,
+	quoteAsset string,
+	baseAssetAmount sdk.Coin,
+) (convertedAmount math.LegacyDec, err error) {
+	quote, base, err := p.parsePoolAssetsByDenoms(quoteAsset, baseAssetAmount.Denom)
+	if err != nil {
+		return math.LegacyDec{}, err
+	}
+	if base.Weight.IsZero() || quote.Weight.IsZero() {
+		return math.LegacyDec{}, errors.New("pool is misconfigured, got 0 weight")
+	}
+
+	// Validate base asset amount is positive
+	if !baseAssetAmount.Amount.IsPositive() {
+		return math.LegacyDec{}, errors.New("base asset amount must be positive")
+	}
+
+	// Same formula as SpotPrice, but multiplied by the base amount to get the converted amount
+	// converted_amount = (Base Weight / Quote Weight) * (Quote Supply * Base Amount) / Base Supply
+	//
+	// By multiplying quote supply by the base amount before dividing, we maintain more precision
+	// in the intermediate calculations, reducing the chance of the result being zero for large amounts.
+	invWeightRatio := math.LegacyNewDecFromInt(base.Weight).Quo(math.LegacyNewDecFromInt(quote.Weight))
+	baseAmountDec := math.LegacyNewDecFromInt(baseAssetAmount.Amount)
+	quoteSupplyDec := math.LegacyNewDecFromInt(quote.Token.Amount)
+	baseSupplyDec := math.LegacyNewDecFromInt(base.Token.Amount)
+
+	// converted_amount = invWeightRatio * (quoteSupply * baseAmount) / baseSupply
+	convertedAmount = invWeightRatio.Mul(quoteSupplyDec.Mul(baseAmountDec)).Quo(baseSupplyDec)
+	return convertedAmount, nil
+}
+
 // calcPoolOutGivenSingleIn - balance pAo.
 func (p *Pool) calcSingleAssetJoin(tokenIn sdk.Coin, swapFee math.LegacyDec, tokenInPoolAsset PoolAsset, totalShares math.Int) (numShares math.Int, err error) {
 	_, err = p.GetPoolAsset(tokenIn.Denom)
