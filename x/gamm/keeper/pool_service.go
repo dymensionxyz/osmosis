@@ -101,69 +101,75 @@ func validateSpotPrice(spotPrice math.LegacyDec) error {
 	return nil
 }
 
-// calcMultiPoolSpotPrice calculates the spot price between two assets across multiple pools.
-// For example, if we have pool A-B and pool B-C, this function can calculate the spot price between A-C.
-// The spot price is calculated by chaining the individual pool spot prices together:
-// spotPrice(A->C) = spotPrice(A->B) * spotPrice(B->C)
+// calcMultiPoolConversionPrice calculates the total converted amount between two assets across multiple pools.
+// For example, if we have pool A-B and pool B-C, this function can calculate the converted amount between A-C.
+// The conversion calculation multiplies each individual pool's converted amounts together:
+// convertedAmt(A->C) = convertedAmt(A->B) * convertedAmt(B->C)
 //
-// This function does NOT apply swap fees and represents the theoretical exchange rate
+// This function does NOT apply swap fees and represents the theoretical exchange amount
 // at the current pool states without considering trade impact.
 //
 // Parameters:
 //   - ctx: SDK context
 //   - routes: Array of SwapAmountInRoute defining the path from input asset to output asset
-//   - tokenInDenom: The denomination of the input token (starting asset)
+//   - tokenIn: The input token with its amount to convert
 //
-// Returns the final spot price and any error encountered during calculation.
-func (k Keeper) CalcMultiPoolSpotPrice(
+// Returns the final converted amount and any error encountered during calculation.
+func (k Keeper) CalcMultiPoolConversionPrice(
 	ctx sdk.Context,
 	routes []poolmanagertypes.SwapAmountInRoute,
-	tokenInDenom string,
-) (finalSpotPrice math.LegacyDec, err error) {
+	tokenIn sdk.Coin,
+) (convertedAmt math.LegacyDec, err error) {
 	if len(routes) == 0 {
 		return math.LegacyDec{}, fmt.Errorf("empty routes provided")
 	}
 
-	// Initialize the cumulative spot price to 1.0
-	finalSpotPrice = math.LegacyOneDec()
-	currentTokenDenom := tokenInDenom
+	// Initialize the cumulative converted amount
+	convertedAmt = math.LegacyOneDec()
+	currentTokenIn := tokenIn
 
-	// Iterate through each route and multiply the spot prices
+	// Process each route to calculate total converted amount
 	for _, route := range routes {
-		// Get the pool for this route step
-		pool, err := k.GetPoolAndPoke(ctx, route.PoolId)
+		// Retrieve and validate the pool
+		p, err := k.GetPoolAndPoke(ctx, route.PoolId)
 		if err != nil {
 			return math.LegacyDec{}, fmt.Errorf("get pool %d: %w", route.PoolId, err)
 		}
 
-		// Calculate spot price for this pool: currentToken -> route.TokenOutDenom
-		stepSpotPrice, err := pool.SpotPrice(ctx, route.TokenOutDenom, currentTokenDenom)
+		pool, ok := p.(*balancer.Pool)
+		if !ok {
+			return math.LegacyDec{}, fmt.Errorf("pool %d is not a balancer pool", route.PoolId)
+		}
+
+		// Calculate the converted amount for this pool step
+		stepConvertedAmt, err := pool.SpotPriceForAmount(ctx, route.TokenOutDenom, currentTokenIn)
 		if err != nil {
-			return math.LegacyDec{}, fmt.Errorf("calculate spot price for pool %d (%s -> %s): %w",
-				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+			return math.LegacyDec{}, fmt.Errorf("calculate converted amount for pool %d (%s -> %s): %w",
+				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
-		if err := validateSpotPrice(stepSpotPrice); err != nil {
-			return math.LegacyDec{}, fmt.Errorf("validate spot price for pool %d (%s -> %s): %w",
-				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+		// Validate the conversion result
+		if err := validateSpotPrice(stepConvertedAmt); err != nil {
+			return math.LegacyDec{}, fmt.Errorf("validate converted amount (%s) for pool %d (%s -> %s): %w",
+				stepConvertedAmt, route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
-		// Multiply the cumulative spot price by this step's spot price
-		finalSpotPrice = finalSpotPrice.Mul(stepSpotPrice)
+		// Multiply the total by this step's conversion
+		convertedAmt = convertedAmt.Mul(stepConvertedAmt)
 
-		// validate the final spot price
-		if err := validateSpotPrice(finalSpotPrice); err != nil {
-			return math.LegacyDec{}, fmt.Errorf("validate accumulated spot price for pool %d (%s -> %s): %w",
-				route.PoolId, currentTokenDenom, route.TokenOutDenom, err)
+		// Ensure final converted amount is valid
+		if err := validateSpotPrice(convertedAmt); err != nil {
+			return math.LegacyDec{}, fmt.Errorf("validate total converted amount for pool %d (%s -> %s): %w",
+				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
-		// The output of this step becomes the input for the next step
-		currentTokenDenom = route.TokenOutDenom
+		// Set current token to the output of this step for the next iteration
+		currentTokenIn = sdk.NewCoin(route.TokenOutDenom, stepConvertedAmt.TruncateInt())
 	}
 
-	// Apply the same precision rounding as CalculateSpotPrice
-	finalSpotPrice = osmomath.SigFigRound(finalSpotPrice, types.SpotPriceSigFigs)
-	return finalSpotPrice, nil
+	// Apply precision rounding
+	convertedAmt = osmomath.SigFigRound(convertedAmt, types.SpotPriceSigFigs)
+	return convertedAmt, nil
 }
 
 // This function:
