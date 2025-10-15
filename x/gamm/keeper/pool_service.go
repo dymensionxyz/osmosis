@@ -119,13 +119,11 @@ func (k Keeper) CalcMultiPoolConversionPrice(
 	ctx sdk.Context,
 	routes []poolmanagertypes.SwapAmountInRoute,
 	tokenIn sdk.Coin,
-) (convertedAmt math.LegacyDec, err error) {
+) (convertedAmt math.Int, err error) {
 	if len(routes) == 0 {
-		return math.LegacyDec{}, fmt.Errorf("empty routes provided")
+		return math.Int{}, fmt.Errorf("empty routes provided")
 	}
 
-	// Initialize the cumulative converted amount
-	convertedAmt = math.LegacyOneDec()
 	currentTokenIn := tokenIn
 
 	// Process each route to calculate total converted amount
@@ -133,43 +131,36 @@ func (k Keeper) CalcMultiPoolConversionPrice(
 		// Retrieve and validate the pool
 		p, err := k.GetPoolAndPoke(ctx, route.PoolId)
 		if err != nil {
-			return math.LegacyDec{}, fmt.Errorf("get pool %d: %w", route.PoolId, err)
+			return math.Int{}, fmt.Errorf("get pool %d: %w", route.PoolId, err)
 		}
 
 		pool, ok := p.(*balancer.Pool)
 		if !ok {
-			return math.LegacyDec{}, fmt.Errorf("pool %d is not a balancer pool", route.PoolId)
+			return math.Int{}, fmt.Errorf("pool %d is not a balancer pool", route.PoolId)
 		}
 
 		// Calculate the converted amount for this pool step
 		stepConvertedAmt, err := pool.SpotPriceForAmount(ctx, route.TokenOutDenom, currentTokenIn)
 		if err != nil {
-			return math.LegacyDec{}, fmt.Errorf("calculate converted amount for pool %d (%s -> %s): %w",
+			return math.Int{}, fmt.Errorf("calculate converted amount for pool %d (%s -> %s): %w",
 				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
 		// Validate the conversion result
 		if err := validateSpotPrice(stepConvertedAmt); err != nil {
-			return math.LegacyDec{}, fmt.Errorf("validate converted amount (%s) for pool %d (%s -> %s): %w",
+			return math.Int{}, fmt.Errorf("validate converted amount (%s) for pool %d (%s -> %s): %w",
 				stepConvertedAmt, route.PoolId, currentTokenIn, route.TokenOutDenom, err)
-		}
-
-		// Multiply the total by this step's conversion
-		convertedAmt = convertedAmt.Mul(stepConvertedAmt)
-
-		// Ensure final converted amount is valid
-		if err := validateSpotPrice(convertedAmt); err != nil {
-			return math.LegacyDec{}, fmt.Errorf("validate total converted amount for pool %d (%s -> %s): %w",
-				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
 		// Set current token to the output of this step for the next iteration
 		currentTokenIn = sdk.NewCoin(route.TokenOutDenom, stepConvertedAmt.TruncateInt())
+		if err := currentTokenIn.Validate(); err != nil {
+			return math.Int{}, fmt.Errorf("validate current token (%s) for pool %d: %w",
+				currentTokenIn, route.PoolId, err)
+		}
 	}
 
-	// Apply precision rounding
-	convertedAmt = osmomath.SigFigRound(convertedAmt, types.SpotPriceSigFigs)
-	return convertedAmt, nil
+	return currentTokenIn.Amount, nil
 }
 
 // This function:

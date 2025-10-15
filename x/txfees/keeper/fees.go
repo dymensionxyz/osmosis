@@ -200,7 +200,7 @@ func (k Keeper) CalcCoinInBaseDenom(ctx sdk.Context, inputFee sdk.Coin) (sdk.Coi
 		return sdk.Coin{}, err
 	}
 
-	return sdk.NewCoin(baseDenom, convertedValue.TruncateInt()), nil
+	return sdk.NewCoin(baseDenom, convertedValue), nil
 }
 
 // CalcBaseInCoin converts a coin in the base denomination to a specified fee token denomination.
@@ -230,7 +230,7 @@ func (k Keeper) CalcBaseInCoin(ctx sdk.Context, inputCoin sdk.Coin, denom string
 		return sdk.Coin{}, err
 	}
 
-	return sdk.NewCoin(denom, convertedValue.TruncateInt()), nil
+	return sdk.NewCoin(denom, convertedValue), nil
 }
 
 func reverseInRoute(feeTokenRoute []pooltypes.SwapAmountInRoute, denom string) []pooltypes.SwapAmountInRoute {
