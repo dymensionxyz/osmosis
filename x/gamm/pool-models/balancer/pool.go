@@ -648,7 +648,7 @@ func (p Pool) SpotPrice(ctx sdk.Context, quoteAsset, baseAsset string) (spotPric
 	return spotPrice, err
 }
 
-// SpotPriceForAmount converts a specific amount of base asset to quote asset,
+// CalculateAssetConversion converts a specific amount of base asset to quote asset,
 // using the same weight-ratio formula as SpotPrice.
 // This is more accurate than SpotPrice for unbalanced pools because multiplying
 // by the amount reduces the probability of precision loss resulting in zero.
@@ -664,7 +664,7 @@ func (p Pool) SpotPrice(ctx sdk.Context, quoteAsset, baseAsset string) (spotPric
 // - baseAssetAmount: coin with the denomination and amount of base asset to convert
 //
 // Returns the converted amount in quote asset denomination.
-func (p Pool) SpotPriceForAmount(
+func (p Pool) CalculateAssetConversion(
 	ctx sdk.Context,
 	quoteAsset string,
 	baseAssetAmount sdk.Coin,

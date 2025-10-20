@@ -140,7 +140,7 @@ func (k Keeper) CalcMultiPoolConversionPrice(
 		}
 
 		// Calculate the converted amount for this pool step
-		stepConvertedAmt, err := pool.SpotPriceForAmount(ctx, route.TokenOutDenom, currentTokenIn)
+		stepConvertedAmtDec, err := pool.CalculateAssetConversion(ctx, route.TokenOutDenom, currentTokenIn)
 		if err != nil {
 			return math.Int{}, fmt.Errorf("calculate converted amount for pool %d (%s -> %s): %w",
 				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
