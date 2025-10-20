@@ -1285,7 +1285,7 @@ func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPrice() {
 
 			routes, tokenInDenom := tc.setupPools()
 
-			spotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolSpotPrice(suite.Ctx, routes, tokenInDenom)
+			spotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolConversionPrice(suite.Ctx, routes, sdk.NewCoin(tokenInDenom, math.OneInt()))
 
 			if tc.expectError {
 				suite.Require().Error(err)
@@ -1296,7 +1296,7 @@ func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPrice() {
 				suite.Require().NoError(err)
 				expectedPrice, err := math.LegacyNewDecFromStr(tc.expectedSpotPrice)
 				suite.Require().NoError(err)
-				suite.Require().Equal(spotPrice, expectedPrice)
+				suite.Require().Equal(expectedPrice.TruncateInt(), spotPrice)
 			}
 		})
 	}
@@ -1337,7 +1337,7 @@ func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPriceVsSinglePoolCalculation(
 		{PoolId: poolId1, TokenOutDenom: "bar"},
 		{PoolId: poolId2, TokenOutDenom: "baz"},
 	}
-	multiPoolSpotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolSpotPrice(suite.Ctx, routes, "adym")
+	multiPoolSpotPrice, err := suite.App.GAMMKeeper.CalcMultiPoolConversionPrice(suite.Ctx, routes, sdk.NewCoin("adym", math.OneInt()))
 	suite.Require().NoError(err)
 
 	// Calculate manually by chaining individual spot prices
@@ -1347,5 +1347,5 @@ func (suite *KeeperTestSuite) TestCalcMultiPoolSpotPriceVsSinglePoolCalculation(
 	suite.Require().NoError(err)
 	manualSpotPrice := spotPrice1.Mul(spotPrice2)
 
-	suite.Require().Equal(multiPoolSpotPrice, manualSpotPrice)
+	suite.Require().Equal(manualSpotPrice.TruncateInt(), multiPoolSpotPrice)
 }

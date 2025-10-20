@@ -24,6 +24,8 @@ func TestKeeperTestSuite(t *testing.T) {
 func (suite *KeeperTestSuite) SetupTest() {
 	suite.Setup()
 
+	suite.App.TxFeesKeeper.SetBaseDenom(suite.Ctx, sdk.DefaultBondDenom)
+
 	txconfig := suite.App.GetTxConfig()
 	suite.clientCtx = client.Context{}.
 		WithTxConfig(txconfig).

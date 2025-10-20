@@ -1,12 +1,12 @@
 package balancer_test
 
 import (
+	"errors"
 	fmt "fmt"
 	"math/rand"
 	"testing"
 	time "time"
 
-	sdkerrors "cosmossdk.io/errors"
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -383,7 +383,7 @@ var calcSingleAssetJoinTestCases = []calcJoinSharesTestCase{
 		poolAssets:   oneTrillionEvenPoolAssets,
 		tokensIn:     sdk.NewCoins(sdk.NewInt64Coin(doesNotExistDenom, 50_000)),
 		expectShares: math.ZeroInt(),
-		expErr:       sdkerrors.Wrapf(types.ErrDenomNotFoundInPool, fmt.Sprintf(balancer.ErrMsgFormatNoPoolAssetFound, doesNotExistDenom)),
+		expErr:       errors.Join(types.ErrDenomNotFoundInPool, fmt.Errorf(balancer.ErrMsgFormatNoPoolAssetFound, doesNotExistDenom)),
 	},
 	{
 		// Pool liquidity is changed by 1e-12 / 2

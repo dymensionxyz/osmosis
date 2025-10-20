@@ -2,6 +2,7 @@ package ante
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"slices"
 
@@ -246,14 +247,14 @@ func DeductFees(txFeesKeeper types.TxFeesKeeper, bankKeeper types.BankKeeper, ct
 		// sends to FeeCollectorName module account
 		err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
 		if err != nil {
-			return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+			return errors.Join(sdkerrors.ErrInsufficientFunds, err)
 		}
 	} else {
 		// TODO: investigate handling non-DYM fees https://github.com/dymensionxyz/dymension/issues/1387
 		// sends to the txfees module to be swapped and burned
 		err := bankKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.ModuleName, fees)
 		if err != nil {
-			return errorsmod.Wrapf(sdkerrors.ErrInsufficientFunds, err.Error())
+			return errors.Join(sdkerrors.ErrInsufficientFunds, err)
 		}
 	}
 
