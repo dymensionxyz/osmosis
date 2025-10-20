@@ -146,14 +146,14 @@ func (k Keeper) CalcMultiPoolConversionPrice(
 				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
 		}
 
-		// Validate the intermediate conversion result
-		if err := validateSpotPrice(stepConvertedAmt); err != nil {
-			return math.Int{}, fmt.Errorf("validate converted amount (%s) for pool %d (%s -> %s): %w",
-				stepConvertedAmt, route.PoolId, currentTokenIn, route.TokenOutDenom, err)
+		stepConvertedAmt := stepConvertedAmtDec.TruncateInt()
+		if !stepConvertedAmt.IsPositive() {
+			return math.Int{}, fmt.Errorf("converted amount (%s) for pool %d (%s -> %s) is zero or negative",
+				stepConvertedAmtDec, route.PoolId, currentTokenIn, route.TokenOutDenom)
 		}
 
 		// Set current token to the output of this step for the next iteration
-		currentTokenIn = sdk.NewCoin(route.TokenOutDenom, stepConvertedAmt.TruncateInt())
+		currentTokenIn = sdk.NewCoin(route.TokenOutDenom, stepConvertedAmt)
 	}
 
 	// assert final step
