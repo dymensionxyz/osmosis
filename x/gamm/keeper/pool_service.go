@@ -136,29 +136,24 @@ func (k Keeper) CalcMultiPoolConversionPrice(
 
 		pool, ok := p.(*balancer.Pool)
 		if !ok {
-			return math.Int{}, fmt.Errorf("pool %d is not a balancer pool", route.PoolId)
+			return math.Int{}, fmt.Errorf("pool is not a balancer pool: %d", route.PoolId)
 		}
 
 		// Calculate the converted amount for this pool step
 		stepConvertedAmtDec, err := pool.CalculateAssetConversion(ctx, route.TokenOutDenom, currentTokenIn)
 		if err != nil {
-			return math.Int{}, fmt.Errorf("calculate converted amount for pool %d (%s -> %s): %w",
-				route.PoolId, currentTokenIn, route.TokenOutDenom, err)
+			return math.Int{}, fmt.Errorf("calculate converted amount: %w, pool: %d, input: %s, output: %s",
+				err, route.PoolId, currentTokenIn, route.TokenOutDenom)
 		}
 
 		stepConvertedAmt := stepConvertedAmtDec.TruncateInt()
 		if !stepConvertedAmt.IsPositive() {
-			return math.Int{}, fmt.Errorf("converted amount (%s) for pool %d (%s -> %s) is zero or negative",
+			return math.Int{}, fmt.Errorf("converted amount is non positive: %s, pool: %d, input: %s, output: %s",
 				stepConvertedAmtDec, route.PoolId, currentTokenIn, route.TokenOutDenom)
 		}
 
 		// Set current token to the output of this step for the next iteration
 		currentTokenIn = sdk.NewCoin(route.TokenOutDenom, stepConvertedAmt)
-	}
-
-	// assert final step
-	if currentTokenIn.Amount.IsZero() {
-		return math.Int{}, fmt.Errorf("converted amount is zero")
 	}
 
 	return currentTokenIn.Amount, nil
